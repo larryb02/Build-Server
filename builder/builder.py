@@ -13,7 +13,7 @@ class Builder:
     def __init__(self):
         pass
 
-    def build(self, build_repo) -> bool:
+    def build(self, repo) -> bool:
         """
         Compile C program into a binary
 
@@ -27,7 +27,7 @@ class Builder:
             OSError
         """
         try:
-            os.chdir(build_repo)
+            os.chdir(repo)
         except OSError as e:
             logger.error("Failed to change directory: %s", e.strerror)
             raise e
