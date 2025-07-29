@@ -17,6 +17,8 @@ class Builder:
 
     def clone_repo(self, repo):
         """
+        Clone git repository into build directory
+
         params:
             repo: string with an expected format of a valid git protocol e.g. git@github.com:some-users/repository
         raises:
@@ -35,7 +37,8 @@ class Builder:
         """
         Compile C program into a binary
 
-        Creates a subprocess
+        params:
+            repo: string with an expected format of a valid git protocol e.g. git@github.com:some-users/repository
         raises:
             OSError
             CalledProcessError
@@ -53,7 +56,7 @@ class Builder:
         Clone and build C program
 
         params:
-            repo:
+            repo: string with an expected format of a valid git protocol e.g. git@github.com:some-users/repository
         raises:
             OSError
             CalledProcessError
