@@ -63,10 +63,6 @@ class Builder:
         """
         try:
             self.clone_repo(repo)
-        except Exception as e:
-            logger.error("Failed to clone repo: %s", e)
-            raise e
-        try:
             self.build(repo)
         except Exception as e:
             logger.error("Failed to build program: %s", e)
