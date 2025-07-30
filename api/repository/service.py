@@ -1,3 +1,4 @@
+from uuid import UUID
 from api.repository.models import Repository, RepositoryCreate
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import insert
@@ -19,3 +20,7 @@ def create(repo: RepositoryCreate, dbsession):
     except Exception as e:
         raise e
     return record
+
+async def register(repo: str, agent) -> UUID:
+    job_id = await agent.add_job(repo)
+    return job_id

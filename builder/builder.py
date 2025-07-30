@@ -62,6 +62,7 @@ class Builder:
             CalledProcessError
         """
         try:
+            repo = Path(repo)
             self.clone_repo(repo)
             self.build(repo)
         except Exception as e:

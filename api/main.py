@@ -1,9 +1,11 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from api.repository.views import router as repository_router
+from builder.agent import Agent
 
 
 @asynccontextmanager
@@ -15,7 +17,15 @@ async def lifespan(app: FastAPI):
     logger = logging.getLogger(f"{__name__}")
     logger.setLevel(logging.INFO)
     ctx['logger'] = logger
+
+    # initialize agent
+    agent = Agent()
+    asyncio.create_task(agent.run())
+    ctx['agent'] = agent
     yield ctx
+    
+    # shutdown
+    agent.close()
 
 
 app = FastAPI(lifespan=lifespan)
