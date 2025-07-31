@@ -1,4 +1,3 @@
-from uuid import UUID
 from api.repository.models import (
     ArtifactRepository,
     ArtifactRepositoryCreate,
