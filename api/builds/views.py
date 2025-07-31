@@ -10,7 +10,7 @@ router = APIRouter(prefix="/builds")
 @router.post("/register", response_model=BuildRead)
 async def register_build(repo: BuildCreate, request: Request):
     """
-    Registers a new build to be processed by the Builder
+    Registers a new program to be built
     """
     try:
         validate(repo.repository_url)
