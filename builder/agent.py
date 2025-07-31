@@ -10,12 +10,12 @@ from builder.builder import Builder
 
 
 JOB_TYPE = enum.Enum("JOB_TYPE", ["BUILD_PROGRAM", "SEND_ARTIFACTS"])
-
+STATUS = enum.Enum("STATUS", ["QUEUED", "RUNNING", "COMPLETED"])
 
 @dataclass
 class JobState:
     type: JOB_TYPE = None
-    status: Literal["QUEUED", "RUNNING", "COMPLETED"] | None = None
+    status: STATUS | None = None
     result: asyncio.Future = None
 
 
@@ -24,11 +24,11 @@ class Agent:
     Long running process that assigns jobs from task queue to workers
     """
 
-    STATUS = enum.Enum("STATUS", ["QUEUED", "RUNNING", "COMPLETED"])
+    
 
     async def __build_program(self):
         job_id, repo_url = await self.build_job_queue.get()
-        self.jobs[job_id].status = Agent.STATUS.RUNNING
+        self.jobs[job_id].status = STATUS.RUNNING
         self.logger.info(f"[Worker-{job_id}] Building: {repo_url}")
         b = Builder()
         status = b.run(repo_url)
@@ -38,6 +38,7 @@ class Agent:
             self.logger.error(f"Failed to set result of future {e}")
             raise e
         self.build_job_queue.task_done()
+        self.jobs[job_id].status = STATUS.COMPLETED
 
     async def __send_artifacts(self):
         job_id, artifacts = await self.artifact_job_queue.get()
@@ -71,7 +72,7 @@ class Agent:
         job_id = uuid4()
         self.logger.info(f"Added new job: [{job_id} {job_type}]: {job}")
         await self.jobhandlers[job_type]["queue"].put((job_id, job))
-        self.jobs[job_id].status = Agent.STATUS.QUEUED
+        self.jobs[job_id].status = STATUS.QUEUED
         self.jobs[job_id].result = asyncio.get_running_loop().create_future()
         return job_id
 
