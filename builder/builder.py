@@ -1,4 +1,5 @@
 import os
+import enum
 import subprocess
 import logging
 from pathlib import Path
@@ -11,6 +12,8 @@ logger.setLevel(logging.INFO)
 class Builder:
     BUILD_CMD = "make"
     BUILD_DIR = Path("../build").resolve()
+
+    BUILD_STATUS = enum.Enum("STATUS", ["FAILED", "SUCCEEDED"])
 
     def __init__(self):
         pass
@@ -67,4 +70,5 @@ class Builder:
             self.build(repo)
         except Exception as e:
             logger.error("Failed to build program: %s", e)
-            raise e
+            return Builder.BUILD_STATUS.FAILED
+        return Builder.BUILD_STATUS.SUCCEEDED
