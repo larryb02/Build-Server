@@ -12,6 +12,7 @@ from builder.builder import Builder
 JOB_TYPE = enum.Enum("JOB_TYPE", ["BUILD_PROGRAM", "SEND_ARTIFACTS"])
 STATUS = enum.Enum("STATUS", ["QUEUED", "RUNNING", "COMPLETED"])
 
+
 @dataclass
 class JobState:
     type: JOB_TYPE = None
@@ -23,8 +24,6 @@ class Agent:
     """
     Long running process that assigns jobs from task queue to workers
     """
-
-    
 
     async def __build_program(self):
         job_id, repo_url = await self.build_job_queue.get()
