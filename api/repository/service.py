@@ -20,5 +20,3 @@ def create_repository(repo: ArtifactRepositoryCreate, dbsession):
     except Exception as e:
         raise e
     return record
-
-## on artifact creation
