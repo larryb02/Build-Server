@@ -1,3 +1,4 @@
+import platform
 from starlette.config import Config
 from starlette.datastructures import Secret
 import logging
@@ -10,4 +11,11 @@ DATABASE_PASSWORD = config("DATABASE_PASSWORD", cast=Secret)
 DATABASE_HOSTNAME = config("DATABASE_HOSTNAME")
 DATABASE_NAME = config("DATABASE_NAME")
 DATABASE_URI = f"postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOSTNAME}:{DATABASE_PORT}/{DATABASE_NAME}"
-LOG_LEVEL = config("LOG_LEVEL", default=logging.DEBUG)
+
+LOG_LEVEL = config("LOG_LEVEL", default=logging.INFO)
+
+BUILD_DIR = (
+    config("WINDOWS_BUILD_DIRECTORY")
+    if platform.system() == "WINDOWS"
+    else config("POSIX_BUILD_DIRECTORY")
+)
