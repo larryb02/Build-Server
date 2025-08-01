@@ -31,28 +31,10 @@ class Agent:
     Long running process that assigns jobs from task queue to workers
     """
 
-    async def __build_program(self):
-        job_id, repo_url = await self.build_job_queue.get()
-        self.jobs[job_id].status = STATUS.RUNNING
-        self.logger.info(f"[Worker-{job_id}] Building: {repo_url}")
-        b = Builder()
-        status = b.run(repo_url)
-        try:
-            self.jobs[job_id].result.set_result(status)
-        except asyncio.InvalidStateError as e:
-            self.logger.error(f"Failed to set result of future {e}")
-            raise e
-        self.build_job_queue.task_done()
-        self.jobs[job_id].status = STATUS.COMPLETED
-
-    async def __send_artifacts(self):
-        job_id, artifacts = await self.artifact_job_queue.get()
-        self.logger.info(f"Cool shiny artifact: {job_id} {artifacts}")
-
     def __init__(self):
         logging.basicConfig()
         self.logger = logging.getLogger(f"{__name__}")
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG) # get this from env variable
         self.build_job_queue = asyncio.Queue()
         self.artifact_job_queue = asyncio.Queue()
         self.jobs = defaultdict(
@@ -60,7 +42,7 @@ class Agent:
         )  # maps job type/status/results to a job_id; make this clearer
 
         # predefined job handlers due to time constraints and simple needs
-        # the next logical step is to create a class that takes a job_type, handler, and queue as parameters
+        # the next logical step is to create a message queue system
         # to allow for dynamic job types and handlers if the need ever arises for more
         self.jobhandlers = {
             JobType.BUILD_PROGRAM: {
@@ -73,12 +55,49 @@ class Agent:
             },
         }
 
+    async def __build_program(self):
+        job_id, repo_url = await self.build_job_queue.get()
+        self.logger.info(f"[Worker-{job_id}] Building: {repo_url}")
+        b = Builder()
+        try:
+            status = b.run(repo_url)
+            try:
+                self.jobs[job_id].result.set_result(status)
+            except asyncio.InvalidStateError as e:
+                self.logger.error(f"Failed to set result of future {e}")
+                raise e
+        except Exception as e:
+            self.logger.error(f"[Worker-{job_id}] Build fail: {e}")
+            self.jobs[job_id].result.set_exception(e)
+        # self.jobs[job_id].status = Status.COMPLETED
+
+    async def __send_artifacts(self):
+        job_id, repo_url = await self.artifact_job_queue.get()
+        self.logger.info(f"[Worker-{job_id}] Gathering artifacts for build: {repo_url}")
+        b = Builder()
+        try:
+            artifacts = b.gather_artifacts(repo_url)
+        except Exception as e:
+            self.logger.error(f"[Worker-{job_id}] Job failed: {e}")
+            self.jobs[job_id].result.set_exception(e)
+        self.jobs[job_id].result.set_result(artifacts)
+        # self.jobs[job_id].status = Status.COMPLETED
+
     async def add_job(self, job_type, job) -> UUID:
         job_id = uuid4()
-        self.logger.info(f"Added new job: [{job_id} {job_type}]: {job}")
-        await self.jobhandlers[job_type]["queue"].put((job_id, job))
-        self.jobs[job_id].status = STATUS.QUEUED
+        self.logger.info(
+            f"Added new job: [{job_id} {job_type}]: {job} id: {id(self.jobhandlers[job_type]["queue"])}"
+        )
+        try:
+            await self.jobhandlers[job_type]["queue"].put((job_id, job))
+        except Exception as e:
+            self.logger.error("Failed to add job to queue")
+            raise e
+        # self.jobs[job_id].status = Status.QUEUED
         self.jobs[job_id].result = asyncio.get_running_loop().create_future()
+        self.logger.debug(
+            f"[{job_type}] Queue Size: {self.jobhandlers[job_type]["queue"].qsize()}"
+        )
         return job_id
 
     def close(self):
@@ -89,6 +108,7 @@ class Agent:
     async def do_job(self, job_type):
         while True:
             await self.jobhandlers[job_type]["fn"]()
+            self.jobhandlers[job_type]["queue"].task_done()
 
     async def run(self):
         self.logger.info("Started build agent")
