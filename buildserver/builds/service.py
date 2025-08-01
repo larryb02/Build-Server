@@ -47,7 +47,7 @@ def create_artifact(artifact: ArtifactCreate, dbsession):
 async def post_process(request, build_job_id):
     db_session = (
         Session()
-    )  # have to manually create session due to being in another thread.
+    )  # NOTE: have to manually create session due to being in another thread.
     # could benefit from using an async engine https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html
     agent = request.state.agent
     logger = request.state.logger

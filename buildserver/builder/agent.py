@@ -42,7 +42,7 @@ class Agent:
             JobState
         )  # maps job type/status/results to a job_id; make this clearer
 
-        # predefined job handlers due to time constraints and simple needs
+        # NOTE: predefined job handlers due to time constraints and simple needs
         # the next logical step is to create a message queue system
         # to allow for dynamic job types and handlers if the need ever arises for more
         self.jobhandlers = {
