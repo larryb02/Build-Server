@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 import re
 
-from buildserver.config import LOG_LEVEL
+import buildserver.config as config
 
 
 
@@ -15,12 +15,12 @@ class BuildStatus(enum.Enum):
 
 class Builder:
     BUILD_CMD = "make"
-    BUILD_DIR = Path("../build").resolve()
+    BUILD_DIR = Path(config.BUILD_DIR).resolve()
 
     def __init__(self):
         logging.basicConfig()
         self.logger = logging.getLogger(f"{__name__}")  # log format will be [MODULE: MSG]
-        self.logger.setLevel(LOG_LEVEL) # grab from config
+        self.logger.setLevel(config.LOG_LEVEL) # grab from config
 
     def clone_repo(self, repo):
         """

@@ -6,6 +6,7 @@ import logging
 from uuid import uuid4, UUID
 
 from buildserver.builder.builder import Builder
+from buildserver.config import LOG_LEVEL
 
 
 class JobType(enum.Enum):
@@ -34,7 +35,7 @@ class Agent:
     def __init__(self):
         logging.basicConfig()
         self.logger = logging.getLogger(f"{__name__}")
-        self.logger.setLevel(logging.DEBUG) # get this from env variable
+        self.logger.setLevel(LOG_LEVEL) # get this from env variable
         self.build_job_queue = asyncio.Queue()
         self.artifact_job_queue = asyncio.Queue()
         self.jobs = defaultdict(
