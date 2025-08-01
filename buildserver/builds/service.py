@@ -1,24 +1,26 @@
+from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from uuid import UUID
 from sqlalchemy import insert
+from logging import Logger
 
-from buildserver.database.core import Session
-from buildserver.builder.agent import JobType
+from buildserver.database.core import Session, DbSession
+from buildserver.builder.agent import JobType, Agent
 from buildserver.builder.builder import BuildStatus
 from buildserver.builds.models import Artifact, ArtifactCreate
 
 
-def validate(repo_url):
+def validate(repo_url: str):
     if repo_url == "":
         raise RequestValidationError("Url may not be blank")
 
 
-async def register(repo: str, agent) -> UUID:
+async def register(repo: str, agent: Agent) -> UUID:
     job_id = await agent.add_job(JobType.BUILD_PROGRAM, repo)
     return job_id
 
 
-def create_artifact(artifact: ArtifactCreate, dbsession):
+def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
     stmt = (
         insert(Artifact)
         .values(
@@ -44,7 +46,7 @@ def create_artifact(artifact: ArtifactCreate, dbsession):
     return record
 
 
-async def post_process(request, build_job_id):
+async def post_process(request: Request, build_job_id: UUID):
     db_session = (
         Session()
     )  # NOTE: have to manually create session due to being in another thread.
@@ -70,9 +72,9 @@ async def post_process(request, build_job_id):
             raise e
 
 
-async def gather_artifacts(agent, logger, repo_url, db_session):
+async def gather_artifacts(agent: Agent, logger: Logger, repo_url: str, db_session: DbSession):
     job_id = await agent.add_job(JobType.SEND_ARTIFACTS, repo_url)
-    default_repository_id = 7  # Can assume that only one artifact repository will exist
+    default_repository_id = 1  # Can assume that only one artifact repository will exist
     try:
         artifacts = await agent.jobs[job_id].result
     except Exception as e:

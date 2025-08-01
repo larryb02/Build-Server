@@ -84,7 +84,7 @@ class Agent:
         self.jobs[job_id].result.set_result(artifacts)
         # self.jobs[job_id].status = Status.COMPLETED
 
-    async def add_job(self, job_type, job) -> UUID:
+    async def add_job(self, job_type: JobType, job: any) -> UUID:
         job_id = uuid4()
         self.logger.info(
             f"Added new job: [{job_id} {job_type}]: {job} id: {id(self.jobhandlers[job_type]["queue"])}"
@@ -106,7 +106,7 @@ class Agent:
             w.cancel()
         self.logger.info("Shut down build agent")
 
-    async def do_job(self, job_type):
+    async def do_job(self, job_type: JobType):
         while True:
             await self.jobhandlers[job_type]["fn"]()
             self.jobhandlers[job_type]["queue"].task_done()

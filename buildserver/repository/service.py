@@ -1,11 +1,13 @@
+from sqlalchemy import insert
+
 from buildserver.repository.models import (
     ArtifactRepository,
     ArtifactRepositoryCreate,
 )
-from sqlalchemy import insert
+from buildserver.database.core import DbSession
 
 
-def create_repository(repo: ArtifactRepositoryCreate, dbsession):
+def create_repository(repo: ArtifactRepositoryCreate, dbsession: DbSession):
     stmt = (
         insert(ArtifactRepository)
         .values(artifact_repository_name=repo.repository_name)

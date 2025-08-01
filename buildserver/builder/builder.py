@@ -8,10 +8,10 @@ import re
 import buildserver.config as config
 
 
-
 class BuildStatus(enum.Enum):
     FAILED = "FAILED"
     SUCCEEDED = "SUCCEEDED"
+
 
 class Builder:
     BUILD_CMD = "make"
@@ -19,10 +19,12 @@ class Builder:
 
     def __init__(self):
         logging.basicConfig()
-        self.logger = logging.getLogger(f"{__name__}")  # log format will be [MODULE: MSG]
-        self.logger.setLevel(config.LOG_LEVEL) # grab from config
+        self.logger = logging.getLogger(
+            f"{__name__}"
+        )  # log format will be [MODULE: MSG]
+        self.logger.setLevel(config.LOG_LEVEL)  # grab from config
 
-    def clone_repo(self, repo):
+    def clone_repo(self, repo: str):
         """
         Clone git repository into build directory
 
@@ -46,7 +48,7 @@ class Builder:
         self.logger.info(f"Cloned {repo} at {commit_hash} PWD: {Path.cwd()}")
         return commit_hash
 
-    def build(self, repo):
+    def build(self, repo: str):
         """
         Compile C program into a binary
 
@@ -64,16 +66,12 @@ class Builder:
             raise e
         subprocess.run(Builder.BUILD_CMD, check=True)
 
-    def is_artifact(self, file_name):
+    def is_artifact(self, file_name: str):
         denylist = r"Makefile|.*\.(c|h)"
         pattern = re.compile(denylist)
         return not pattern.match(file_name)
 
-    def gather_artifacts(
-        self, repo_url
-    ):  # we need information from the build so we can determine
-        # Build Path, Commit Hash, Git repository url
-        # so really we just need the repo_url and we can determine the rest
+    def gather_artifacts(self, repo_url: str):
         """
         Collect all artifacts from a successful build
         """
@@ -120,7 +118,7 @@ class Builder:
         commit_hash = str(p.stdout, encoding="utf-8").strip("\n")
         return commit_hash
 
-    def run(self, repo):
+    def run(self, repo: str):
         """
         Clone and build C program
 
