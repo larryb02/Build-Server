@@ -3,10 +3,11 @@ import enum
 import subprocess
 import logging
 from pathlib import Path
+import re
 
-logging.basicConfig()
-logger = logging.getLogger(f"builder.{__name__}")  # log format will be [MODULE: MSG]
-logger.setLevel(logging.INFO)
+from api.config import LOG_LEVEL
+
+
 
 
 class Builder:
@@ -16,7 +17,9 @@ class Builder:
     BUILD_STATUS = enum.Enum("STATUS", ["FAILED", "SUCCEEDED"])
 
     def __init__(self):
-        pass
+        logging.basicConfig()
+        self.logger = logging.getLogger(f"{__name__}")  # log format will be [MODULE: MSG]
+        self.logger.setLevel(LOG_LEVEL) # grab from config
 
     def clone_repo(self, repo):
         """
