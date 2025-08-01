@@ -8,14 +8,21 @@ from uuid import uuid4, UUID
 from builder.builder import Builder
 
 
-JOB_TYPE = enum.Enum("JOB_TYPE", ["BUILD_PROGRAM", "SEND_ARTIFACTS"])
-STATUS = enum.Enum("STATUS", ["QUEUED", "RUNNING", "COMPLETED"])
+class JobType(enum.Enum):
+    BUILD_PROGRAM = "BUILD_PROGRAM"
+    SEND_ARTIFACTS = "SEND_ARTIFACTS"
+
+
+class Status(enum.Enum):
+    QUEUED = "QUEUED"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
 
 
 @dataclass
 class JobState:
-    type: JOB_TYPE = None
-    status: STATUS | None = None
+    type: JobType = None
+    status: Status | None = None
     result: asyncio.Future = None
 
 
@@ -56,11 +63,11 @@ class Agent:
         # the next logical step is to create a class that takes a job_type, handler, and queue as parameters
         # to allow for dynamic job types and handlers if the need ever arises for more
         self.jobhandlers = {
-            JOB_TYPE.BUILD_PROGRAM: {
+            JobType.BUILD_PROGRAM: {
                 "fn": self.__build_program,
                 "queue": self.build_job_queue,
             },
-            JOB_TYPE.SEND_ARTIFACTS: {
+            JobType.SEND_ARTIFACTS: {
                 "fn": self.__send_artifacts,
                 "queue": self.artifact_job_queue,
             },
@@ -86,5 +93,5 @@ class Agent:
     async def run(self):
         self.logger.info("Started build agent")
         self.workers = [
-            asyncio.create_task(self.do_job(job_type)) for job_type in JOB_TYPE
+            asyncio.create_task(self.do_job(job_type)) for job_type in JobType
         ]
