@@ -5,10 +5,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.repository.views import router as repository_router
-from api.builds.views import router as build_router
-from builder.agent import Agent
-import api.config
+from buildserver.repository.views import router as repository_router
+from buildserver.builds.views import router as build_router
+from buildserver.builder.agent import Agent
+import buildserver.config
 
 
 @asynccontextmanager
@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
     logging.basicConfig()
     logging.getLogger("uvicorn").handlers.clear()
     logger = logging.getLogger(f"{__name__}")
-    logger.setLevel(api.config.LOG_LEVEL)
+    logger.setLevel(buildserver.config.LOG_LEVEL)
     ctx['logger'] = logger
 
     # initialize agent

@@ -5,7 +5,7 @@ import enum
 import logging
 from uuid import uuid4, UUID
 
-from builder.builder import Builder
+from buildserver.builder.builder import Builder
 
 
 class JobType(enum.Enum):

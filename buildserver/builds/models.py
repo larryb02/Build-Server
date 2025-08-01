@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy import ForeignKey, LargeBinary, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from api.database.core import Base
+from buildserver.database.core import Base
 
 class BuildCreate(BaseModel):
     repository_url: str

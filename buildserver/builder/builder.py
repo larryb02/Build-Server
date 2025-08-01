@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 import re
 
-from api.config import LOG_LEVEL
+from buildserver.config import LOG_LEVEL
 
 
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Request
 from fastapi.exceptions import RequestValidationError
-from api.repository.models import ArtifactRepositoryCreate, ArtifactRepositoryRead
-from api.database.core import DbSession
-from api.repository.service import create_repository
+from buildserver.repository.models import ArtifactRepositoryCreate, ArtifactRepositoryRead
+from buildserver.database.core import DbSession
+from buildserver.repository.service import create_repository
 
 router = APIRouter(prefix="/artifacts")
 

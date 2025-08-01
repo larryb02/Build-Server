@@ -2,7 +2,7 @@ from typing import Annotated
 from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session
 from fastapi import Depends
-from api.config import DATABASE_URI
+from buildserver.config import DATABASE_URI
 
 
 engine = create_engine(DATABASE_URI)

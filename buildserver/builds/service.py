@@ -2,10 +2,10 @@ from fastapi.exceptions import RequestValidationError
 from uuid import UUID
 from sqlalchemy import insert
 
-from api.database.core import Session
-from builder.agent import JobType
-from builder.builder import BuildStatus
-from api.builds.models import Artifact, ArtifactCreate
+from buildserver.database.core import Session
+from buildserver.builder.agent import JobType
+from buildserver.builder.builder import BuildStatus
+from buildserver.builds.models import Artifact, ArtifactCreate
 
 
 def validate(repo_url):
@@ -14,7 +14,7 @@ def validate(repo_url):
 
 
 async def register(repo: str, agent) -> UUID:
-    job_id = await agent.add_job(repo)
+    job_id = await agent.add_job(JobType.BUILD_PROGRAM, repo)
     return job_id
 
 

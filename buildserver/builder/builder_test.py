@@ -1,4 +1,4 @@
-from builder.builder import Builder
+from buildserver.builder.builder import Builder
 import pytest
 
 

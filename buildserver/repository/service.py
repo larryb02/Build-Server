@@ -1,4 +1,4 @@
-from api.repository.models import (
+from buildserver.repository.models import (
     ArtifactRepository,
     ArtifactRepositoryCreate,
 )

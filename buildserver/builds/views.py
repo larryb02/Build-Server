@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Request, BackgroundTasks
 from fastapi.exceptions import RequestValidationError
 
-from api.builds.models import BuildCreate, BuildRead
-from api.builds.service import validate, register, post_process
+from buildserver.builds.models import BuildCreate, BuildRead
+from buildserver.builds.service import validate, register, post_process
 
 router = APIRouter(prefix="/builds")
 

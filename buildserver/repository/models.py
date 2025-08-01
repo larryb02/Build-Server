@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from api.database.core import Base
+from buildserver.database.core import Base
 
 class ArtifactRead(BaseModel):
     git_repository_url: str
@@ -27,4 +27,3 @@ class ArtifactRepository(Base):
     artifact_repository_name: Mapped[str] = mapped_column(
         String(50), default="Default Artifact Repository"
     )
-    artifacts: Mapped[list["Artifact"]] = relationship(back_populates="artifact_repository")
