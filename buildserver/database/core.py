@@ -1,16 +1,17 @@
 from typing import Annotated
-from sqlalchemy import create_engine, URL
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session, Session
 from fastapi import Depends
 from buildserver.config import DATABASE_URI
 
 
 engine = create_engine(DATABASE_URI)
 session_factory = sessionmaker(bind=engine)
-Session = scoped_session(session_factory)
+SessionLocal = scoped_session(session_factory)
+
 
 def get_session():
-    with Session() as session:
+    with SessionLocal() as session:
         try:
             yield session
             session.commit()
@@ -20,6 +21,8 @@ def get_session():
         finally:
             session.close()
 
+def create_session() -> scoped_session[Session]:
+    return SessionLocal()
 
 DbSession = Annotated[scoped_session, Depends(get_session)]
 
