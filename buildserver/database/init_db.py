@@ -1,6 +1,6 @@
 from buildserver.database.core import Base, engine
-from buildserver.builds.models import Artifact
-from buildserver.repository.models import ArtifactRepository
+import buildserver.builds.models
+import buildserver.repository.models
 from sqlalchemy.orm import Session
 
 with Session(engine) as session:
