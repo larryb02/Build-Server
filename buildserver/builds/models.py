@@ -1,12 +1,10 @@
 from datetime import datetime
-from typing import Optional, Union
-from uuid import UUID
+from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy import DateTime, ForeignKey, LargeBinary, String, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
-from buildserver.builder.agent import JobState, Status
 from buildserver.builder.builder import BuildStatus
 from buildserver.database.core import Base
 
