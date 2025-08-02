@@ -39,11 +39,13 @@ class BuildRead(BaseModel):
     # job_id: Optional[UUID]
     git_repository_url: str
     commit_hash: Optional[str]
-    build_status: BuildStatus | Status | str
+    build_status: BuildStatus
     created_at: datetime
+
 
 class BuildCreate(BaseModel):
     git_repository_url: str
+
 
 class Build(Base):
     __tablename__ = "build"
