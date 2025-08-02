@@ -32,13 +32,10 @@ class JobState:
 
 class Agent:
     """
-    Long running process that assigns jobs from task queue to workers
+    Long running task that manages jobs and workers
     """
 
     def __init__(self):
-        logging.basicConfig()
-        self.logger = logging.getLogger(f"{__name__}")
-        self.logger.setLevel(LOG_LEVEL) # get this from env variable
         self.build_job_queue = asyncio.Queue()
         self.artifact_job_queue = asyncio.Queue()
         self.jobs = defaultdict(
