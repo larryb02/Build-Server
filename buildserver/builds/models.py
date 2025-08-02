@@ -24,6 +24,7 @@ class ArtifactCreate(BaseModel):
     commit_hash: str
     artifact_repository_id: int
 
+
 class Artifact(Base):
     __tablename__ = "artifact"
     artifact_id: Mapped[int] = mapped_column(primary_key=True)
@@ -33,9 +34,6 @@ class Artifact(Base):
     commit_hash: Mapped[str] = mapped_column(String(40)) # max length of a sha-1 hash
     artifact_repository_id: Mapped[int] = mapped_column(ForeignKey("artifactrepository.artifact_repository_id"))
 
-"""
-The following models are 
-"""
 class BuildRead(BaseModel):
     build_id: int
     # job_id: Optional[UUID]
