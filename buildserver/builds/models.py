@@ -29,10 +29,13 @@ class Artifact(Base):
     __tablename__ = "artifact"
     artifact_id: Mapped[int] = mapped_column(primary_key=True)
     artifact_name: Mapped[str] = mapped_column(String(255))
-    artifact_file: Mapped[bytes] = mapped_column(LargeBinary()) # NOTE: remove this
+    artifact_file: Mapped[bytes] = mapped_column(LargeBinary())  # NOTE: remove this
     git_repository_url: Mapped[str] = mapped_column(String(255))
-    commit_hash: Mapped[str] = mapped_column(String(40)) # max length of a sha-1 hash
-    artifact_repository_id: Mapped[int] = mapped_column(ForeignKey("artifactrepository.artifact_repository_id"))
+    commit_hash: Mapped[str] = mapped_column(String(40))  # max length of a sha-1 hash
+    artifact_repository_id: Mapped[int] = mapped_column(
+        ForeignKey("artifactrepository.artifact_repository_id")
+    )
+
 
 class BuildRead(BaseModel):
     build_id: int
@@ -51,6 +54,8 @@ class Build(Base):
     __tablename__ = "build"
     build_id: Mapped[int] = mapped_column(primary_key=True)
     git_repository_url: Mapped[str] = mapped_column(String(255))
-    commit_hash: Mapped[str] = mapped_column(String(40), nullable=True) # add this after successful build
+    commit_hash: Mapped[str] = mapped_column(
+        String(40), nullable=True
+    )  # add this after successful build
     build_status: Mapped[str] = mapped_column(Enum(BuildStatus))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
