@@ -8,6 +8,9 @@ from uuid import uuid4, UUID
 from buildserver.builder.builder import Builder
 from buildserver.config import LOG_LEVEL
 
+logging.basicConfig()
+logger = logging.getLogger(f"{__name__}")
+logger.setLevel(LOG_LEVEL)
 
 class JobType(enum.Enum):
     BUILD_PROGRAM = "BUILD_PROGRAM"
