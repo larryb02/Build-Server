@@ -11,6 +11,8 @@ import buildserver.config as config
 class BuildStatus(enum.Enum):
     FAILED = "FAILED"
     SUCCEEDED = "SUCCEEDED"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
 
 
 class Builder:
