@@ -16,6 +16,9 @@ class BuildStatus(enum.Enum):
 
 
 class Builder:
+    """
+        Compiles C programs
+    """
     BUILD_CMD = "make"
     BUILD_DIR = Path(config.BUILD_DIR).resolve()
 
