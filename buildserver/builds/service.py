@@ -1,13 +1,19 @@
 from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from uuid import UUID
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 from logging import Logger
 
-from buildserver.database.core import Session, DbSession
-from buildserver.builder.agent import JobType, Agent
+from buildserver.database.core import Session, DbSession, create_session
+from buildserver.builder.agent import JobType, Agent, Status
 from buildserver.builder.builder import BuildStatus
-from buildserver.builds.models import Artifact, ArtifactCreate
+from buildserver.builds.models import (
+    Artifact,
+    ArtifactCreate,
+    Build,
+    BuildCreate,
+    BuildRead,
+)
 
 
 def validate(repo_url: str):
@@ -18,6 +24,27 @@ def validate(repo_url: str):
 async def register(repo: str, agent: Agent) -> UUID:
     job_id = await agent.add_job(JobType.BUILD_PROGRAM, repo)
     return job_id
+
+
+def create_build(build: BuildCreate, dbsession: DbSession):
+    stmt = (
+        insert(Build)
+        .values(
+            git_repository_url=build.git_repository_url, build_status=BuildStatus.QUEUED
+        )
+        .returning(
+            Build.git_repository_url,
+            Build.build_id,
+            Build.build_status,
+            Build.commit_hash,
+            Build.created_at,
+        )
+    )
+    try:
+        record = dbsession.execute(stmt).one_or_none()
+    except Exception as e:
+        raise e
+    return record
 
 
 def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
@@ -48,7 +75,7 @@ def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
 
 async def post_process(request: Request, build_job_id: UUID):
     db_session = (
-        Session()
+        create_session()
     )  # NOTE: have to manually create session due to being in another thread.
     # could benefit from using an async engine https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html
     agent = request.state.agent
@@ -72,7 +99,9 @@ async def post_process(request: Request, build_job_id: UUID):
             raise e
 
 
-async def gather_artifacts(agent: Agent, logger: Logger, repo_url: str, db_session: DbSession):
+async def gather_artifacts(
+    agent: Agent, logger: Logger, repo_url: str, db_session: DbSession
+):
     job_id = await agent.add_job(JobType.SEND_ARTIFACTS, repo_url)
     default_repository_id = 1  # Can assume that only one artifact repository will exist
     try:
@@ -93,3 +122,21 @@ async def gather_artifacts(agent: Agent, logger: Logger, repo_url: str, db_sessi
         logger.error(f"Failed to create artifact: {e}")
         db_session.rollback()
     db_session.close()
+
+
+def get_all_unique_builds() -> list:
+    """
+    Create a list of all unique builds
+
+    A build is considered unique if b1.git_repository_url != b2.git_repository_url
+    """
+    db_session = create_session()
+    stmt = (
+        select(*Build.__table__.columns)
+        .distinct(Build.git_repository_url)
+        .order_by(Build.git_repository_url, Build.created_at)
+    )
+    builds = db_session.execute(stmt).fetchall()
+    builds = [BuildRead(**build._mapping) for build in builds]
+    db_session.close()
+    return builds
