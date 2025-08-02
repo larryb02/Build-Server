@@ -8,7 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from buildserver.repository.views import router as repository_router
 from buildserver.builds.views import router as build_router
 from buildserver.builder.agent import Agent
-import buildserver.config
+from buildserver.builder.rebuilder import Rebuilder
+from buildserver.config import LOG_LEVEL
 
 
 @asynccontextmanager
@@ -25,9 +26,13 @@ async def lifespan(app: FastAPI):
     agent = Agent()
     loop = asyncio.get_event_loop()
     agent_thread = asyncio.run_coroutine_threadsafe(agent.run(), loop)
-    ctx['agent'] = agent
+    ctx["agent"] = agent
+
+    # initialize rebuilder
+    rebuilder = Rebuilder(agent=agent)
+    asyncio.run_coroutine_threadsafe(rebuilder.run(), loop)
     yield ctx
-    
+
     # shutdown
     agent.close()
     agent_thread.cancel()
