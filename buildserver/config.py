@@ -19,3 +19,8 @@ BUILD_DIR = (
     if platform.system() == "WINDOWS"
     else config("POSIX_BUILD_DIRECTORY")
 )
+
+SLEEP_FOR = config("SLEEP_FOR", default=60 * 15, cast=int)
+TIMEOUT = config("TIMEOUT", default=60, cast=int)
+
+ARTIFACT_REPOSITORY_ROOT = config("ARTIFACT_REPOSITORY_ROOT")

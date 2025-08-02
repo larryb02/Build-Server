@@ -1,7 +1,6 @@
 import logging
 import asyncio
 import subprocess
-from threading import local
 
 from buildserver.builder.agent import Agent
 from buildserver.builds.service import get_all_unique_builds, register
@@ -14,8 +13,9 @@ Background task that periodically checks for new commits and schedules rebuilds
 Runs for the entire lifetime of the application
 """
 
-SLEEP_FOR = 60 * 1
-ASYNC_TIMEOUT = 60
+SLEEP_FOR = config.SLEEP_FOR
+ASYNC_TIMEOUT = config.TIMEOUT
+
 logging.basicConfig()
 logger = logging.getLogger(f"{__name__}")
 logger.setLevel(config.LOG_LEVEL)

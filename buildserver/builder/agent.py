@@ -5,12 +5,17 @@ import enum
 import logging
 from uuid import uuid4, UUID
 
-from buildserver.builder.builder import Builder
-from buildserver.config import LOG_LEVEL
+
+from buildserver.artifacts import artifactstore
+import buildserver.builder.builder as builder
+import buildserver.config as config
 
 logging.basicConfig()
 logger = logging.getLogger(f"{__name__}")
-logger.setLevel(LOG_LEVEL)
+logger.setLevel(config.LOG_LEVEL)
+
+TIMEOUT = config.TIMEOUT
+
 
 class JobType(enum.Enum):
     BUILD_PROGRAM = "BUILD_PROGRAM"
@@ -59,15 +64,16 @@ class Agent:
     async def __build_program(self):
         try:
             job_id, repo_url = await self.build_job_queue.get()
-            async with asyncio.timeout(10):
+            async with asyncio.timeout(TIMEOUT):
                 logger.info(f"[Worker-{job_id}] Building: {repo_url}")
-                b = Builder()
                 try:
-                    status = b.run(repo_url)
+                    status = builder.run(repo_url)
                     try:
                         self.jobs[job_id].result.set_result(status)
                     except asyncio.InvalidStateError as e:
-                        logger.error(f"Failed to set result of future {e}")
+                        logger.error(
+                            f"[{self.__build_program.__name__}]Failed to set result of future {e}"
+                        )
                         raise e
                 except Exception as e:
                     logger.error(f"[Worker-{job_id}] Build fail: {e}")
