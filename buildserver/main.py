@@ -2,7 +2,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from buildserver.repository.views import router as repository_router
@@ -19,8 +19,8 @@ async def lifespan(app: FastAPI):
     logging.basicConfig()
     logging.getLogger("uvicorn").handlers.clear()
     logger = logging.getLogger(f"{__name__}")
-    logger.setLevel(buildserver.config.LOG_LEVEL)
-    ctx['logger'] = logger
+    logger.setLevel(LOG_LEVEL)
+    ctx["logger"] = logger
 
     # initialize agent
     agent = Agent()
