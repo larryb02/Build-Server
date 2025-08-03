@@ -81,15 +81,17 @@ def run(repo: str):
     """
     try:
         commit_hash = clone_repo(repo)
+    except Exception as e:
+        raise e
+    try:
         build_path = utils.get_dir_name(repo)
         build(build_path)
         status = BuildStatus.SUCCEEDED
     except Exception as e:
         logger.error("Failed to build program: %s", e)
         status = BuildStatus.FAILED
-        raise e
     return {
         "git_repository_url": repo,
         "commit_hash": commit_hash,
-        "status": status,
+        "build_status": status,
     }
