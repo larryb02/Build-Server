@@ -31,7 +31,7 @@ def gather_artifacts(repo_url: str):
     for artifact in artifacts:
         root, file = artifact
         artifact = Path(root, file)
-        commit_hash = utils.get_commit_hash(root)
+        commit_hash = utils.get_commit_hash(root, logger)
         artifact_path = store_in_repository(artifact, commit_hash)
         artifact_metadata.append(
             {

@@ -31,12 +31,13 @@ def get_dir_name(url: str):
     return repo
 
 
-def get_commit_hash(path: Path) -> str:
+def get_commit_hash(path: Path, logger: logging.Logger) -> str:
     """
     Get commit hash of the checked out branch
     """
     try:
         os.chdir(path)
+        logger.debug(f"Path: {path} cwd: {Path.cwd()}")
     except OSError as e:
         logger.error(
             f"chdir: {e}"
