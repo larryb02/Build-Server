@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from buildserver.api.builds.views import router as build_router
-from buildserver.builder.agent import Agent
+from buildserver.agent.agent import Agent
 from buildserver.builder.rebuilder import Rebuilder
 from buildserver.config import LOG_LEVEL
 

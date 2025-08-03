@@ -5,7 +5,7 @@ from sqlalchemy import insert, select
 from logging import Logger
 
 from buildserver.database.core import DbSession, create_session
-from buildserver.builder.agent import JobType, Agent
+from buildserver.agent.agent import JobType, Agent
 from buildserver.builder.builder import BuildStatus
 from buildserver.api.builds.models import (
     Artifact,
