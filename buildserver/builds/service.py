@@ -85,7 +85,6 @@ async def post_process(request: Request, build_job_id: UUID):
     logger.info(f"[Background Task]: Got build result {build_status}")
     # can update status here
     # -----------------------
-    # now we gather artifacts
     if build_status["status"] == BuildStatus.SUCCEEDED:
         logger.info("Build succeeded. Uploading artifacts to repository")
         try:
@@ -100,7 +99,6 @@ async def gather_artifacts(
     agent: Agent, logger: Logger, repo_url: str, db_session: DbSession
 ):
     job_id = await agent.add_job(JobType.SEND_ARTIFACTS, repo_url)
-    default_repository_id = 1  # Can assume that only one artifact repository will exist
     try:
         artifacts = await agent.jobs[job_id].result
     except Exception as e:
@@ -109,11 +107,9 @@ async def gather_artifacts(
     try:
         for artifact in artifacts:
             logger.debug(f"Processing artifact: {artifact.keys()}")
-            artifact = ArtifactCreate(
-                **artifact, artifact_repository_id=default_repository_id
-            )
+            artifact = ArtifactCreate(**artifact)
             artifact = create_artifact(artifact, db_session)
-            logger.info(f"Successfully added artifact: {artifact}")
+            logger.debug(f"Successfully added artifact: {artifact}")
         db_session.commit()  # commit after all operations are successful
     except Exception as e:
         logger.error(f"Failed to create artifact: {e}")
