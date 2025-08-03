@@ -57,33 +57,26 @@ class Agent:
     async def __build_program(self):
         try:
             job_id, repo_url = await self.build_job_queue.get()
-            async with asyncio.timeout(TIMEOUT):
-                logger.info(f"[Worker-{job_id}] Building: {repo_url}")
-                try:
-                    status = builder.run(repo_url)
-                    try:
-                        self.jobs[job_id].result.set_result(status)
-                    except asyncio.InvalidStateError as e:
-                        logger.error(
-                            f"[{self.__build_program.__name__}]Failed to set result of future {e}"
-                        )
-                        raise e
-                except Exception as e:
-                    logger.error(f"[Worker-{job_id}] Build fail: {e}")
-                    self.jobs[job_id].result.set_exception(e)
-        except TimeoutError as e:
-            logger.error(f"[Worker-{job_id}] timed out")
+            logger.info(f"[Worker-{job_id}] Building: {repo_url}")
+            status = builder.run(repo_url)
+            self.jobs[job_id].result.set_result(status)
+        except Exception as e:
+            logger.error(f"[Worker-{job_id}] Build fail: {e}")
             self.jobs[job_id].result.set_exception(e)
             raise e
 
     async def __send_artifacts(self):
         job_id, repo_url = await self.artifact_job_queue.get()
-        logger.info(f"[Worker-{job_id}] Gathering artifacts for build: {repo_url}")
-        b = Builder()
+        logger.info(
+            f"[{self.__send_artifacts.__name__} Worker-{job_id}] Gathering artifacts for build: {repo_url}"
+        )
         try:
-            artifacts = b.gather_artifacts(repo_url)
+            artifacts = artifactstore.gather_artifacts(repo_url)
+            self.jobs[job_id].result.set_result(artifacts)
         except Exception as e:
-            logger.error(f"[Worker-{job_id}] Job failed: {e}")
+            logger.error(
+                f"[{self.__send_artifacts.__name__} Worker-{job_id}] Job failed: {e}"
+            )
             self.jobs[job_id].result.set_exception(e)
             raise e
 
