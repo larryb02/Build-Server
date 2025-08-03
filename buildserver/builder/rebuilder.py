@@ -32,21 +32,16 @@ class Rebuilder:
             while True:
                 await asyncio.sleep(SLEEP_FOR)
                 logger.debug(f"Checking for new commits")
-                try:
-                    async with asyncio.timeout(ASYNC_TIMEOUT):
-                        builds = get_all_unique_builds()
-                        logger.debug(f"Got builds: {builds}")
-                        for build in builds:
-                            remote_url = build.git_repository_url
-                            remote_hash = get_remote_hash(remote_url)
-                            if not compare_hashes(
-                                local_hash=build.commit_hash, remote_hash=remote_hash
-                            ):
-                                logger.info(f"{remote_url} got new commits. Rebuilding")
-                                await register(remote_url, self.agent)
-                except TimeoutError as e:
-                    logger.error(f"Rebuilder timed out: {e}")
-                    raise e
+                builds = get_all_unique_builds()
+                logger.debug(f"Got builds: {builds}")
+                for build in builds:
+                    remote_url = build.git_repository_url
+                    remote_hash = get_remote_hash(remote_url)
+                    if not compare_hashes(
+                        local_hash=build.commit_hash, remote_hash=remote_hash
+                    ):
+                        logger.info(f"{remote_url} got new commits. Rebuilding")
+                        await register(remote_url, self.agent)
         except Exception as e:
             logger.error(f"Unknown error occurred: {e}")
             raise e
