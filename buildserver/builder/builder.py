@@ -45,7 +45,7 @@ def clone_repo(repo: str):
         raise e
     subprocess.run(["/usr/bin/git", "clone", repo], check=True)
     try:
-        commit_hash = utils.get_commit_hash(Path.cwd())
+        commit_hash = utils.get_commit_hash(Path(repo), logger)
     except Exception as e:
         logger.error(f"Failed to get commit hash: {e}")
     logger.info(f"Cloned {repo} at {commit_hash} PWD: {Path.cwd()}")
