@@ -30,6 +30,16 @@ async def register(repo: BuildCreate, agent: Agent, logger: Logger) -> UUID:
     dbsession.close()
     return job_id, build
 
+def get_all_builds(dbsession: DbSession):
+    stmt = (
+        select(*Build.__table__.columns)
+    )
+    try:
+        records = dbsession.execute(stmt).fetchall()
+    except Exception as e:
+        raise e
+    return records
+    
 
 def create_build(build: BuildCreate, dbsession: DbSession):
     stmt = (

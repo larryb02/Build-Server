@@ -1,8 +1,11 @@
+import datetime
 from fastapi import APIRouter, HTTPException, status, Request, BackgroundTasks
 from fastapi.exceptions import RequestValidationError
 
 from buildserver.api.builds.models import BuildCreate, BuildRead
-from buildserver.services.builds import register, post_process
+from buildserver.builder.builder import BuildStatus
+from buildserver.database.core import DbSession
+from buildserver.services.builds import register, post_process, get_all_builds
 
 router = APIRouter(prefix="/builds")
 
@@ -37,3 +40,12 @@ async def register_build(
         "build_status": build.build_status,
         "created_at": build.created_at,
     }
+
+
+@router.get("", response_model=list[BuildRead])
+async def get_builds(dbsession: DbSession, request: Request):
+    try:
+        builds = list(build._mapping for build in get_all_builds(dbsession))
+    except Exception as e:
+        request.state.logger.error(f"Failed to get build: {e}")
+    return builds
