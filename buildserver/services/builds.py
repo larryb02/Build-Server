@@ -76,6 +76,21 @@ def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
     return record
 
 
+def update_build(dbsession: DbSession, build_id, **fields):
+    # kwargs = dict(fields)
+    # print(f"Using these fields to update status: {}")
+    stmt = (
+        update(Build)
+        .where(Build.build_id == build_id)
+        .values(**fields)
+        .returning(*Build.__table__._columns)  # return all columns
+    )
+    try:
+        dbsession.execute(stmt)
+    except Exception as e:
+        raise e
+
+
 async def post_process(request: Request, build_job_id: UUID):
     db_session = (
         create_session()
@@ -84,14 +99,20 @@ async def post_process(request: Request, build_job_id: UUID):
     agent = request.state.agent
     logger = request.state.logger
     try:
-        build_status = await agent.jobs[build_job_id].result
+        build_status, build_id = await agent.jobs[build_job_id].result
     except Exception as e:
         logger.error(f"Result Error: {e}")
-        return
+        raise e
     logger.info(f"[Background Task]: Got build result {build_status}")
     # can update status here
+    try:
+        update_build(
+            db_session, build_id, **build_status
+        )
+    except Exception as e:
+        logger.error(f"Failed to update build_status in database: {e}")
     # -----------------------
-    if build_status["status"] == BuildStatus.SUCCEEDED:
+    if build_status["build_status"] == BuildStatus.SUCCEEDED:
         logger.info("Build succeeded. Uploading artifacts to repository")
         try:
             await gather_artifacts(
