@@ -5,7 +5,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from buildserver.repository.views import router as repository_router
 from buildserver.builds.views import router as build_router
 from buildserver.builder.agent import Agent
 from buildserver.builder.rebuilder import Rebuilder
@@ -47,5 +46,4 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(repository_router)
 app.include_router(build_router)

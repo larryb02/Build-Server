@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import DateTime, ForeignKey, LargeBinary, String, Enum
+from sqlalchemy import DateTime, String, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from buildserver.builder.builder import BuildStatus

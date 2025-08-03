@@ -4,8 +4,8 @@ from uuid import UUID
 from sqlalchemy import insert, select
 from logging import Logger
 
-from buildserver.database.core import Session, DbSession, create_session
-from buildserver.builder.agent import JobType, Agent, Status
+from buildserver.database.core import DbSession, create_session
+from buildserver.builder.agent import JobType, Agent
 from buildserver.builder.builder import BuildStatus
 from buildserver.builds.models import (
     Artifact,

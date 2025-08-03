@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Request, BackgroundTasks
 from fastapi.exceptions import RequestValidationError
 
-from buildserver.builder.agent import Status
 from buildserver.builds.models import BuildCreate, BuildRead
 from buildserver.builds.service import create_build, validate, register, post_process
 from buildserver.database.core import DbSession
