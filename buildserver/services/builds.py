@@ -21,9 +21,9 @@ async def register(repo: BuildCreate, agent: Agent, logger: Logger) -> UUID:
     Add a new BUILD job to task queue, create a db record with info about this build
     """
     dbsession = create_session()
-    job_id = await agent.add_job(JobType.BUILD_PROGRAM, repo.git_repository_url)
     try:
         build = BuildRead(**dict(create_build(repo, dbsession)._mapping))
+        job_id = await agent.add_job(JobType.BUILD_PROGRAM, (repo.git_repository_url, build.build_id))
         dbsession.commit()
     except Exception as e:
         logger.error(f"Failed to write build to db: {e}")

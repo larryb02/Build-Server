@@ -56,10 +56,10 @@ class Agent:
 
     async def __build_program(self):
         try:
-            job_id, repo_url = await self.build_job_queue.get()
+            job_id, (repo_url, build_id) = await self.build_job_queue.get()
             logger.info(f"[Worker-{job_id}] Building: {repo_url}")
             status = builder.run(repo_url)
-            self.jobs[job_id].result.set_result(status)
+            self.jobs[job_id].result.set_result((status, build_id))
         except Exception as e:
             logger.error(f"[Worker-{job_id}] Build fail: {e}")
             self.jobs[job_id].result.set_exception(e)
