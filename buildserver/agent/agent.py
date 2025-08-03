@@ -6,11 +6,12 @@ import logging
 from uuid import uuid4, UUID
 
 
+from buildserver.api.builds.models import ArtifactCreate
 from buildserver.artifacts import artifactstore
 import buildserver.builder.builder as builder
 import buildserver.config as config
 from buildserver.database.core import create_session
-from buildserver.services.builds import update_build
+from buildserver.services.builds import create_artifact, update_build
 
 logging.basicConfig()
 logger = logging.getLogger(f"{__name__}")
@@ -62,15 +63,17 @@ class Agent:
             logger.info(f"[Worker-{job_id}] Building: {repo_url}")
             status = builder.run(repo_url)
             async def add_to_db(status):
-                logger.debug(f"Adding to db")
+                logger.debug(f"Updating build-{build_id} in database")
                 db_session = create_session()
                 try:
                     await asyncio.gather(asyncio.to_thread(update_build, db_session, build_id, **status))
+                    db_session.commit()
                 except Exception as e:
-                    logger.error(f"Failed to update db from async: {e}")
-                db_session.commit()
+                    logger.error(f"Failed to update database from async: {e}")
+                    db_session.rollback()
                 db_session.close()
             await add_to_db(status)
+            await self.add_job(JobType.SEND_ARTIFACTS, repo_url)
         except Exception as e:
             logger.error(f"[Worker-{job_id}] Build fail: {e}")
             raise e
@@ -82,12 +85,20 @@ class Agent:
         )
         try:
             artifacts = artifactstore.gather_artifacts(repo_url)
-            self.jobs[job_id].result.set_result(artifacts)
+            for artifact in artifacts:
+                db_session = create_session()
+                try:
+                    await asyncio.gather(asyncio.to_thread(create_artifact, ArtifactCreate(**artifact), db_session))
+                    db_session.commit()
+                    logger.debug(f"Successfully added artifact to database")
+                except Exception as e:
+                    logger.error(f"Failed to write artifact to database: {e}")
+                    db_session.rollback()
+                db_session.close()
         except Exception as e:
             logger.error(
                 f"[{self.__send_artifacts.__name__} Worker-{job_id}] Job failed: {e}"
             )
-            self.jobs[job_id].result.set_exception(e)
             raise e
 
     async def add_job(self, job_type: JobType, job: any) -> UUID:
