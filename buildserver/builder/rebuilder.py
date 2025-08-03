@@ -3,7 +3,7 @@ import asyncio
 import subprocess
 
 from buildserver.builder.agent import Agent
-from buildserver.builds.service import get_all_unique_builds, register
+from buildserver.services.builds import get_all_unique_builds, register
 import buildserver.config as config
 
 

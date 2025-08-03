@@ -7,18 +7,13 @@ from logging import Logger
 from buildserver.database.core import DbSession, create_session
 from buildserver.builder.agent import JobType, Agent
 from buildserver.builder.builder import BuildStatus
-from buildserver.builds.models import (
+from buildserver.api.builds.models import (
     Artifact,
     ArtifactCreate,
     Build,
     BuildCreate,
     BuildRead,
 )
-
-
-def validate(repo_url: str):
-    if repo_url == "":
-        raise RequestValidationError("Url may not be blank")
 
 
 async def register(repo: str, agent: Agent) -> UUID:

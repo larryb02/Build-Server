@@ -1,12 +1,15 @@
 from fastapi import APIRouter, HTTPException, status, Request, BackgroundTasks
 from fastapi.exceptions import RequestValidationError
 
-from buildserver.builds.models import BuildCreate, BuildRead
-from buildserver.builds.service import create_build, validate, register, post_process
+from buildserver.api.builds.models import BuildCreate, BuildRead
+from buildserver.services.builds import create_build, register, post_process
 from buildserver.database.core import DbSession
 
 router = APIRouter(prefix="/builds")
 
+def validate(repo_url: str):
+    if repo_url == "":
+        raise RequestValidationError("Url may not be blank")
 
 @router.post("/register", response_model=BuildRead)
 async def register_build(
