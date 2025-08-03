@@ -9,6 +9,8 @@ from uuid import uuid4, UUID
 from buildserver.artifacts import artifactstore
 import buildserver.builder.builder as builder
 import buildserver.config as config
+from buildserver.database.core import create_session
+from buildserver.services.builds import update_build
 
 logging.basicConfig()
 logger = logging.getLogger(f"{__name__}")
@@ -59,10 +61,18 @@ class Agent:
             job_id, (repo_url, build_id) = await self.build_job_queue.get()
             logger.info(f"[Worker-{job_id}] Building: {repo_url}")
             status = builder.run(repo_url)
-            self.jobs[job_id].result.set_result((status, build_id))
+            async def add_to_db(status):
+                logger.debug(f"Adding to db")
+                db_session = create_session()
+                try:
+                    await asyncio.gather(asyncio.to_thread(update_build, db_session, build_id, **status))
+                except Exception as e:
+                    logger.error(f"Failed to update db from async: {e}")
+                db_session.commit()
+                db_session.close()
+            await add_to_db(status)
         except Exception as e:
             logger.error(f"[Worker-{job_id}] Build fail: {e}")
-            self.jobs[job_id].result.set_exception(e)
             raise e
 
     async def __send_artifacts(self):
