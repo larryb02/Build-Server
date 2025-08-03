@@ -22,16 +22,9 @@ class JobType(enum.Enum):
     SEND_ARTIFACTS = "SEND_ARTIFACTS"
 
 
-class Status(enum.Enum):
-    QUEUED = "QUEUED"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
-
-
 @dataclass
 class JobState:
     type: JobType = None
-    status: Status | None = None
     result: asyncio.Future = None
 
 
@@ -82,7 +75,6 @@ class Agent:
             logger.error(f"[Worker-{job_id}] timed out")
             self.jobs[job_id].result.set_exception(e)
             raise e
-        # self.jobs[job_id].status = Status.COMPLETED
 
     async def __send_artifacts(self):
         job_id, repo_url = await self.artifact_job_queue.get()
@@ -94,8 +86,6 @@ class Agent:
             logger.error(f"[Worker-{job_id}] Job failed: {e}")
             self.jobs[job_id].result.set_exception(e)
             raise e
-        self.jobs[job_id].result.set_result(artifacts)
-        # self.jobs[job_id].status = Status.COMPLETED
 
     async def add_job(self, job_type: JobType, job: any) -> UUID:
         job_id = uuid4()
@@ -107,7 +97,6 @@ class Agent:
         except Exception as e:
             logger.error(f"Failed to add job to queue: {e}")
             raise e
-        # self.jobs[job_id].status = Status.QUEUED
         self.jobs[job_id].result = asyncio.get_running_loop().create_future()
         logger.debug(
             f"[{job_type}] Queue Size: {self.jobhandlers[job_type]["queue"].qsize()}"
