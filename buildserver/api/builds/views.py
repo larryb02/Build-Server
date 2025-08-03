@@ -31,7 +31,7 @@ async def register_build(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=[{"msg": str(e)}],
         )
-    job_id, build = await register(repo, request.state.agent, request.state.logger)
+    job_id, build = await register(repo, request.state.agent)
     background_tasks.add_task(post_process, request, job_id)
     return {
         "git_repository_url": build.git_repository_url,

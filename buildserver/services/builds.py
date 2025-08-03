@@ -1,8 +1,9 @@
 from fastapi import Request
 from uuid import UUID
 from sqlalchemy import insert, or_, select, update
-from logging import Logger
+import logging
 
+from buildserver import config
 from buildserver.database.core import DbSession, create_session
 from buildserver.agent.agent import JobType, Agent
 from buildserver.builder.builder import BuildStatus
@@ -14,8 +15,11 @@ from buildserver.api.builds.models import (
     BuildRead,
 )
 
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(config.LOG_LEVEL)
 
-async def register(repo: BuildCreate, agent: Agent, logger: Logger) -> UUID:
+async def register(repo: BuildCreate, agent: Agent) -> UUID:
     """
     Add a new BUILD job to task queue, create a db record with info about this build
     """
@@ -124,7 +128,7 @@ async def post_process(request: Request, build_job_id: UUID):
         logger.info("Build succeeded. Uploading artifacts to repository")
         try:
             await gather_artifacts(
-                agent, logger, build_status["git_repository_url"], db_session
+                agent, build_status["git_repository_url"], db_session
             )
         except Exception as e:
             raise e
@@ -132,7 +136,7 @@ async def post_process(request: Request, build_job_id: UUID):
 
 
 async def gather_artifacts(
-    agent: Agent, logger: Logger, repo_url: str, db_session: DbSession
+    agent: Agent, repo_url: str, db_session: DbSession
 ):
     job_id = await agent.add_job(JobType.SEND_ARTIFACTS, repo_url)
     try:

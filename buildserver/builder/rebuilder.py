@@ -5,6 +5,7 @@ import subprocess
 from buildserver.agent.agent import Agent
 from buildserver.services.builds import get_all_unique_builds, register
 import buildserver.config as config
+from buildserver.api.builds.models import BuildRead
 
 
 """
@@ -40,7 +41,7 @@ class Rebuilder:
                         local_hash=build.commit_hash, remote_hash=remote_hash
                     ):
                         logger.info(f"{remote_url} got new commits. Rebuilding")
-                        await register(remote_url, self.agent)
+                        await register(build, self.agent)
         except Exception as e:
             logger.error(f"Unknown error occurred: {e}")
             raise e
