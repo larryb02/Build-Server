@@ -13,28 +13,23 @@ class ArtifactRead(BaseModel):
     git_repository_url: str
     commit_hash: str
     artifact_file_name: str
-    artifact_file: bytes
-    artifact_repository_name: str
+    artifact_path: str
 
 
 class ArtifactCreate(BaseModel):
     git_repository_url: str
     artifact_file_name: str
-    artifact_file_contents: bytes
+    artifact_path: str
     commit_hash: str
-    artifact_repository_id: int
 
 
 class Artifact(Base):
     __tablename__ = "artifact"
     artifact_id: Mapped[int] = mapped_column(primary_key=True)
-    artifact_name: Mapped[str] = mapped_column(String(255))
-    artifact_file: Mapped[bytes] = mapped_column(LargeBinary())  # NOTE: remove this
+    artifact_file_name: Mapped[str] = mapped_column(String(255))
+    artifact_path: Mapped[str] = mapped_column(String(255))
     git_repository_url: Mapped[str] = mapped_column(String(255))
     commit_hash: Mapped[str] = mapped_column(String(40))  # max length of a sha-1 hash
-    artifact_repository_id: Mapped[int] = mapped_column(
-        ForeignKey("artifactrepository.artifact_repository_id")
-    )
 
 
 class BuildRead(BaseModel):

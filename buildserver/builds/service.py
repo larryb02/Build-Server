@@ -51,19 +51,16 @@ def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
     stmt = (
         insert(Artifact)
         .values(
-            artifact_name=artifact.artifact_file_name,
-            artifact_file=artifact.artifact_file_contents,
-            artifact_repository_id=artifact.artifact_repository_id,
+            artifact_file_name=artifact.artifact_file_name,
             git_repository_url=artifact.git_repository_url,
             commit_hash=artifact.commit_hash,
+            artifact_path=artifact.artifact_path,
         )
         .returning(
             Artifact.artifact_id,
-            Artifact.artifact_name,
-            Artifact.artifact_repository_id,
+            Artifact.artifact_file_name,
             Artifact.commit_hash,
             Artifact.git_repository_url,
-            Artifact.artifact_file,
         )
     )
     try:
