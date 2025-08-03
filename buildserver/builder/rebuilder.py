@@ -14,7 +14,6 @@ Runs for the entire lifetime of the application
 """
 
 SLEEP_FOR = config.SLEEP_FOR
-ASYNC_TIMEOUT = config.TIMEOUT
 
 logging.basicConfig()
 logger = logging.getLogger(f"{__name__}")
@@ -55,7 +54,9 @@ def compare_hashes(local_hash: str, remote_hash: str):
 def get_remote_hash(remote_url: str) -> str:
     # NOTE: going to create a command pattern that works like this ->
     proc = subprocess.run(
-        ["/usr/bin/git", "ls-remote", remote_url, "HEAD"], stdout=subprocess.PIPE, check=True
+        ["/usr/bin/git", "ls-remote", remote_url, "HEAD"],
+        stdout=subprocess.PIPE,
+        check=True,
     )
     # git ls-remote output: ba8d19c10bb14810dbb663ae2455e6964cee0e41	HEAD,
     # so we only take before the tab character
