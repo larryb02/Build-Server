@@ -133,10 +133,11 @@ def get_all_unique_builds() -> list:
     stmt = (
         select(*Build.__table__.columns)
         .distinct(Build.git_repository_url)
-        .order_by(Build.git_repository_url, Build.created_at)
-        .where(
-            Build.build_status == BuildStatus.SUCCEEDED
-            or Build.build_status == BuildStatus.FAILED
+        .order_by(Build.git_repository_url, Build.created_at).where(
+            or_(
+                Build.build_status == BuildStatus.SUCCEEDED,
+                Build.build_status == BuildStatus.FAILED,
+            )
         )
     )
     builds = db_session.execute(stmt).fetchall()
