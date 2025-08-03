@@ -3,6 +3,7 @@ import Dashboard from './Dashboard';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
 
 const darkTheme = createTheme({
   palette: {
@@ -15,7 +16,13 @@ function App() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <Header />
-      <Dashboard/>
+      <Box sx={{
+        height: '100vh',
+        width: '100vw',
+        display: 'flex'
+      }}>
+        <Dashboard />
+      </Box>
     </ThemeProvider>
   )
 }
