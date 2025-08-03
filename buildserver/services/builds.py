@@ -103,7 +103,6 @@ async def post_process(request: Request, build_job_id: UUID):
         logger.error(f"Result Error: {e}")
         raise e
     logger.info(f"[Background Task]: Got build result {build_status}")
-    # can update status here
     try:
         update_build(
             db_session, build_id, **build_status
@@ -111,7 +110,6 @@ async def post_process(request: Request, build_job_id: UUID):
         db_session.commit()
     except Exception as e:
         logger.error(f"Failed to update build_status in database: {e}")
-    # -----------------------
     if build_status["build_status"] == BuildStatus.SUCCEEDED:
         logger.info("Build succeeded. Uploading artifacts to repository")
         try:
