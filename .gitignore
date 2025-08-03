@@ -211,3 +211,6 @@ hello/
 
 # buildserver directories
 .artifact_repository/
+
+# ide specific
+.vscode/
