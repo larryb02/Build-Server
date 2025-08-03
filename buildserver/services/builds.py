@@ -108,6 +108,7 @@ async def post_process(request: Request, build_job_id: UUID):
         update_build(
             db_session, build_id, **build_status
         )
+        db_session.commit()
     except Exception as e:
         logger.error(f"Failed to update build_status in database: {e}")
     # -----------------------
@@ -119,6 +120,7 @@ async def post_process(request: Request, build_job_id: UUID):
             )
         except Exception as e:
             raise e
+    db_session.close()
 
 
 async def gather_artifacts(
