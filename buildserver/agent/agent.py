@@ -58,22 +58,31 @@ class Agent:
         }
 
     async def __build_program(self):
+        """
+        Run the builder while updating the build status throughout the process. 
+        If build is successful add a task to task queue to gather artifacts
+        """
+
+        async def update_db(**fields):
+            logger.debug(f"Updating build-{build_id} in database")
+            db_session = create_session()
+            try:
+                await asyncio.to_thread(update_build, db_session, build_id, **fields)
+                db_session.commit()
+            except Exception as e:
+                logger.error(f"Failed to update database from async: {e}")
+                db_session.rollback()
+            db_session.close()
+
         try:
             job_id, (repo_url, build_id) = await self.build_job_queue.get()
             logger.info(f"[Worker-{job_id}] Building: {repo_url}")
-            status = builder.run(repo_url)
-            async def add_to_db(status):
-                logger.debug(f"Updating build-{build_id} in database")
-                db_session = create_session()
-                try:
-                    await asyncio.gather(asyncio.to_thread(update_build, db_session, build_id, **status))
-                    db_session.commit()
-                except Exception as e:
-                    logger.error(f"Failed to update database from async: {e}")
-                    db_session.rollback()
-                db_session.close()
-            await add_to_db(status)
-            await self.add_job(JobType.SEND_ARTIFACTS, repo_url)
+            await update_db(build_status=builder.BuildStatus.RUNNING)
+            build_metadata = builder.run(repo_url)
+            logger.debug(f"Build complete updating status in db")
+            await update_db(**build_metadata)
+            if build_metadata["build_status"] == builder.BuildStatus.SUCCEEDED:
+                await self.add_job(JobType.SEND_ARTIFACTS, repo_url)
         except Exception as e:
             logger.error(f"[Worker-{job_id}] Build fail: {e}")
             raise e
