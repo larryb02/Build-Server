@@ -77,6 +77,9 @@ ARTIFACT_REPOSITORY_ROOT=
 
 ```  
 
+**Note**:  
+POSIX_BUILD_DIRECTORY/WINDOWS_BUILD_DIRECTORY and ARTIFACT_REPOSITORY_ROOT need to be created manually for now, or else the build server will not run properly
+
 Store this .env in /web  
 ```
 VITE_API_HOSTNAME=
