@@ -4,7 +4,9 @@ Proof of concept build server for C programs
 
 # Architecture
 ###  API
-REST API that exposes an interface for a client to communicate with the build server system
+REST API that exposes an interface for a client to communicate with the build server system  
+
+Built using FastAPI framework
 
 For api documentation visit [here](localhost:8000/docs)
 ###  Build Agent
@@ -30,4 +32,48 @@ Tables:
 - Build
     - Stores metadata about builds such as the build status, the repository url, and the commit hash
 
-The entry point of this application resides in /api/main.py this is where the http server, the build agent 
+### Web App
+Web interface to view builds known to the system and their status
+
+The entry point of this application resides in /api/main.py this is where the http server, the build agent, and the rebuilder are configured and initialized
+
+### How to run locally
+Requirements:
+- SQL server. Can confirm postgres is supported, but most implementations should work as well.
+- python3
+- npm
+
+Clone repository
+```bash
+git clone git@github.com:larryb02/Build-Server.git
+```
+## Stand up server side
+Setup a virtual environment
+```bash
+python3 -m venv <venv_name>
+```
+Activate venv  
+```bash
+source <venv_name>/bin/activate
+```
+Install requirements
+```bash
+python3 -m pip install -r requirements.txt
+```
+Start server
+```bash
+fastapi run or fastapi dev (for development)
+```  
+## Stand up web page locally
+There are two ways to access the web page locally:  
+
+Build the files and access via localhost:8000/index.html
+```bash
+npm run build
+```
+or  
+
+Run in dev mode and access via localhost:5176 or the port that vite specifies
+```bash
+npm run dev
+```
