@@ -43,6 +43,34 @@ Requirements:
 - python3
 - npm
 
+Two .env files are required, one for the server side and one for the web page  
+
+Store this .env in /buildserver
+```
+# Defaults
+DATABASE_PORT=
+DATABASE_HOSTNAME=
+DATABASE_USER=
+DATABASE_PASSWORD=
+DATABASE_NAME=
+
+LOG_LEVEL=DEBUG
+
+POSIX_BUILD_DIRECTORY=
+WINDOWS_BUILD_DIRECTORY=
+
+SLEEP_FOR=5
+TIMEOUT=60
+
+ARTIFACT_REPOSITORY_ROOT=
+
+```  
+
+Store this .env in /web  
+```
+VITE_API_HOSTNAME=
+```
+
 Clone repository
 ```bash
 git clone git@github.com:larryb02/Build-Server.git
