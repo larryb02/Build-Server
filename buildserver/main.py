@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     # initialize agent
     agent = Agent()
     loop = asyncio.get_event_loop()
-    agent_thread = asyncio.run_coroutine_threadsafe(agent.run(), loop)
+    asyncio.run_coroutine_threadsafe(agent.run(), loop)
     ctx["agent"] = agent
 
     # initialize rebuilder
@@ -34,7 +34,6 @@ async def lifespan(app: FastAPI):
 
     # shutdown
     agent.close()
-    agent_thread.cancel()
 
 
 app = FastAPI(lifespan=lifespan)
