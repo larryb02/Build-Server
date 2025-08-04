@@ -8,7 +8,7 @@ REST API that exposes an interface for a client to communicate with the build se
 
 Built using FastAPI framework
 
-For api documentation visit [here](localhost:8000/docs)
+For api documentation visit [here](./openapi.json) this file can be viewed on a swagger editor
 ###  Build Agent
 Long running task that manages jobs and workers  
 The build agent maintains a job queue and assigns workers to jobs  
@@ -36,6 +36,14 @@ Tables:
 Web interface to view builds known to the system and their status
 
 The entry point of this application resides in /api/main.py this is where the http server, the build agent, and the rebuilder are configured and initialized
+
+### Kicking off builds
+In order to register repositories for builds, there is an endpoint exposed via REST api  
+```bash
+curl -X POST http://localhost:8000/builds/register \
+  -H "Content-Type: application/json" \
+  -d '{"git_repository_url": "value"}'
+```
 
 ### How to run locally
 Requirements:
