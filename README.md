@@ -39,7 +39,7 @@ The entry point of this application resides in /api/main.py this is where the ht
 
 ### How to run locally
 Requirements:
-- SQL server. Can confirm postgres is supported, but most implementations should work as well.
+- SQL server. Can confirm postgres is supported, but most implementations should work as well
 - python3
 - npm
 
