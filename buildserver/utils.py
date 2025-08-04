@@ -25,10 +25,11 @@ def get_dir_name(url: str):
     if Path.is_dir(url_to_path):
         return url_to_path.name
     if url.startswith("git"):
-        repo = url.split(":")[-1:]
+        repo = url.split("/")[-1:] # split on the user/repo_name.git
     else:
         repo = url.split("com/")[-1:]
-    repo = repo.split(".")[0]  # remove the .git
+        repo = url.split("/")[-1:]
+    repo = repo[0].split(".")[0]  # remove the .git
     return repo
 
 
