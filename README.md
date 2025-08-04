@@ -93,8 +93,14 @@ Start server
 fastapi run or fastapi dev (for development)
 ```  
 ## Stand up web page locally
-There are two ways to access the web page locally:  
-
+From project root
+```bash
+cd ./web
+```
+Install dependencies
+```bash
+npm install
+```
 Run in dev mode and access via localhost:5176 or the port that vite specifies
 ```bash
 npm run dev
