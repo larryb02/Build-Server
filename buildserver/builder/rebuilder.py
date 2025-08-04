@@ -40,8 +40,8 @@ class Rebuilder:
                         local_hash=build.commit_hash, remote_hash=remote_hash
                     ):
                         logger.info(f"{remote_url} got new commits. Rebuilding")
-                        await register(BuildCreate(git_repository_url=build.git_repository_url))
-                        await self.agent.add_job(JobType.BUILD_PROGRAM, (build.git_repository_url, build.build_id))
+                        await register(BuildCreate(git_repository_url=remote_url))
+                        await self.agent.add_job(JobType.BUILD_PROGRAM, (remote_url, build.build_id))
         except Exception as e:
             logger.error(f"Unknown error occurred: {e}")
             raise e
