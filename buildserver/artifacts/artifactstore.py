@@ -41,7 +41,10 @@ def gather_artifacts(repo_url: str):
                 "git_repository_url": repo_url,
             }
         )
-
+    try:
+        utils.cleanup_build_files(Path(path))
+    except Exception as e:
+        raise e
     return artifact_metadata
 
 

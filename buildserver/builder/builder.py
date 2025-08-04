@@ -4,6 +4,7 @@ Functions for compiling C programs
 
 import os
 import enum
+import shutil
 import subprocess
 import logging
 from pathlib import Path
@@ -90,6 +91,7 @@ def run(repo: str):
     except Exception as e:
         logger.error("Failed to build program: %s", e)
         status = BuildStatus.FAILED
+        utils.cleanup_build_files(Path(BUILD_DIR, build_path))
     return {
         "git_repository_url": repo,
         "commit_hash": commit_hash,

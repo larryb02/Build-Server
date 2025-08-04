@@ -6,6 +6,7 @@ from pathlib import Path
 import logging
 import subprocess
 import os
+import shutil
 
 import buildserver.config as config
 
@@ -48,3 +49,12 @@ def get_commit_hash(path: Path, logger: logging.Logger) -> str:
     )  # NOTE: consider using command pattern for all of these subproccess calls
     commit_hash = str(p.stdout, encoding="utf-8").strip("\n")
     return commit_hash
+
+def cleanup_build_files(build_path: Path):
+    """
+    Cleanup a build directory after a build has completed
+    """
+    try:
+        shutil.rmtree(build_path)
+    except Exception as e:
+        logger.error(f"Failed to remove {build_path}: {e}")
