@@ -32,5 +32,12 @@ def test_run():
     # repo doesnt exist
 
     # build fail
-    # # build success
-    assert True
+    local_test_repo_broken = "../hello_fail"
+    build = builder.run(local_test_repo_broken)
+    assert build["build_status"] == builder.BuildStatus.FAILED
+    utils.cleanup_build_files(Path(BUILD_DIR, "hello_fail"))
+    # build success
+    local_test_repo = "../hello"
+    build = builder.run(local_test_repo)
+    assert build["build_status"] == builder.BuildStatus.SUCCEEDED
+    utils.cleanup_build_files(Path(BUILD_DIR, "hello"))
