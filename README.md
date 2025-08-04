@@ -67,12 +67,6 @@ fastapi run or fastapi dev (for development)
 ## Stand up web page locally
 There are two ways to access the web page locally:  
 
-Build the files and access via localhost:8000/index.html
-```bash
-npm run build
-```
-or  
-
 Run in dev mode and access via localhost:5176 or the port that vite specifies
 ```bash
 npm run dev
