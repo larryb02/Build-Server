@@ -11,6 +11,7 @@ Built using FastAPI framework
 For api documentation visit [here](./openapi.json) this file can be viewed on a swagger editor
 ###  Build Agent
 Long running task that manages jobs and workers  
+
 The build agent maintains a job queue and assigns workers to jobs  
 Improvements that could be made are: 
 - Creating an abstraction to allow dynamic creation of job queues in order to better scale when a new feature arises and to separate code that workers should execute from the agent
@@ -22,7 +23,9 @@ This gets called by workers in the build agent
 Long running task that checks for new commits for any builds known to the server
 ### Artifact Repository
 The artifact repository is a structured directory that stores artifacts with the following pattern: <commit_hash>/artifact  
+
 The code that provides functionality to interact with the artifact repository can be found in artifactstore.py  
+
 Ideally the artifact repository should be able to exist locally, on a file server, or on a cloud based object store such as Amazon S3, however this is a WIP
 ###  Database
 Postgresql Server  
