@@ -25,12 +25,6 @@ class JobType(enum.Enum):
     SEND_ARTIFACTS = "SEND_ARTIFACTS"
 
 
-@dataclass
-class JobState:
-    type: JobType = None
-    result: asyncio.Future = None
-
-
 class Agent:
     """
     Long running task that manages jobs and workers
@@ -39,9 +33,6 @@ class Agent:
     def __init__(self):
         self.build_job_queue = asyncio.Queue()
         self.artifact_job_queue = asyncio.Queue()
-        self.jobs = defaultdict(
-            JobState
-        )  # maps job type/status/results to a job_id; make this clearer
 
         # NOTE: predefined job handlers due to time constraints and simple needs
         # the next logical step is to create a message queue system
