@@ -1,6 +1,4 @@
 import asyncio
-from collections import defaultdict
-from dataclasses import dataclass
 import enum
 import logging
 from uuid import uuid4, UUID
@@ -50,7 +48,7 @@ class Agent:
 
     async def __build_program(self):
         """
-        Run the builder while updating the build status throughout the process. 
+        Run the builder while updating the build status throughout the process.
         If build is successful add a task to task queue to gather artifacts
         """
 
@@ -91,7 +89,9 @@ class Agent:
             for artifact in artifacts:
                 db_session = create_session()
                 try:
-                    await asyncio.gather(asyncio.to_thread(create_artifact, ArtifactCreate(**artifact), db_session))
+                    await asyncio.to_thread(
+                        create_artifact, ArtifactCreate(**artifact), db_session
+                    )
                     db_session.commit()
                     logger.debug(f"Successfully added artifact to database")
                 except Exception as e:
@@ -105,16 +105,13 @@ class Agent:
             raise e
 
     async def add_job(self, job_type: JobType, job: any) -> UUID:
-        job_id = uuid4() # using job id's to trace workers while debugging
-        logger.info(
-            f"Added new job: [{job_id} {job_type}]: {job} id: {id(self.jobhandlers[job_type]["queue"])}"
-        )
+        job_id = uuid4()  # using job id's to trace workers while debugging
+        logger.info(f"Added new job: [{job_id}-{job_type}]: {job}")
         try:
             await self.jobhandlers[job_type]["queue"].put((job_id, job))
         except Exception as e:
             logger.error(f"Failed to add job to queue: {e}")
             raise e
-        self.jobs[job_id].result = asyncio.get_running_loop().create_future()
         logger.debug(
             f"[{job_type}] Queue Size: {self.jobhandlers[job_type]["queue"].qsize()}"
         )
