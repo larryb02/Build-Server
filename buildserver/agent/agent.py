@@ -88,6 +88,9 @@ class Agent:
             raise e
 
     async def __send_artifacts(self):
+        """
+        Collect artifacts and store in artifact repository with a reference in the database
+        """
         job_id, repo_url = await self.artifact_job_queue.get()
         logger.info(
             f"[{self.__send_artifacts.__name__} Worker-{job_id}] Gathering artifacts for build: {repo_url}"
@@ -111,7 +114,7 @@ class Agent:
             raise e
 
     async def add_job(self, job_type: JobType, job: any) -> UUID:
-        job_id = uuid4()
+        job_id = uuid4() # using job id's to trace workers while debugging
         logger.info(
             f"Added new job: [{job_id} {job_type}]: {job} id: {id(self.jobhandlers[job_type]["queue"])}"
         )
