@@ -30,6 +30,7 @@ async def register_build(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=[{"msg": str(e)}],
         )
+    # TODO: this is a smell, and signifies importance of modularizing these components (api and agent in this case)
     build = await register(repo)
     await request.state.agent.add_job(JobType.BUILD_PROGRAM, (repo.git_repository_url, build.build_id))
     return {
