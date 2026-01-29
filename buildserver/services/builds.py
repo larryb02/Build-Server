@@ -1,3 +1,4 @@
+# TODO: Move this back to the api layer
 from uuid import UUID
 from sqlalchemy import insert, or_, select, update
 import logging

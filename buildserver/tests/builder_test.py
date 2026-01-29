@@ -16,6 +16,7 @@ def test_build():
 
 
 def test_clone():
+    # TODO: create a test repository or clone this repository...just something that i manage
     git_repo_url = "git@github.com:rpm-software-management/dnf.git"
     builder.clone_repo(git_repo_url)
     # Repository should exist in $BUILD_DIR/repo
