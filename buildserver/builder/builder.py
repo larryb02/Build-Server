@@ -42,7 +42,7 @@ def clone_repo(repo: str):
     try:
         os.chdir(BUILD_DIR)
     except OSError as e:
-        logger.error("Failed to change directory: %s", e.strerror)
+        logger.error(f"Failed to change directory: {e.strerror}")
         raise e
     subprocess.run(["/usr/bin/git", "clone", repo], check=True)
     try:
