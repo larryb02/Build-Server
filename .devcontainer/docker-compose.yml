@@ -1,0 +1,20 @@
+services:
+  dev:
+    platform: linux/amd64
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    container_name: python_dev
+    volumes:
+      - ..:/workspace:cached
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    depends_on:
+      - postgres
+      - rabbitmq
+  rabbitmq:
+    platform: linux/amd64
+    image: rabbitmq
+  postgres: 
+    platform: linux/amd64
+    image: postgres
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: example
