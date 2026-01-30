@@ -27,8 +27,7 @@ jobs:
         run: black --check buildserver/
       
       - name: Create env file
-        run: |
-          echo "${{ secrets.DEV_ENV_FILE }}" > .env
+        run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
 
       - name: Run tests
         run: pytest -v buildserver/tests/
