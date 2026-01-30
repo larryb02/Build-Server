@@ -29,5 +29,8 @@ jobs:
       - name: Create env file
         run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
 
+      - name: Add project to path
+        run: echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
+
       - name: Run unit tests
         run: pytest -v buildserver/tests/unit
