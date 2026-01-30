@@ -25,7 +25,7 @@ def get_dir_name(url: str):
     if Path.is_dir(url_to_path):
         return url_to_path.name
     if url.startswith("git"):
-        repo = url.split("/")[-1:] # split on the user/repo_name.git
+        repo = url.split("/")[-1:]  # split on the user/repo_name.git
     else:
         repo = url.split("com/")[-1:]
         repo = url.split("/")[-1:]
@@ -48,6 +48,7 @@ def get_commit_hash(path: Path, logger: logging.Logger) -> str:
     )  # NOTE: consider using command pattern for all of these subproccess calls
     commit_hash = str(p.stdout, encoding="utf-8").strip("\n")
     return commit_hash
+
 
 def cleanup_build_files(build_path: Path):
     """

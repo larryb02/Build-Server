@@ -1,5 +1,5 @@
 """
-Rebuilder periodically checks for new commits on a repository 
+Rebuilder periodically checks for new commits on a repository
 and triggers new build jobs based on the state of the repository
 """
 
@@ -11,7 +11,6 @@ from buildserver.agent.agent import Agent, JobType
 from buildserver.services.builds import get_all_unique_builds, register
 from buildserver import config
 from buildserver.api.builds.models import BuildCreate
-
 
 SLEEP_FOR = config.SLEEP_FOR
 
@@ -27,8 +26,7 @@ class Rebuilder:
 
     async def run(self):
         try:
-            logger.info(
-                "Started rebuilder [%d]", id(asyncio.get_running_loop()))
+            logger.info("Started rebuilder [%d]", id(asyncio.get_running_loop()))
             while True:
                 await asyncio.sleep(SLEEP_FOR)
                 logger.debug("Checking for new commits")
@@ -40,10 +38,11 @@ class Rebuilder:
                     if not compare_hashes(
                         local_hash=build.commit_hash, remote_hash=remote_hash
                     ):
-                        logger.info(
-                            "%s got new commits. Rebuilding", remote_url)
+                        logger.info("%s got new commits. Rebuilding", remote_url)
                         await register(BuildCreate(git_repository_url=remote_url))
-                        await self.agent.add_job(JobType.BUILD_PROGRAM, (remote_url, build.build_id))
+                        await self.agent.add_job(
+                            JobType.BUILD_PROGRAM, (remote_url, build.build_id)
+                        )
         except Exception as e:
             logger.error("Unknown error occurred: %s", e)
             raise e

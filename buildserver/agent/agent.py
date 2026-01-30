@@ -84,7 +84,9 @@ class Agent:
         job_id, repo_url = await self.artifact_job_queue.get()
         logger.info(
             "[%s Worker-%s] Gathering artifacts for build: %s",
-            self.__send_artifacts.__name__, job_id, repo_url
+            self.__send_artifacts.__name__,
+            job_id,
+            repo_url,
         )
         try:
             artifacts = artifactstore.gather_artifacts(repo_url)
@@ -103,7 +105,9 @@ class Agent:
         except Exception as e:
             logger.error(
                 "[%s Worker-%s] Job failed: %s",
-                self.__send_artifacts.__name__, job_id, e
+                self.__send_artifacts.__name__,
+                job_id,
+                e,
             )
             raise e
 

@@ -14,6 +14,7 @@ logger.setLevel(config.LOG_LEVEL)
 
 BUILD_DIR = Path(config.BUILD_DIR).resolve()
 
+
 def gather_artifacts(repo_url: str):
     """
     Collect all artifacts from a successful build

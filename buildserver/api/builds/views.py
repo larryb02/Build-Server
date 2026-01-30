@@ -32,7 +32,9 @@ async def register_build(
             detail=[{"msg": str(e)}],
         )
     build = await register(repo)
-    await request.state.agent.add_job(JobType.BUILD_PROGRAM, (repo.git_repository_url, build.build_id))
+    await request.state.agent.add_job(
+        JobType.BUILD_PROGRAM, (repo.git_repository_url, build.build_id)
+    )
     return {
         "git_repository_url": build.git_repository_url,
         "build_id": build.build_id,

@@ -6,7 +6,6 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session, Sessio
 from fastapi import Depends
 from buildserver.config import DATABASE_URI
 
-
 engine = create_engine(DATABASE_URI)
 session_factory = sessionmaker(bind=engine)
 SessionLocal = scoped_session(session_factory)
@@ -23,8 +22,10 @@ def get_session():
         finally:
             session.close()
 
+
 def create_session() -> scoped_session[Session]:
     return SessionLocal()
+
 
 DbSession = Annotated[scoped_session, Depends(get_session)]
 
