@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-import buildserver.builder.builder as builder
+from buildserver.builder import builder
 
 
 class TestBuild:

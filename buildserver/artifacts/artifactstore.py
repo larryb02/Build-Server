@@ -1,11 +1,12 @@
-from pathlib import Path
-import shutil
-import logging
-import re
-import os
+"""Artifact collection and storage"""
 
-from buildserver import utils
-import buildserver.config as config
+import logging
+import os
+import re
+import shutil
+from pathlib import Path
+
+from buildserver import config, utils
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ def gather_artifacts(repo_url: str):
     path = Path(config.BUILD_DIR, utils.get_dir_name(repo_url))
     ignore = set([".git"])
     if not path.exists():
-        logger.error(f"Path: {path} doesn't exist")
+        logger.error("Path: %s doesn't exist", path)
     artifacts = []
     for root, dirs, files in path.walk():
         dirs[:] = [d for d in dirs if d not in ignore]
@@ -58,8 +59,8 @@ def store_in_repository(artifact, commit_hash):
     try:
         artifact_path = shutil.copy(src=artifact, dst=artifact_directory)
     except Exception as e:
-        logger.error(f"{store_in_repository.__name__}: Failed to copy artifact: {e}")
-    logger.debug(f"Artifact written to {artifact_path}")
+        logger.error("%s: Failed to copy artifact: %s", store_in_repository.__name__, e)
+    logger.debug("Artifact written to %s", artifact_path)
     return artifact_path
 
 

@@ -1,4 +1,6 @@
 import logging
+import subprocess
+
 import pytest
 
 from buildserver import utils
@@ -30,8 +32,6 @@ class TestGetCommitHash:
         # Initialize a git repo with a commit
         repo = tmp_path / "repo"
         repo.mkdir()
-        import subprocess
-
         subprocess.run(["git", "init", str(repo)], check=True)
         test_file = repo / "file.txt"
         test_file.write_text("hello")

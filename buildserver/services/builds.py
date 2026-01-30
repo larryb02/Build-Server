@@ -1,6 +1,9 @@
-from uuid import UUID
-from sqlalchemy import insert, or_, select, update
+"""Build service layer for database operations"""
+
 import logging
+from uuid import UUID
+
+from sqlalchemy import insert, or_, select, update
 
 from buildserver import config
 from buildserver.database.core import DbSession, create_session
@@ -28,7 +31,7 @@ async def register(repo: BuildCreate) -> UUID:
         # await agent.add_job(JobType.BUILD_PROGRAM, (repo.git_repository_url, build.build_id))
         dbsession.commit()
     except Exception as e:
-        logger.error(f"Failed to write build to db: {e}")
+        logger.error("Failed to write build to db: %s", e)
         dbsession.rollback()
     dbsession.close()
     return build

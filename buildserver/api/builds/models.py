@@ -1,3 +1,5 @@
+"""Pydantic and SQLAlchemy models for builds and artifacts"""
+
 from datetime import datetime
 from typing import Optional
 

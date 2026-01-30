@@ -4,14 +4,13 @@ Functions for compiling C programs
 
 import os
 import enum
-import shutil
 import subprocess
 import logging
 from pathlib import Path
 
 
-import buildserver.config as config
-import buildserver.utils as utils
+from buildserver import config
+from buildserver import utils
 
 logging.basicConfig()
 logger = logging.getLogger(f"{__name__}")  # log format will be [MODULE: MSG]
@@ -38,19 +37,19 @@ def clone_repo(repo: str):
         OSError
         CalledProcessError
     """
-    logger.info(f"Cloning {repo} into {BUILD_DIR}")
+    logger.info("Cloning %s into %s", repo, BUILD_DIR)
     try:
         os.chdir(BUILD_DIR)
     except OSError as e:
-        logger.error(f"Failed to change directory: {e.strerror}")
+        logger.error("Failed to change directory: %s", e.strerror)
         raise e
     subprocess.run(["/usr/bin/git", "clone", repo], check=True)
     try:
         repo = utils.get_dir_name(repo)
         commit_hash = utils.get_commit_hash(Path(BUILD_DIR, repo), logger)
     except Exception as e:
-        logger.error(f"Failed to get commit hash: {e}")
-    logger.info(f"Cloned {repo} at {commit_hash} PWD: {Path.cwd()}")
+        logger.error("Failed to get commit hash: %s", str(e))
+    logger.info("Cloned %s at %s PWD: %s}", repo, commit_hash, Path.cwd())
     return commit_hash
 
 
@@ -63,11 +62,11 @@ def build(repo: str):
         OSError
         CalledProcessError
     """
-    logger.info("Building %s")
+    logger.info("Building %s", repo)
     try:
         os.chdir(Path(BUILD_DIR, repo))
     except OSError as e:
-        logger.error(f"Failed to change directory: {e.strerror}")
+        logger.error("Failed to change directory: %s", e.strerror)
         raise e
     subprocess.run(BUILD_CMD, check=True)
 

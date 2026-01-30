@@ -1,13 +1,14 @@
+"""Build agent that manages job queues and workers"""
+
 import asyncio
 import enum
 import logging
 from uuid import uuid4, UUID
 
-
 from buildserver.api.builds.models import ArtifactCreate
 from buildserver.artifacts import artifactstore
-import buildserver.builder.builder as builder
-import buildserver.config as config
+from buildserver.builder import builder
+from buildserver import config
 from buildserver.database.core import create_session
 from buildserver.services.builds import create_artifact, update_build
 
@@ -53,27 +54,27 @@ class Agent:
         """
 
         async def update_db(**fields):
-            logger.debug(f"Updating build-{build_id} in database")
+            logger.debug("Updating build-%s in database", build_id)
             db_session = create_session()
             try:
                 await asyncio.to_thread(update_build, db_session, build_id, **fields)
                 db_session.commit()
             except Exception as e:
-                logger.error(f"Failed to update database from async: {e}")
+                logger.error("Failed to update database from async: %s", e)
                 db_session.rollback()
             db_session.close()
 
         try:
             job_id, (repo_url, build_id) = await self.build_job_queue.get()
-            logger.info(f"[Worker-{job_id}] Building: {repo_url}")
+            logger.info("[Worker-%s] Building: %s", job_id, repo_url)
             await update_db(build_status=builder.BuildStatus.RUNNING)
             build_metadata = builder.run(repo_url)
-            logger.debug(f"Build complete updating status in db")
+            logger.debug("Build complete updating status in db")
             await update_db(**build_metadata)
             if build_metadata["build_status"] == builder.BuildStatus.SUCCEEDED:
                 await self.add_job(JobType.SEND_ARTIFACTS, repo_url)
         except Exception as e:
-            logger.error(f"[Worker-{job_id}] Build fail: {e}")
+            logger.error("[Worker-%s] Build fail: %s", job_id, e)
             raise e
 
     async def __send_artifacts(self):
@@ -82,7 +83,8 @@ class Agent:
         """
         job_id, repo_url = await self.artifact_job_queue.get()
         logger.info(
-            f"[{self.__send_artifacts.__name__} Worker-{job_id}] Gathering artifacts for build: {repo_url}"
+            "[%s Worker-%s] Gathering artifacts for build: %s",
+            self.__send_artifacts.__name__, job_id, repo_url
         )
         try:
             artifacts = artifactstore.gather_artifacts(repo_url)
@@ -93,27 +95,28 @@ class Agent:
                         create_artifact, ArtifactCreate(**artifact), db_session
                     )
                     db_session.commit()
-                    logger.debug(f"Successfully added artifact to database")
+                    logger.debug("Successfully added artifact to database")
                 except Exception as e:
-                    logger.error(f"Failed to write artifact to database: {e}")
+                    logger.error("Failed to write artifact to database: %s", e)
                     db_session.rollback()
                 db_session.close()
         except Exception as e:
             logger.error(
-                f"[{self.__send_artifacts.__name__} Worker-{job_id}] Job failed: {e}"
+                "[%s Worker-%s] Job failed: %s",
+                self.__send_artifacts.__name__, job_id, e
             )
             raise e
 
     async def add_job(self, job_type: JobType, job: any) -> UUID:
         job_id = uuid4()  # using job id's to trace workers while debugging
-        logger.info(f"Added new job: [{job_id}-{job_type}]: {job}")
+        logger.info("Added new job: [%s-%s]: %s", job_id, job_type, job)
         try:
             await self.jobhandlers[job_type]["queue"].put((job_id, job))
         except Exception as e:
-            logger.error(f"Failed to add job to queue: {e}")
+            logger.error("Failed to add job to queue: %s", e)
             raise e
         logger.debug(
-            f"[{job_type}] Queue Size: {self.jobhandlers[job_type]["queue"].qsize()}"
+            "[%s] Queue Size: %d", job_type, self.jobhandlers[job_type]["queue"].qsize()
         )
         return job_id
 
@@ -127,12 +130,12 @@ class Agent:
             try:
                 await self.jobhandlers[job_type]["fn"]()
             except Exception as e:
-                logger.error(f"Caught exception {e}")
+                logger.error("Caught exception %s", e)
             logger.debug("task done")
             self.jobhandlers[job_type]["queue"].task_done()
 
     async def run(self):
-        logger.info(f"Started build agent: [{id(asyncio.get_running_loop())}]")
+        logger.info("Started build agent: [%d]", id(asyncio.get_running_loop()))
         self.workers = [
             asyncio.create_task(self.do_job(job_type)) for job_type in JobType
         ]
@@ -140,5 +143,5 @@ class Agent:
             for worker in self.workers:
                 await worker
         except Exception as e:
-            logger.error(f"Exception raised: {e}")
+            logger.error("Exception raised: %s", e)
             raise

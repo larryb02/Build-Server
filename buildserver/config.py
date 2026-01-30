@@ -1,7 +1,10 @@
+"""Configuration values loaded from environment variables"""
+
+import logging
 import platform
+
 from starlette.config import Config
 from starlette.datastructures import Secret
-import logging
 
 config = Config(".env")
 

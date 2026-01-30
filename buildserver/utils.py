@@ -8,7 +8,7 @@ import subprocess
 import os
 import shutil
 
-import buildserver.config as config
+from buildserver import config
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -39,11 +39,9 @@ def get_commit_hash(path: Path, logger: logging.Logger) -> str:
     """
     try:
         os.chdir(path)
-        logger.debug(f"Path: {path} cwd: {Path.cwd()}")
+        logger.debug("Path: %s cwd: %s", path, Path.cwd())
     except OSError as e:
-        logger.error(
-            f"chdir: {e}"
-        )  # new logging format make sure to update rest of code
+        logger.error("chdir: %s", e)
         raise e
     p = subprocess.run(
         ["/usr/bin/git", "rev-parse", "HEAD"], check=True, stdout=subprocess.PIPE
@@ -58,4 +56,4 @@ def cleanup_build_files(build_path: Path):
     try:
         shutil.rmtree(build_path)
     except Exception as e:
-        logger.error(f"Failed to remove {build_path}: {e}")
+        logger.error("Failed to remove %s: %s", build_path, e)

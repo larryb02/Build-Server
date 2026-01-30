@@ -1,3 +1,5 @@
+"""Database engine, session, and base model configuration"""
+
 from typing import Annotated
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session, Session
