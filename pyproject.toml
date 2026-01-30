@@ -17,7 +17,7 @@ buildserver = "buildserver.main:app"
 version = {file = "version.txt"}
 
 [tool.setuptools.packages.find]
-where = ["buildserver"]
+include = ["buildserver*"]
 
 [build-system]
 requires = ["setuptools"]
