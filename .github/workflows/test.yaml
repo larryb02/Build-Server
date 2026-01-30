@@ -21,4 +21,4 @@ jobs:
         run: pip install -r buildserver/requirements.txt
 
       - name: Run tests
-        run: pytest buildserver/tests/
+        run: pytest -v buildserver/tests/
