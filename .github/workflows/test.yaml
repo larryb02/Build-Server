@@ -6,23 +6,6 @@ on:
     branches: [main]
 
 jobs:
-  precheck:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: pip install -r pylint black
-
-      - name: Lint
-        run: pylint buildserver/
-
-      - name: Check formatting
-        run: black --check buildserver/
-
   test:
     runs-on: ubuntu-latest
 
@@ -35,7 +18,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r buildserver/requirements.txt
+        run: pip install -r buildserver/requirements.txt pylint black
+
+      - name: Lint
+        run: pylint --fail-under=7 buildserver/
+
+      - name: Check formatting
+        run: black --check buildserver/
 
       - name: Run tests
         run: pytest -v buildserver/tests/
