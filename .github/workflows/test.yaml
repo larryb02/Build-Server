@@ -48,7 +48,7 @@ jobs:
         run: |
           pip install --upgrade setuptools pip; \
           pip install pytest; \
-          pip install --no-build-isolation -e .
+          pip install -e .
 
       # - name: Lint
       #   run: pylint --fail-under=7 buildserver/
