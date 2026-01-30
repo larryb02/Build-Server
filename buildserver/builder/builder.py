@@ -9,7 +9,9 @@ import logging
 from pathlib import Path
 
 
-from buildserver import config
+from buildserver.config import Config
+
+config = Config()
 from buildserver import utils
 
 logging.basicConfig()

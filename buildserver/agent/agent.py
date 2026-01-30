@@ -8,7 +8,9 @@ from uuid import uuid4, UUID
 from buildserver.api.builds.models import ArtifactCreate
 from buildserver.artifacts import artifactstore
 from buildserver.builder import builder
-from buildserver import config
+from buildserver.config import Config
+
+config = Config()
 from buildserver.database.core import create_session
 from buildserver.services.builds import create_artifact, update_build
 

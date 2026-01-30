@@ -5,7 +5,9 @@ from uuid import UUID
 
 from sqlalchemy import insert, or_, select, update
 
-from buildserver import config
+from buildserver.config import Config
+
+config = Config()
 from buildserver.database.core import DbSession, create_session
 from buildserver.builder.builder import BuildStatus
 from buildserver.api.builds.models import (

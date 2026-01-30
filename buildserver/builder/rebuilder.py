@@ -9,7 +9,9 @@ import subprocess
 
 from buildserver.agent.agent import Agent, JobType
 from buildserver.services.builds import get_all_unique_builds, register
-from buildserver import config
+from buildserver.config import Config
+
+config = Config()
 from buildserver.api.builds.models import BuildCreate
 
 SLEEP_FOR = config.SLEEP_FOR

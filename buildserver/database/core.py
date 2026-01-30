@@ -4,9 +4,11 @@ from typing import Annotated
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session, Session
 from fastapi import Depends
-from buildserver.config import DATABASE_URI
+from buildserver.config import Config
 
-engine = create_engine(DATABASE_URI)
+config = Config()
+
+engine = create_engine(config.DATABASE_URI)
 session_factory = sessionmaker(bind=engine)
 SessionLocal = scoped_session(session_factory)
 

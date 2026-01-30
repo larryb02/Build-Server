@@ -10,7 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from buildserver.api.builds.views import router as build_router
 from buildserver.agent.agent import Agent
 from buildserver.builder.rebuilder import Rebuilder
-from buildserver.config import LOG_LEVEL
+from buildserver.config import Config
+
+config = Config()
 
 
 @asynccontextmanager
@@ -20,7 +22,7 @@ async def lifespan(app: FastAPI):
     logging.basicConfig()
     logging.getLogger("uvicorn").handlers.clear()
     logger = logging.getLogger(f"{__name__}")
-    logger.setLevel(LOG_LEVEL)
+    logger.setLevel(config.LOG_LEVEL)
     ctx["logger"] = logger
 
     # initialize agent

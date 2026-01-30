@@ -8,7 +8,9 @@ import subprocess
 import os
 import shutil
 
-from buildserver import config
+from buildserver.config import Config
+
+config = Config()
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)

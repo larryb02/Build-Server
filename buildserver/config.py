@@ -3,27 +3,69 @@
 import logging
 import platform
 
-from starlette.config import Config
+from starlette.config import Config as StarletteConfig
 from starlette.datastructures import Secret
 
-config = Config(".env")
 
-DATABASE_PORT = config("DATABASE_PORT")
-DATABASE_USER = config("DATABASE_USER")
-DATABASE_PASSWORD = config("DATABASE_PASSWORD", cast=Secret)
-DATABASE_HOSTNAME = config("DATABASE_HOSTNAME")
-DATABASE_NAME = config("DATABASE_NAME")
-DATABASE_URI = f"postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOSTNAME}:{DATABASE_PORT}/{DATABASE_NAME}"
+class Config:
+    """Lazy-loading configuration that reads values on first access"""
 
-LOG_LEVEL = config("LOG_LEVEL", default=logging.INFO)
+    def __init__(self):
+        self._config = StarletteConfig(".env")
+        self._database_uri = None
+        self._build_dir = None
 
-BUILD_DIR = (
-    config("WINDOWS_BUILD_DIRECTORY")
-    if platform.system() == "WINDOWS"
-    else config("POSIX_BUILD_DIRECTORY")
-)
+    @property
+    def DATABASE_PORT(self):
+        return self._config("DATABASE_PORT")
 
-SLEEP_FOR = config("SLEEP_FOR", default=60 * 15, cast=int)
-TIMEOUT = config("TIMEOUT", default=60, cast=int)
+    @property
+    def DATABASE_USER(self):
+        return self._config("DATABASE_USER")
 
-ARTIFACT_REPOSITORY_ROOT = config("ARTIFACT_REPOSITORY_ROOT")
+    @property
+    def DATABASE_PASSWORD(self):
+        return self._config("DATABASE_PASSWORD", cast=Secret)
+
+    @property
+    def DATABASE_HOSTNAME(self):
+        return self._config("DATABASE_HOSTNAME")
+
+    @property
+    def DATABASE_NAME(self):
+        return self._config("DATABASE_NAME")
+
+    @property
+    def DATABASE_URI(self):
+        if self._database_uri is None:
+            self._database_uri = (
+                f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}"
+                f"@{self.DATABASE_HOSTNAME}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+            )
+        return self._database_uri
+
+    @property
+    def LOG_LEVEL(self):
+        return self._config("LOG_LEVEL", default=logging.INFO)
+
+    @property
+    def BUILD_DIR(self):
+        if self._build_dir is None:
+            self._build_dir = (
+                self._config("WINDOWS_BUILD_DIRECTORY")
+                if platform.system() == "WINDOWS"
+                else self._config("POSIX_BUILD_DIRECTORY")
+            )
+        return self._build_dir
+
+    @property
+    def SLEEP_FOR(self):
+        return self._config("SLEEP_FOR", default=60 * 15, cast=int)
+
+    @property
+    def TIMEOUT(self):
+        return self._config("TIMEOUT", default=60, cast=int)
+
+    @property
+    def ARTIFACT_REPOSITORY_ROOT(self):
+        return self._config("ARTIFACT_REPOSITORY_ROOT")

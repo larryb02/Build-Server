@@ -6,7 +6,10 @@ import re
 import shutil
 from pathlib import Path
 
-from buildserver import config, utils
+from buildserver import utils
+from buildserver.config import Config
+
+config = Config()
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
