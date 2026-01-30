@@ -18,7 +18,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install -r buildserver/requirements.txt
+        run: pip install -r buildserver/requirements.txt pylint black
+
+      - name: Lint
+        run: pylint buildserver/
+
+      - name: Check formatting
+        run: black --check buildserver/
 
       - name: Run tests
         run: pytest -v buildserver/tests/
