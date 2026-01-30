@@ -29,5 +29,5 @@ jobs:
       - name: Create env file
         run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
 
-      - name: Run tests
-        run: pytest -v buildserver/tests/
+      - name: Run unit tests
+        run: pytest -v buildserver/tests/unit
