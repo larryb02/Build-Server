@@ -3,6 +3,7 @@ import pytest
 
 from buildserver.builder import builder
 
+
 @pytest.mark.integration
 class TestBuild:
     def test_build(self):

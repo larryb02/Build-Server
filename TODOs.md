@@ -5,7 +5,7 @@ Currently undergoing a major refactor. The goal is to create a modular, producti
 - [ ] Refactors
 	- [ ] Extend the API architecture with a dedicated control plane
         - [ ] Decouple agent and rebuilder from API
-        - [ ] Revisit Rebuilder design 
+        - [ ] Revisit Rebuilder design
 	- [ ] Replace in memory queue with distributed message queue
 	- [ ] Move builder services back into api layer
     - [ ] Artifactstore become proper service

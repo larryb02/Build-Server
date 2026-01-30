@@ -4,31 +4,31 @@ Proof of concept build server for C programs
 
 # Architecture
 ###  API
-REST API that exposes an interface for a client to communicate with the build server system  
+REST API that exposes an interface for a client to communicate with the build server system
 
 Built using FastAPI framework
 
 For api documentation visit [here](./openapi.json) this file can be viewed on a swagger editor
 ###  Build Agent
-Long running task that manages jobs and workers  
+Long running task that manages jobs and workers
 
-The build agent maintains a job queue and assigns workers to jobs  
-Improvements that could be made are: 
+The build agent maintains a job queue and assigns workers to jobs
+Improvements that could be made are:
 - Creating an abstraction to allow dynamic creation of job queues in order to better scale when a new feature arises and to separate code that workers should execute from the agent
 - Dynamically creating workers up to config specified limits to allow for more throughput
 ###  Builder
-API for building C programs  
+API for building C programs
 This gets called by workers in the build agent
 ### Rebuilder
 Long running task that checks for new commits for any builds known to the server
 ### Artifact Repository
-The artifact repository is a structured directory that stores artifacts with the following pattern: <commit_hash>/artifact  
+The artifact repository is a structured directory that stores artifacts with the following pattern: <commit_hash>/artifact
 
-The code that provides functionality to interact with the artifact repository can be found in artifactstore.py  
+The code that provides functionality to interact with the artifact repository can be found in artifactstore.py
 
 Ideally the artifact repository should be able to exist locally, on a file server, or on a cloud based object store such as Amazon S3, however this is a WIP
 ###  Database
-Postgresql Server  
+Postgresql Server
 Tables:
 - Artifact
     - Stores metadata about artifacts such as the artifacts path in the artifact repository
@@ -41,7 +41,7 @@ Web interface to view builds known to the system and their status
 The entry point of this application resides in /api/main.py this is where the http server, the build agent, and the rebuilder are configured and initialized
 
 ### Kicking off builds
-In order to register repositories for builds, there is an endpoint exposed via REST api  
+In order to register repositories for builds, there is an endpoint exposed via REST api
 ```bash
 curl -X POST http://localhost:8000/builds/register \
   -H "Content-Type: application/json" \
@@ -54,7 +54,7 @@ Requirements:
 - python3
 - npm
 
-Two .env files are required, one for the server side and one for the web page  
+Two .env files are required, one for the server side and one for the web page
 
 Store this .env in /buildserver
 ```
@@ -75,12 +75,12 @@ TIMEOUT=60
 
 ARTIFACT_REPOSITORY_ROOT=
 
-```  
+```
 
-**Note**:  
+**Note**:
 POSIX_BUILD_DIRECTORY/WINDOWS_BUILD_DIRECTORY and ARTIFACT_REPOSITORY_ROOT need to be created manually for now, or else the build server will not run properly
 
-Store this .env in /web  
+Store this .env in /web
 ```
 VITE_API_HOSTNAME=
 ```
@@ -94,7 +94,7 @@ Setup a virtual environment
 ```bash
 python3 -m venv <venv_name>
 ```
-Activate venv  
+Activate venv
 ```bash
 source <venv_name>/bin/activate
 ```
@@ -105,7 +105,7 @@ python3 -m pip install -r requirements.txt
 Start server
 ```bash
 fastapi run or fastapi dev (for development)
-```  
+```
 ## Stand up web page locally
 From project root
 ```bash
