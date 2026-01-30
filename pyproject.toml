@@ -1,0 +1,21 @@
+[project]
+name = "buildserver"
+dynamic = ["version"]
+authors = [{name="Larry Banks"}]
+description = "CI/CD System"
+readme = "README.md"
+requires-python = ">=3.12"
+
+[project.urls]
+Homepage = "https://github.com/larryb02/Build-Server"
+Issues = "https://github.com/larryb02/Build-Server/issues"
+
+[project.scripts]
+buildserver = "buildserver.main:app"
+
+[tool.setuptools.dynamic]
+version = {file = "version.txt"}
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
