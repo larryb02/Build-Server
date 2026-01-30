@@ -13,5 +13,8 @@
             }
         }
     },
-    "postCreateCommand": "pip install -r ./buildserver/requirements.txt"
+    "remoteEnv": {
+        "PYTHONPATH": "${containerWorkspaceFolder}:${containerEnv:PYTHONPATH}"
+    },
+    "postCreateCommand": "pip install -r ./buildserver/requirements.txt pylint pre-commit && pre-commit install"
 }
