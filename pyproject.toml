@@ -5,6 +5,9 @@ authors = [{name="Larry Banks"}]
 description = "CI/CD System"
 readme = "README.md"
 requires-python = ">=3.12"
+dependencies = [
+    "starlette",
+]
 
 [project.urls]
 Homepage = "https://github.com/larryb02/Build-Server"
