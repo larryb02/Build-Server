@@ -17,7 +17,7 @@ Currently undergoing a major refactor. The goal is to create a modular, producti
 	- [ ] interactions that need testing
         - [ ] job execution pipeline
 - [ ] CI/CD
-	- [ ] On commit?
+	- [ ] On push?
 	- [ ] On merge to main?
 - [ ] Versioning
 - [ ] Changelogs
