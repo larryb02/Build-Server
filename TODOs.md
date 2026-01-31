@@ -1,27 +1,34 @@
-# TODOs
-
-Currently undergoing a major refactor. The goal is to create a modular, production-grade, distributed ci/cd system and decided to track the state of TODOs here.
-
 - [ ] Refactors
-	- [ ] Extend the API architecture with a dedicated control plane
-        - [ ] Decouple agent and rebuilder from API
-        - [ ] Revisit Rebuilder design
-	- [ ] Replace in memory queue with distributed message queue
-	- [ ] Move builder services back into api layer
-    - [ ] Artifactstore become proper service
+	- [ ] API needs to become a proper control plane
+	- [ ] Replace in memory queue with distributed network queue
+	- [ ] Move services back into api layer
+	- [ ] Aim for fine grained exception handling
+	- [ ] Configuration management
+		- [ ] Eventually may want support for more than just env files
+	- [ ] Builder
+		- [ ] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
 - [x] Create devcontainer
 	- [x] compose file that spins up postgres and a distributed mq of choice
 - [ ] Testing
 	- [ ] packages that need testing
-		- [x] builder
+		- [ ] builder
+		- [ ] artifactstore (currently named artifacts)
+		- [ ]
 	- [ ] interactions that need testing
-        - [ ] job execution pipeline
 - [ ] CI/CD
 	- [ ] On push?
+		- [ ] test, lint, format on push
 	- [ ] On merge to main?
+		- [ ] test, lint, format (sanity check?)
+		- [ ] stage new release
+			- [ ] maybe only on pr
+		- [ ] deploy new release
 - [ ] Versioning
 - [ ] Changelogs
 - [ ] Deployment
+- [ ] Dev experience
+	- [ ] Create custom image based on microsoft devcontainer python image and install python dependencies there
 - [ ] Monitoring
 - [ ] Documentation
 	- [ ] Create website for documentation
+		- [ ] github pages could be good for this
