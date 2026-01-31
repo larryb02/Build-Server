@@ -69,5 +69,6 @@ jobs:
           pip install --upgrade setuptools pip; \
           pip install pytest; \
           pip install -e .[test]
+      - run: mkdir ./build # hack until build dir becomes ephemeral
       - name: Run e2e tests
         run: pytest -v buildserver/tests/e2e
