@@ -16,7 +16,7 @@ Homepage = "https://github.com/larryb02/Build-Server"
 Issues = "https://github.com/larryb02/Build-Server/issues"
 
 [project.scripts]
-buildserver = "buildserver.main:app"
+buildserver = "buildserver.main:main"
 
 [tool.setuptools.dynamic]
 version = {file = "version.txt"}

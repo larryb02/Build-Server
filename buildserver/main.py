@@ -1,5 +1,6 @@
 """FastAPI application entrypoint"""
 
+import uvicorn
 import asyncio
 import logging
 from contextlib import asynccontextmanager
@@ -50,3 +51,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(build_router)
+
+
+def main():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+if __name__ == "__main__":
+    main()
