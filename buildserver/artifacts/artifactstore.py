@@ -72,9 +72,3 @@ def is_artifact(file_name: str):
     denylist = r"Makefile|.*\.(c|h)"
     pattern = re.compile(denylist)
     return not pattern.match(file_name)
-
-
-def is_artifact(file_name: str):
-    denylist = r"Makefile|.*\.(c|h)"
-    pattern = re.compile(denylist)
-    return not pattern.match(file_name)
