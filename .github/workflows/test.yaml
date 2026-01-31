@@ -46,10 +46,7 @@ jobs:
         run: |
           pip install --upgrade setuptools pip; \
           pip install pytest; \
-          pip install -e .
-
-      - name: Create env file
-        run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
+          pip install -e .[test]
 
       - name: Run unit tests
         run: pytest -v buildserver/tests/unit
