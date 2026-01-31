@@ -11,6 +11,14 @@ dependencies = [
     "psycopg2-binary",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+    "asgi-lifespan",
+]
+
 [project.urls]
 Homepage = "https://github.com/larryb02/Build-Server"
 Issues = "https://github.com/larryb02/Build-Server/issues"
