@@ -7,27 +7,20 @@
 		- [ ] Eventually may want support for more than just env files
 	- [ ] Builder
 		- [ ] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
+		- [ ] Need to fail fast
 - [x] Create devcontainer
 	- [x] compose file that spins up postgres and a distributed mq of choice
-- [ ] Testing
-	- [ ] packages that need testing
-		- [ ] builder
-		- [ ] artifactstore (currently named artifacts)
-		- [ ]
-	- [ ] interactions that need testing
 - [ ] CI/CD
 	- [ ] On push?
 		- [ ] test, lint, format on push
 	- [ ] On merge to main?
-		- [ ] test, lint, format (sanity check?)
+		- [x] test, lint, format (sanity check?)
 		- [ ] stage new release
-			- [ ] maybe only on pr
+			- maybe only on pr
 		- [ ] deploy new release
 - [ ] Versioning
 - [ ] Changelogs
 - [ ] Deployment
-- [ ] Dev experience
-	- [ ] Create custom image based on microsoft devcontainer python image and install python dependencies there
 - [ ] Monitoring
 - [ ] Documentation
 	- [ ] Create website for documentation
