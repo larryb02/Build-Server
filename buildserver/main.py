@@ -1,16 +1,17 @@
 """FastAPI application entrypoint"""
 
 import uvicorn
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from buildserver.agent import agent
 from buildserver.api.builds.views import router as build_router
-from buildserver.agent.agent import Agent
-from buildserver.builder.rebuilder import Rebuilder
+
+# from buildserver.agent.agent import Agent
+# from buildserver.builder.rebuilder import Rebuilder
 from buildserver.config import Config
 
 config = Config()
@@ -27,18 +28,18 @@ async def lifespan(app: FastAPI):
     ctx["logger"] = logger
 
     # initialize agent
-    agent = Agent()
-    loop = asyncio.get_event_loop()
-    asyncio.run_coroutine_threadsafe(agent.run(), loop)
-    ctx["agent"] = agent
+    # agent = Agent()
+    # loop = asyncio.get_event_loop()
+    # asyncio.run_coroutine_threadsafe(agent.run(), loop)
+    # ctx["agent"] = agent
 
-    # initialize rebuilder
-    rebuilder = Rebuilder(agent=agent)
-    asyncio.run_coroutine_threadsafe(rebuilder.run(), loop)
+    # # initialize rebuilder
+    # rebuilder = Rebuilder(agent=agent)
+    # asyncio.run_coroutine_threadsafe(rebuilder.run(), loop)
     yield ctx
 
     # shutdown
-    agent.close()
+    # agent.close()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -53,9 +54,10 @@ app.add_middleware(
 app.include_router(build_router)
 
 
-def _main():
+def main():
+    agent.start()
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 if __name__ == "__main__":
-    _main()
+    main()

@@ -9,6 +9,7 @@ dependencies = [
     "fastapi[standard]",
     "sqlalchemy",
     "psycopg2-binary",
+    "pika",
 ]
 
 [project.optional-dependencies]

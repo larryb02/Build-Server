@@ -1,6 +1,5 @@
 - [ ] Refactors
 	- [ ] API needs to become a proper control plane
-	- [ ] Replace in memory queue with distributed network queue
 	- [ ] Move services back into api layer
 	- [ ] Aim for fine grained exception handling
 	- [ ] Configuration management
@@ -8,6 +7,13 @@
 	- [ ] Builder
 		- [ ] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
 		- [ ] Need to fail fast
+	- [ ] Agent
+		- [ ] Decoupling initiative
+			- [x] clear start semantics
+			- [ ] clear stop
+			- [ ] Communicate with api over HTTP
+		- [ ] Fail fast when error propagates
+		- [ ] Replace in memory queue with distributed network queue
 - [x] Create devcontainer
 	- [x] compose file that spins up postgres and a distributed mq of choice
 - [ ] CI/CD
