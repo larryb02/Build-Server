@@ -4,7 +4,9 @@ import pytest
 from buildserver.builder import builder
 
 
-@pytest.mark.skip("Work in progress")
+pytestmark = pytest.mark.skip("all tests still WIP")
+
+
 class TestBuild:
     def test_build(self):
         build_repo = "../hello"
