@@ -1,18 +1,21 @@
+import json
 import threading
 import time
+import uuid
+from unittest.mock import patch
 
-import pika
 import pytest
 
 from buildserver.agent import agent
-from buildserver.rmq.rmq import RabbitMQConnection
+from buildserver.models.jobs import JobStatus
+from buildserver.rmq.rmq import RabbitMQConsumer, RabbitMQProducer
 
 
 @pytest.fixture()
 def run_agent():
     """Start the agent in a background thread with a fresh connection."""
-    agent._rmq = RabbitMQConnection()
-    agent.results.clear()
+    agent._rmq = RabbitMQConsumer()
+    agent.active_jobs.clear()
     t = threading.Thread(target=agent.start, daemon=True)
     t.start()
     time.sleep(1)
@@ -21,32 +24,56 @@ def run_agent():
     t.join(timeout=5)
 
 
-def _publish(body: bytes):
-    params = RabbitMQConnection._get_connection_parameters()
-    connection = pika.BlockingConnection(params)
-    channel = connection.channel()
-    channel.basic_publish(
-        exchange="",
-        routing_key=agent.BUILD_QUEUE,
-        body=body,
-        properties=pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent),
-    )
-    connection.close()
+@pytest.fixture()
+def producer():
+    return RabbitMQProducer()
+
+
+def _make_job_message(repo_url: str = "git@github.com:user/repo.git") -> bytes:
+    return json.dumps(
+        {
+            "job_id": str(uuid.uuid4()),
+            "git_repository_url": repo_url,
+            "job_status": JobStatus.CREATED,
+        }
+    ).encode()
 
 
 class TestJobSubmission:
 
-    def test_agent_receives_message(self, run_agent):
-        _publish(b"hello")
-        time.sleep(1)
+    def test_agent_receives_and_executes_job(self, run_agent, producer):
+        with (
+            patch("buildserver.agent.agent.builder") as mock_builder,
+            patch("buildserver.agent.agent.requests"),
+        ):
+            mock_builder.run.return_value = {
+                "git_repository_url": "git@github.com:user/repo.git",
+                "commit_hash": "abc123",
+                "build_status": JobStatus.SUCCEEDED,
+            }
 
-        assert len(agent.results) == 1
-        assert agent.results[0] == "doing work!"
+            producer.publish(agent.BUILD_QUEUE, _make_job_message())
+            time.sleep(1)
 
-    def test_agent_handles_multiple_messages(self, run_agent):
-        for msg in [b"job-1", b"job-2", b"job-3"]:
-            _publish(msg)
-        time.sleep(2)
+            mock_builder.run.assert_called_once()
+            result = mock_builder.run.return_value
+            assert result["build_status"] in (JobStatus.SUCCEEDED, JobStatus.FAILED)
 
-        assert len(agent.results) == 3
-        assert all(r == "doing work!" for r in agent.results)
+    def test_agent_executes_multiple_jobs(self, run_agent, producer):
+        with (
+            patch("buildserver.agent.agent.builder") as mock_builder,
+            patch("buildserver.agent.agent.requests"),
+        ):
+            mock_builder.run.return_value = {
+                "git_repository_url": "git@github.com:user/repo.git",
+                "commit_hash": "abc123",
+                "build_status": JobStatus.FAILED,
+            }
+
+            for _ in range(3):
+                producer.publish(agent.BUILD_QUEUE, _make_job_message())
+            time.sleep(2)
+
+            assert mock_builder.run.call_count == 3
+            result = mock_builder.run.return_value
+            assert result["build_status"] is not None

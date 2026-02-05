@@ -2,8 +2,12 @@
 
 import logging
 
+import requests
+
+from buildserver.agent.builder import builder
 from buildserver.config import Config
-from buildserver.rmq.rmq import RabbitMQConnection
+from buildserver.models.jobs import Job, JobStatus, JobStatusUpdate
+from buildserver.rmq.rmq import RabbitMQConsumer
 
 config = Config()
 
@@ -150,7 +154,8 @@ TIMEOUT = config.TIMEOUT
 #     asyncio.run(agent.run())
 
 BUILD_QUEUE = "build_jobs"
-
+# NOTE: hack for now will store in config once agent becomes separate binary
+API_ENDPOINT = "localhost:8000"
 # create a class called 'Agent' (for now)
 # maintain a connection to rabbitmq [x]
 # what should behavior be if connection to rabbitmq fails
@@ -158,23 +163,41 @@ BUILD_QUEUE = "build_jobs"
 # make sure queues are durable
 # when does agent get initialized? -> module scope for now,
 # don't need multiple instances just a singleton [x]
-# how do build jobs get invoked? -> [jobs submitted]
+# verify body matches schema
+# how do build jobs get invoked?
+# -> [consume from queue -> validate
+# -> update active jobs -> builder executes -> report status back to API]
+# run this asynchronously
 # will want to limit number of jobs being performed at a time
 # how will shutdown be handled? - command line, ctrl-c, kill
 
 
-_rmq = RabbitMQConnection()
+_rmq = RabbitMQConsumer()
 results = []
+active_jobs: list[Job] = []
 
 
-def _handle_delivery(body: bytes):
+def _on_message(body: bytes):
     logger.info("received data %s", body)
-    result = _do_job()
-    results.append(result)
-
-
-def _do_job():
-    return "doing work!"
+    job = Job.model_validate_json(body)
+    # since queue limits amount of messages consumed
+    # should be fine to immediately start executing a job
+    active_jobs.append(job)
+    # from here agent needs to update status will just make calls to API for now
+    # NOTE: for first iteration this is fine, ideally want to stream here
+    requests.patch(
+        f"{API_ENDPOINT}/jobs/{job.job_id}", data={"status_update": JobStatus.RUNNING}
+    )
+    try:
+        # NOTE: currently not very 'integration testable'
+        res = builder.run(job.git_repository_url)
+        # update with final status here
+        requests.patch(
+            f"{API_ENDPOINT}/jobs/{job.job_id}", data={"status_update": res["status"]}
+        )
+    # TODO: Bad.
+    except OSError as e:
+        logger.error("OSError %s", e)
 
 
 def start():
@@ -184,7 +207,7 @@ def start():
     logger.info("starting agent...")
     try:
         # NOTE: blocking connection is fine until agent has more things to do
-        _rmq.start(BUILD_QUEUE, _handle_delivery)
+        _rmq.start(BUILD_QUEUE, _on_message)
     except KeyboardInterrupt:
         stop()
 
