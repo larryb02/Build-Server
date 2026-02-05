@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 from buildserver.config import Config
+from buildserver.models.jobs import JobStatus
 
 config = Config()
 from buildserver import utils
@@ -89,10 +90,10 @@ def run(repo: str):
     try:
         build_path = utils.get_dir_name(repo)
         build(build_path)
-        status = BuildStatus.SUCCEEDED
+        status = JobStatus.SUCCEEDED
     except Exception as e:
         logger.error("Failed to build program: %s", e)
-        status = BuildStatus.FAILED
+        status = JobStatus.FAILED
         utils.cleanup_build_files(Path(BUILD_DIR, build_path))
     return {
         "git_repository_url": repo,
