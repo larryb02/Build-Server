@@ -73,7 +73,12 @@ class RabbitMQConnection:
             self._connection.close()
 
     def _connect(self):
-        logger.info("Connecting to RabbitMQ...")
+        logger.info(
+            "Connecting to RabbitMQ host=%s port=%s user=%s",
+            self._parameters.host,
+            self._parameters.port,
+            self._parameters.credentials.username,
+        )
         try:
             self._connection = pika.SelectConnection(
                 parameters=self._parameters,
