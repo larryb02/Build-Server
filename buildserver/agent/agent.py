@@ -186,14 +186,14 @@ def _on_message(body: bytes):
     # from here agent needs to update status will just make calls to API for now
     # NOTE: for first iteration this is fine, ideally want to stream here
     requests.patch(
-        f"{API_ENDPOINT}/jobs/{job.job_id}", data={"status_update": JobStatus.RUNNING}
+        f"{API_ENDPOINT}/jobs/{job.job_id}", json={"status_update": JobStatus.RUNNING}
     )
     try:
         # NOTE: currently not very 'integration testable'
         res = builder.run(job.git_repository_url)
         # update with final status here
         requests.patch(
-            f"{API_ENDPOINT}/jobs/{job.job_id}", data={"status_update": res["status"]}
+            f"{API_ENDPOINT}/jobs/{job.job_id}", json={"status_update": res["status"]}
         )
     # TODO: Bad.
     except OSError as e:
