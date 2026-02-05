@@ -7,13 +7,17 @@
 	- [ ] Builder
 		- [ ] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
 		- [ ] Need to fail fast
+		- [ ] Fix error handling ASAP.
 	- [ ] Agent
 		- [ ] Decoupling initiative
 			- [x] clear start semantics
-			- [ ] clear stop
-			- [ ] Communicate with api over HTTP
-		- [ ] Fail fast when error propagates
-		- [ ] Replace in memory queue with distributed network queue
+			- [x] clear stop
+			- [x] Communicate with api over HTTP
+			- [ ] Move out of buildserver?
+			- [ ] Create CLI
+				- [ ] should run as a Daemon
+		- [x] Replace in memory queue with distributed network queue
+	- [ ] Shared models
 - [x] Create devcontainer
 	- [x] compose file that spins up postgres and a distributed mq of choice
 - [ ] CI/CD
