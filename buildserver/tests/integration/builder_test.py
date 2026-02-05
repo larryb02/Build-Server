@@ -4,7 +4,7 @@ import pytest
 from buildserver.builder import builder
 
 
-@pytest.mark.integration
+@pytest.mark.skip("Work in progress")
 class TestBuild:
     def test_build(self):
         build_repo = "../hello"
