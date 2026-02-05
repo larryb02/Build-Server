@@ -1,46 +1,52 @@
-"""Build service layer for database operations"""
+"""Job service layer for database operations"""
 
 import logging
-from uuid import UUID
 
 from sqlalchemy import insert, or_, select, update
 
 from buildserver.config import Config
-
-config = Config()
 from buildserver.database.core import DbSession, create_session
-from buildserver.builder.builder import BuildStatus
+from buildserver.models.jobs import JobStatus
 from buildserver.api.builds.models import (
     Artifact,
     ArtifactCreate,
-    Build,
-    BuildCreate,
-    BuildRead,
+    Job,
+    JobCreate,
+    JobRead,
 )
+from buildserver.rmq.rmq import RabbitMQProducer
+
+config = Config()
+
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(config.LOG_LEVEL)
 
 
-async def register(repo: BuildCreate) -> UUID:
+def register_job(repo: JobCreate) -> JobRead:
     """
-    Add a new BUILD job to task queue, create a db record with info about this build
+    Register a new job and create a database record with QUEUED status.
     """
     dbsession = create_session()
     try:
-        build = BuildRead(**dict(create_build(repo, dbsession)._mapping))
-        # await agent.add_job(JobType.BUILD_PROGRAM, (repo.git_repository_url, build.build_id))
+        job = JobRead(**dict(create_job(repo, dbsession)._mapping))
         dbsession.commit()
+        # publish to queue
+        publisher = RabbitMQProducer()
+        publisher.publish(
+            "build_queue", bytes(JobRead)
+        )  # fix this later, types are all fucked up right now
+        return job
     except Exception as e:
-        logger.error("Failed to write build to db: %s", e)
+        logger.error("Failed to write job to db: %s", e)
         dbsession.rollback()
     dbsession.close()
-    return build
 
 
-def get_all_builds(dbsession: DbSession):
-    stmt = select(*Build.__table__.columns)
+def get_all_jobs(dbsession: DbSession):
+    """Retrieve all job records from the database."""
+    stmt = select(*Job.__table__.columns)
     try:
         records = dbsession.execute(stmt).fetchall()
     except Exception as e:
@@ -48,18 +54,17 @@ def get_all_builds(dbsession: DbSession):
     return records
 
 
-def create_build(build: BuildCreate, dbsession: DbSession):
+def create_job(job: JobCreate, dbsession: DbSession):
+    """Insert a new job record into the database."""
     stmt = (
-        insert(Build)
-        .values(
-            git_repository_url=build.git_repository_url, build_status=BuildStatus.QUEUED
-        )
+        insert(Job)
+        .values(git_repository_url=job.git_repository_url, job_status=JobStatus.QUEUED)
         .returning(
-            Build.git_repository_url,
-            Build.build_id,
-            Build.build_status,
-            Build.commit_hash,
-            Build.created_at,
+            Job.git_repository_url,
+            Job.job_id,
+            Job.job_status,
+            Job.commit_hash,
+            Job.created_at,
         )
     )
     try:
@@ -70,6 +75,7 @@ def create_build(build: BuildCreate, dbsession: DbSession):
 
 
 def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
+    """Insert a new artifact record into the database."""
     stmt = (
         insert(Artifact)
         .values(
@@ -92,38 +98,52 @@ def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
     return record
 
 
-def update_build(dbsession: DbSession, build_id, **fields):
-    stmt = (
-        update(Build)
-        .where(Build.build_id == build_id)
-        .values(**fields)
-        .returning(*Build.__table__._columns)  # return all columns
-    )
-    try:
-        dbsession.execute(stmt)
-    except Exception as e:
-        raise e
-
-
-def get_all_unique_builds() -> list:
+def update_job_status(
+    dbsession: DbSession, job_id: int, new_status: JobStatus
+) -> JobRead | None:
     """
-    Create a list of all unique builds
+    Update the status of an existing job.
 
-    A build is considered unique if b1.git_repository_url != b2.git_repository_url
+    Args:
+        dbsession: Active database session.
+        job_id: The ID of the job to update.
+        new_status: The new status to set on the job.
+
+    Returns:
+        The updated job as a JobRead model, or None if the job was not found.
+    """
+    stmt = (
+        update(Job)
+        .where(Job.job_id == job_id)
+        .values(job_status=new_status)
+        .returning(*Job.__table__.columns)
+    )
+    record = dbsession.execute(stmt).one_or_none()
+    if record is None:
+        return None
+    return JobRead(**record._mapping)
+
+
+def get_all_unique_jobs() -> list[JobRead]:
+    """
+    Retrieve the most recent job for each unique repository URL.
+
+    A job is considered unique if its git_repository_url differs from others.
+    Only includes jobs with SUCCEEDED or FAILED status.
     """
     db_session = create_session()
     stmt = (
-        select(*Build.__table__.columns)
-        .distinct(Build.git_repository_url)
-        .order_by(Build.git_repository_url, Build.created_at.desc())
+        select(*Job.__table__.columns)
+        .distinct(Job.git_repository_url)
+        .order_by(Job.git_repository_url, Job.created_at.desc())
         .where(
             or_(
-                Build.build_status == BuildStatus.SUCCEEDED,
-                Build.build_status == BuildStatus.FAILED,
+                Job.job_status == JobStatus.SUCCEEDED,
+                Job.job_status == JobStatus.FAILED,
             )
         )
     )
-    builds = db_session.execute(stmt).fetchall()
-    builds = [BuildRead(**build._mapping) for build in builds]
+    jobs = db_session.execute(stmt).fetchall()
+    jobs = [JobRead(**job._mapping) for job in jobs]
     db_session.close()
-    return builds
+    return jobs
