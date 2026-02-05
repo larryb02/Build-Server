@@ -69,3 +69,19 @@ class Config:
     @property
     def ARTIFACT_REPOSITORY_ROOT(self):
         return self._config("ARTIFACT_REPOSITORY_ROOT")
+
+    @property
+    def RABBITMQ_HOST(self):
+        return self._config("RABBITMQ_HOST", default="rabbitmq")
+
+    @property
+    def RABBITMQ_PORT(self):
+        return self._config("RABBITMQ_PORT", default=5672, cast=int)
+
+    @property
+    def RABBITMQ_USER(self):
+        return self._config("RABBITMQ_USER", default="guest")
+
+    @property
+    def RABBITMQ_PASSWORD(self):
+        return self._config("RABBITMQ_PASSWORD", default="guest", cast=Secret)

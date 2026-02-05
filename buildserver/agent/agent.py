@@ -1,20 +1,11 @@
 """Build agent that manages job queues and workers"""
 
-import pika
-import asyncio
-import enum
 import logging
-from concurrent.futures import ProcessPoolExecutor
-from uuid import uuid4, UUID
 
-from buildserver.api.builds.models import ArtifactCreate
-from buildserver.artifacts import artifactstore
-from buildserver.builder import builder
 from buildserver.config import Config
+from buildserver.rmq.rmq import RabbitMQConnection
 
 config = Config()
-from buildserver.database.core import create_session
-from buildserver.services.builds import create_artifact, update_build
 
 logging.basicConfig()
 logger = logging.getLogger(f"{__name__}")
@@ -158,14 +149,51 @@ TIMEOUT = config.TIMEOUT
 #     agent = Agent()
 #     asyncio.run(agent.run())
 
-# connect to message queue
-#
+BUILD_QUEUE = "build_jobs"
+
+# create a class called 'Agent' (for now)
+# maintain a connection to rabbitmq [x]
+# what should behavior be if connection to rabbitmq fails
+# -> should not kill the process, continuously attempt to reconnect [x]
+# make sure queues are durable
+# when does agent get initialized? -> module scope for now,
+# don't need multiple instances just a singleton [x]
+# how do build jobs get invoked? -> [jobs submitted]
+# will want to limit number of jobs being performed at a time
+# how will shutdown be handled? - command line, ctrl-c, kill
+
+
+_rmq = RabbitMQConnection()
+results = []
+
+
+def _handle_delivery(body: bytes):
+    logger.info("received data %s", body)
+    result = _do_job()
+    results.append(result)
+
+
+def _do_job():
+    return "doing work!"
 
 
 def start():
     """
     Initialize the build agent.
-    # TODO: this will eventually become its own binary
     """
-    # executor = ProcessPoolExecutor(max_workers=1)
-    connection = pika.SelectConnection()
+    logger.info("starting agent...")
+    try:
+        # NOTE: blocking connection is fine until agent has more things to do
+        _rmq.start(BUILD_QUEUE, _handle_delivery)
+    except KeyboardInterrupt:
+        stop()
+
+
+def stop():
+    """Stop the agent and close the RabbitMQ connection."""
+    logger.info("stopping agent...")
+    _rmq.stop()
+
+
+if __name__ == "__main__":
+    start()
