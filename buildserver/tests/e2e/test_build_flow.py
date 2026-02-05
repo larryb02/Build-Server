@@ -3,13 +3,12 @@
 import asyncio
 import pytest
 
+pytestmark = pytest.mark.skip("in a refactor, these tests will fail")
 from buildserver.builder.builder import BuildStatus
 
 TEST_REPO = "git@github.com:larryb02/test.git"
 POLL_INTERVAL = 2
 POLL_TIMEOUT = 120
-
-pytestmark = pytest.mark.skip("in a refactor, these tests will fail")
 
 
 @pytest.mark.asyncio
