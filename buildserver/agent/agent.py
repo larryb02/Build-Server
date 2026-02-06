@@ -5,8 +5,9 @@ import logging
 import requests
 
 from buildserver.agent.builder import builder
+from buildserver.api.builds.models import JobRead
 from buildserver.config import Config
-from buildserver.models.jobs import Job, JobStatus
+from buildserver.models.jobs import JobStatus
 from buildserver.rmq.rmq import RabbitMQConsumer
 
 config = Config()
@@ -155,7 +156,7 @@ TIMEOUT = config.TIMEOUT
 
 BUILD_QUEUE = "build_jobs"
 # NOTE: hack for now will store in config once agent becomes separate binary
-API_ENDPOINT = "localhost:8000"
+API_ENDPOINT = "http://localhost:8000"
 # create a class called 'Agent' (for now)
 # maintain a connection to rabbitmq [x]
 # what should behavior be if connection to rabbitmq fails
@@ -174,12 +175,12 @@ API_ENDPOINT = "localhost:8000"
 
 _rmq = RabbitMQConsumer()
 results = []
-active_jobs: list[Job] = []
+active_jobs: list[JobRead] = []
 
 
 def _on_message(body: bytes):
     logger.info("received data %s", body)
-    job = Job.model_validate_json(body)
+    job = JobRead.model_validate_json(body)
     # since queue limits amount of messages consumed
     # should be fine to immediately start executing a job
     active_jobs.append(job)
@@ -187,7 +188,7 @@ def _on_message(body: bytes):
     # NOTE: for first iteration this is fine, ideally want to stream here
     requests.patch(
         f"{API_ENDPOINT}/jobs/{job.job_id}",
-        json={"status_update": JobStatus.RUNNING},
+        json={"job_status": JobStatus.RUNNING},
         timeout=5,
     )
     try:
@@ -196,7 +197,7 @@ def _on_message(body: bytes):
         # update with final status here
         requests.patch(
             f"{API_ENDPOINT}/jobs/{job.job_id}",
-            json={"status_update": run_status["status"]},
+            json={"job_status": run_status["status"]},
             timeout=5,
         )
     # TODO: Bad.

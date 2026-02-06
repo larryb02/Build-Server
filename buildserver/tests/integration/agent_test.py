@@ -1,4 +1,5 @@
 import json
+from random import randint
 import threading
 import time
 import uuid
@@ -32,9 +33,11 @@ def producer():
 def _make_job_message(repo_url: str = "git@github.com:user/repo.git") -> bytes:
     return json.dumps(
         {
-            "job_id": str(uuid.uuid4()),
+            "job_id": randint(0, 1000),
             "git_repository_url": repo_url,
+            "commit_hash": "abc123",
             "job_status": JobStatus.CREATED,
+            "created_at": time.time(),
         }
     ).encode()
 

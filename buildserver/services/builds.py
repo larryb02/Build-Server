@@ -14,7 +14,6 @@ from buildserver.api.builds.models import (
     JobCreate,
     JobRead,
 )
-from buildserver.rmq.rmq import RabbitMQProducer
 
 config = Config()
 
@@ -24,24 +23,13 @@ logger = logging.getLogger(__name__)
 logger.setLevel(config.LOG_LEVEL)
 
 
-def register_job(repo: JobCreate) -> JobRead:
-    """
-    Register a new job and create a database record with QUEUED status.
-    """
-    dbsession = create_session()
-    try:
-        job = JobRead(**dict(create_job(repo, dbsession)._mapping))
-        dbsession.commit()
-        # publish to queue
-        publisher = RabbitMQProducer()
-        publisher.publish(
-            "build_queue", bytes(JobRead)
-        )  # fix this later, types are all fucked up right now
-        return job
-    except Exception as e:
-        logger.error("Failed to write job to db: %s", e)
-        dbsession.rollback()
-    dbsession.close()
+def get_job_by_id(dbsession: DbSession, job_id: int) -> JobRead | None:
+    """Retrieve a single job by ID."""
+    stmt = select(*Job.__table__.columns).where(Job.job_id == job_id)
+    record = dbsession.execute(stmt).one_or_none()
+    if record is None:
+        return None
+    return JobRead(**record._mapping)
 
 
 def get_all_jobs(dbsession: DbSession):

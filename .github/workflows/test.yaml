@@ -81,7 +81,9 @@ jobs:
           python-version: "3.12"
       - uses: docker/setup-docker-action@v4
       - name: Setup external services
-        run: docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=example postgres
+        run: |
+          docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=example postgres; \
+          docker run --rm -d -p 5672:5672 rabbitmq
       - name: Create env file
         run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
       - name: Install dependencies
