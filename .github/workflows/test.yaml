@@ -49,7 +49,7 @@ jobs:
       - name: Create env file
         run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
       - name: Run unit tests
-        run: pytest -v buildserver/tests/unit
+        run: pytest -xv buildserver/tests/unit
 
   integration-test:
     runs-on: ubuntu-latest
@@ -71,7 +71,7 @@ jobs:
           pip install pytest; \
           pip install -e .[test]
       - name: Run integration tests
-        run: pytest -v buildserver/tests/integration
+        run: pytest -xv buildserver/tests/integration
 
   e2e-test:
     runs-on: ubuntu-latest
@@ -95,4 +95,4 @@ jobs:
           pip install -e .[test]
       - run: mkdir ./build # hack until build dir becomes ephemeral
       - name: Run e2e tests
-        run: pytest -v buildserver/tests/e2e
+        run: pytest -xv buildserver/tests/e2e
