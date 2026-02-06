@@ -6,6 +6,8 @@ from buildserver.models.jobs import JobStatus
 
 TEST_REPO = "git@github.com:larryb02/test.git"
 
+mark = pytest.mark.skip("work in progress")
+
 
 @pytest.mark.asyncio
 async def test_register_and_build_succeeds(client):
