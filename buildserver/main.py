@@ -1,18 +1,16 @@
 """FastAPI application entrypoint"""
 
 from concurrent.futures import ProcessPoolExecutor
-import uvicorn
 import logging
 from contextlib import asynccontextmanager
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from buildserver.agent.agent import Agent
 from buildserver.api.builds.views import router as build_router
 
-# from buildserver.agent.agent import Agent
-# from buildserver.builder.rebuilder import Rebuilder
 from buildserver.config import Config
 from buildserver.database.core import init_db
 
@@ -22,26 +20,12 @@ config = Config()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ctx = {}
-    # initialize logger
     logging.basicConfig()
     logging.getLogger("uvicorn").handlers.clear()
     logger = logging.getLogger(f"{__name__}")
     logger.setLevel(config.LOG_LEVEL)
     ctx["logger"] = logger
-
-    # initialize agent
-    # agent = Agent()
-    # loop = asyncio.get_event_loop()
-    # asyncio.run_coroutine_threadsafe(agent.run(), loop)
-    # ctx["agent"] = agent
-
-    # # initialize rebuilder
-    # rebuilder = Rebuilder(agent=agent)
-    # asyncio.run_coroutine_threadsafe(rebuilder.run(), loop)
     yield ctx
-
-    # shutdown
-    # agent.close()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -56,7 +40,7 @@ app.add_middleware(
 app.include_router(build_router)
 
 
-def main():
+def main():  # noqa: C0116
     init_db()
     executor = ProcessPoolExecutor()
     executor.submit(Agent().start)
