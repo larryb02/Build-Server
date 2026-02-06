@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from buildserver.builder import builder
+from buildserver.agent.builder import builder
 
 
 pytestmark = pytest.mark.skip("all tests still WIP")
