@@ -17,7 +17,6 @@
 			- [ ] Create CLI
 				- [ ] should run as a Daemon
 		- [x] Replace in memory queue with distributed network queue
-	- [ ] Shared models
 - [x] Create devcontainer
 	- [x] compose file that spins up postgres and a distributed mq of choice
 - [ ] CI/CD
