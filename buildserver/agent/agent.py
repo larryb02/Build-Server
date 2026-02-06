@@ -6,7 +6,7 @@ import requests
 
 from buildserver.agent.builder import builder
 from buildserver.config import Config
-from buildserver.models.jobs import Job, JobStatus, JobStatusUpdate
+from buildserver.models.jobs import Job, JobStatus
 from buildserver.rmq.rmq import RabbitMQConsumer
 
 config = Config()
@@ -185,16 +185,26 @@ def _on_message(body: bytes):
     active_jobs.append(job)
     # from here agent needs to update status will just make calls to API for now
     # NOTE: for first iteration this is fine, ideally want to stream here
-    requests.patch(
-        f"{API_ENDPOINT}/jobs/{job.job_id}", json={"status_update": JobStatus.RUNNING}
-    )
+    with requests.patch(
+        f"{API_ENDPOINT}/jobs/{job.job_id}",
+        json={"status_update": JobStatus.RUNNING},
+        timeout=5,
+    ) as res:
+        if res.status_code != 201:
+            logger.error("failed to update job status: %s", res.json())
+            return
     try:
         # NOTE: currently not very 'integration testable'
-        res = builder.run(job.git_repository_url)
+        run_status = builder.run(job.git_repository_url)
         # update with final status here
-        requests.patch(
-            f"{API_ENDPOINT}/jobs/{job.job_id}", json={"status_update": res["status"]}
-        )
+        with requests.patch(
+            f"{API_ENDPOINT}/jobs/{job.job_id}",
+            json={"status_update": run_status["status"]},
+            timeout=5,
+        ) as res:
+            if res.status_code != 201:
+                logger.error("failed to update job status: %s", res.json())
+                return
     # TODO: Bad.
     except OSError as e:
         logger.error("OSError %s", e)

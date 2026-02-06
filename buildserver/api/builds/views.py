@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from buildserver.api.builds.models import JobCreate, JobRead
 from buildserver.database.core import DbSession
 from buildserver.models.jobs import JobStatusUpdate
-from buildserver.services.builds import register_job, get_all_builds, update_job_status
+from buildserver.services.builds import register_job, get_all_jobs, update_job_status
 
 router = APIRouter(prefix="/jobs")
 
@@ -48,7 +48,7 @@ async def register_build(
 async def get_jobs(dbsession: DbSession, request: Request) -> list[JobRead]:
     """Retrieve all job records."""
     try:
-        jobs = list(job._mapping for job in get_all_builds(dbsession))
+        jobs = list(job._mapping for job in get_all_jobs(dbsession))
     except Exception as e:
         request.state.logger.error(f"Failed to get jobs: {e}")
     return jobs[:10]  # make sure to sort by date descending
