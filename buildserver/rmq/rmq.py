@@ -73,8 +73,11 @@ class RabbitMQConsumer(RabbitMQConnection):
         self._stopping = False
         self._queue: str | None = None
         self._on_message: Callable[[bytes], None] | None = None
+        self._prefetch_count: int = 1
 
-    def start(self, queue: str, on_message: Callable[[bytes], None]) -> None:
+    def start(
+        self, queue: str, on_message: Callable[[bytes], None], prefetch_count: int = 1
+    ) -> None:
         """Connect to RabbitMQ and begin consuming from the given queue.
 
         Blocks the calling thread. Automatically reconnects on connection loss.
@@ -83,9 +86,11 @@ class RabbitMQConsumer(RabbitMQConnection):
             queue: The queue name to consume from.
             on_message: Callback that receives the raw message body as bytes.
                 Messages are acked on success and nacked on exception.
+            prefetch_count: Max unacked messages to allow (limits concurrency).
         """
         self._queue = queue
         self._on_message = on_message
+        self._prefetch_count = prefetch_count
         while not self._stopping:
             self._connect()
             self._connection.ioloop.start()
@@ -146,6 +151,8 @@ class RabbitMQConsumer(RabbitMQConnection):
     def _on_channel_open(self, channel: pika.channel.Channel) -> None:
         logger.info("Channel opened")
         self._channel = channel
+        # Limit unacked messages to avoid overwhelming workers
+        self._channel.basic_qos(prefetch_count=self._prefetch_count)
         self._channel.queue_declare(
             queue=self._queue,
             durable=True,
@@ -164,9 +171,10 @@ class RabbitMQConsumer(RabbitMQConnection):
         properties: pika.spec.BasicProperties,
         body: bytes,
     ) -> None:
-        try:
-            self._on_message(body)
-            channel.basic_ack(delivery_tag=method.delivery_tag)
-        except Exception as e:
-            logger.error("Message handler failed: %s", e)
-            channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+        # try:
+        self._on_message(body)
+        channel.basic_ack(delivery_tag=method.delivery_tag)
+
+    # except Exception as e:
+    #     logger.error("Message handler failed: %s", e)
+    #     channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)

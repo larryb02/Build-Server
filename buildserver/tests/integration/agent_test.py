@@ -7,20 +7,19 @@ from unittest.mock import patch
 
 import pytest
 
-from buildserver.agent import agent
+from buildserver.agent.agent import Agent, BUILD_QUEUE
 from buildserver.models.jobs import JobStatus
-from buildserver.rmq.rmq import RabbitMQConsumer, RabbitMQProducer
+from buildserver.rmq.rmq import RabbitMQProducer
 
 
 @pytest.fixture()
 def run_agent():
-    """Start the agent in a background thread with a fresh connection."""
-    agent._rmq = RabbitMQConsumer()
-    agent.active_jobs.clear()
+    """Start the agent in a background thread with a fresh instance."""
+    agent = Agent()
     t = threading.Thread(target=agent.start, daemon=True)
     t.start()
     time.sleep(1)
-    yield
+    yield agent
     agent.stop()
     t.join(timeout=5)
 
@@ -55,7 +54,7 @@ class TestJobSubmission:
                 "build_status": JobStatus.SUCCEEDED,
             }
 
-            producer.publish(agent.BUILD_QUEUE, _make_job_message())
+            producer.publish(BUILD_QUEUE, _make_job_message())
             time.sleep(1)
 
             mock_builder.run.assert_called_once()
@@ -74,7 +73,7 @@ class TestJobSubmission:
             }
 
             for _ in range(3):
-                producer.publish(agent.BUILD_QUEUE, _make_job_message())
+                producer.publish(BUILD_QUEUE, _make_job_message())
             time.sleep(2)
 
             assert mock_builder.run.call_count == 3

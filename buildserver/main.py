@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from buildserver.agent import agent
+from buildserver.agent.agent import Agent
 from buildserver.api.builds.views import router as build_router
 
 # from buildserver.agent.agent import Agent
@@ -59,7 +59,7 @@ app.include_router(build_router)
 def main():
     init_db()
     executor = ProcessPoolExecutor()
-    executor.submit(agent.start)
+    executor.submit(Agent().start)
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
