@@ -7,12 +7,11 @@ from buildserver.api.builds.models import JobCreate, JobRead
 from buildserver.database.core import DbSession
 from buildserver.models.jobs import JobStatusUpdate
 from buildserver.services.builds import (
-    create_job,
+    register_job,
     get_job_by_id,
     get_all_jobs,
     update_job_status,
 )
-from buildserver.rmq.rmq import RabbitMQProducer
 
 router = APIRouter(prefix="/jobs")
 
@@ -23,7 +22,7 @@ def validate(repo_url: str):
 
 
 @router.post("/register", response_model=JobRead)
-def register_job(repo: JobCreate, dbsession: DbSession):
+def register(repo: JobCreate, dbsession: DbSession):
     """
     Registers a new program to be built
     """
@@ -34,10 +33,7 @@ def register_job(repo: JobCreate, dbsession: DbSession):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=[{"msg": str(e)}],
         )
-    job = JobRead(**dict(create_job(repo, dbsession)._mapping))
-    publisher = RabbitMQProducer()
-    publisher.publish("build_jobs", job.model_dump_json().encode())
-    return job
+    return register_job(repo, dbsession)
 
 
 @router.get("", response_model=list[JobRead])

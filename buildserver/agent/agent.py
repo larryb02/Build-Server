@@ -203,6 +203,9 @@ def _on_message(body: bytes):
     # TODO: Bad.
     except OSError as e:
         logger.error("OSError %s", e)
+    except Exception as e:
+        logger.error("General Exception: %s", e)
+        raise e
 
 
 def start():

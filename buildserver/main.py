@@ -1,5 +1,6 @@
 """FastAPI application entrypoint"""
 
+from concurrent.futures import ProcessPoolExecutor
 import uvicorn
 import logging
 from contextlib import asynccontextmanager
@@ -13,6 +14,7 @@ from buildserver.api.builds.views import router as build_router
 # from buildserver.agent.agent import Agent
 # from buildserver.builder.rebuilder import Rebuilder
 from buildserver.config import Config
+from buildserver.database.core import init_db
 
 config = Config()
 
@@ -55,7 +57,9 @@ app.include_router(build_router)
 
 
 def main():
-    agent.start()
+    init_db()
+    executor = ProcessPoolExecutor()
+    executor.submit(agent.start)
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 

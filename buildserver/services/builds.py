@@ -14,6 +14,7 @@ from buildserver.api.builds.models import (
     JobCreate,
     JobRead,
 )
+from buildserver.rmq.rmq import RabbitMQProducer
 
 config = Config()
 
@@ -60,6 +61,14 @@ def create_job(job: JobCreate, dbsession: DbSession):
     except Exception as e:
         raise e
     return record
+
+
+def register_job(repo: JobCreate, dbsession: DbSession) -> JobRead:
+    """Create a new job and publish it to the build queue."""
+    job = JobRead(**dict(create_job(repo, dbsession)._mapping))
+    publisher = RabbitMQProducer()
+    publisher.publish("build_jobs", job.model_dump_json().encode())
+    return job
 
 
 def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
