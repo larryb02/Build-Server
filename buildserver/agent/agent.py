@@ -185,26 +185,20 @@ def _on_message(body: bytes):
     active_jobs.append(job)
     # from here agent needs to update status will just make calls to API for now
     # NOTE: for first iteration this is fine, ideally want to stream here
-    with requests.patch(
+    requests.patch(
         f"{API_ENDPOINT}/jobs/{job.job_id}",
         json={"status_update": JobStatus.RUNNING},
         timeout=5,
-    ) as res:
-        if res.status_code != 201:
-            logger.error("failed to update job status: %s", res.json())
-            return
+    )
     try:
         # NOTE: currently not very 'integration testable'
         run_status = builder.run(job.git_repository_url)
         # update with final status here
-        with requests.patch(
+        requests.patch(
             f"{API_ENDPOINT}/jobs/{job.job_id}",
             json={"status_update": run_status["status"]},
             timeout=5,
-        ) as res:
-            if res.status_code != 201:
-                logger.error("failed to update job status: %s", res.json())
-                return
+        )
     # TODO: Bad.
     except OSError as e:
         logger.error("OSError %s", e)
