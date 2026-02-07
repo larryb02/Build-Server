@@ -6,7 +6,7 @@ from sqlalchemy import insert, or_, select, update
 
 from buildserver.config import Config
 from buildserver.database.core import DbSession, create_session
-from buildserver.models.jobs import JobStatus
+from buildserver.api.builds.models import JobStatus
 from buildserver.api.builds.models import (
     Artifact,
     ArtifactCreate,
