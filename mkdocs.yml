@@ -1,0 +1,15 @@
+site_name: Build Server
+site_description: A CI/CD system for building programs
+site_author: Larry Banks
+
+repo_url: https://github.com/larryb02/Build-Server
+repo_name: larryb02/Build-Server
+
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - API: api.md
+  - Agent: agent.md

@@ -21,8 +21,8 @@ test = [
     "asgi-lifespan",
 ]
 docs = [
-    "sphinx",
-    "furo",
+    "mkdocs",
+    "mkdocs-material",
 ]
 
 [project.urls]
