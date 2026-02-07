@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 
 from buildserver.api.builds.models import JobCreate, JobRead
 from buildserver.database.core import DbSession
-from buildserver.models.jobs import JobStatusUpdate
+from buildserver.api.builds.models import JobStatusUpdate
 from buildserver.services.builds import (
     register_job,
     get_job_by_id,

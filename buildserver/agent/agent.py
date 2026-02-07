@@ -8,7 +8,6 @@ import requests
 from buildserver.agent.builder import builder
 from buildserver.api.builds.models import JobRead
 from buildserver.config import Config
-from buildserver.models.jobs import JobStatus
 from buildserver.rmq.rmq import RabbitMQConsumer
 
 config = Config()
@@ -45,7 +44,7 @@ class Agent:
     def __init__(self):
         self._rmq = RabbitMQConsumer()
         self._executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
-        self.active_jobs: list[JobRead] = []
+        self.active_jobs: list[Job] = []
 
     def start(self):
         """Start consuming from the build queue. Blocks the calling thread."""
@@ -68,7 +67,7 @@ class Agent:
     def _handle_job(self, body: bytes):
         """Execute a build job. Runs in a worker thread."""
         logger.info("received data %s", body)
-        job = JobRead.model_validate_json(body)
+        job = Job.model_validate_json(body)
         # since queue limits amount of messages consumed
         # should be fine to immediately start executing a job
         self.active_jobs.append(job)

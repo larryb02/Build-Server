@@ -1,14 +1,30 @@
 """Pydantic and SQLAlchemy models for jobs and artifacts"""
 
 from datetime import datetime
+from enum import Enum as PyEnum
 from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy import DateTime, String, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
-from buildserver.models.jobs import JobStatus
 from buildserver.database.core import Base
+
+
+class JobStatus(str, PyEnum):
+    """Represents the current state of a job in the build pipeline."""
+
+    FAILED = "FAILED"
+    SUCCEEDED = "SUCCEEDED"
+    QUEUED = "QUEUED"
+    RUNNING = "RUNNING"
+    CREATED = "CREATED"
+
+
+class JobStatusUpdate(BaseModel):
+    """Request body for updating a job's current status."""
+
+    job_status: JobStatus
 
 
 class ArtifactRead(BaseModel):

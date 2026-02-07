@@ -1,9 +1,9 @@
-"""
-Type definitions for Job related objects
-"""
+"""Type definitions for the agent package"""
 
+from datetime import datetime
 from enum import Enum
-import uuid
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -14,20 +14,14 @@ class JobStatus(str, Enum):
     SUCCEEDED = "SUCCEEDED"
     QUEUED = "QUEUED"
     RUNNING = "RUNNING"
-    CREATED = "CREATED"
-
-
-class JobStatusUpdate(BaseModel):
-    """Request body for updating a job's current status."""
-
-    job_status: JobStatus
+    # CREATED = "CREATED"
 
 
 class Job(BaseModel):
-    """
-    A job is what gets executed
-    """
+    """A job consumed from the build queue."""
 
-    job_id: uuid.UUID
+    job_id: int
     git_repository_url: str
+    commit_hash: Optional[str]
     job_status: JobStatus
+    created_at: datetime
