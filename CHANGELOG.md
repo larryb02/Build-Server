@@ -1,5 +1,5 @@
 # v0.1.0
-- ### Major refactors:
+- Major refactors:
     - decoupled buildserver/agent and buildserver/api
         - both now standalone binaries
     - improved error handling in builder
