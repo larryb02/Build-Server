@@ -5,8 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
-from buildserver.agent.builder import builder
-from buildserver.api.builds.models import JobRead
+from buildserver.agent.builder.builder import run as run_build, BuildError, CloneError
+from buildserver.agent.types import Job, JobStatus
 from buildserver.config import Config
 from buildserver.rmq.rmq import RabbitMQConsumer
 
@@ -79,19 +79,19 @@ class Agent:
             timeout=5,
         )
         try:
-            # NOTE: currently not very 'integration testable'
-            run_status = builder.run(job.git_repository_url)
-            # update with final status here
-            requests.patch(
-                f"{API_ENDPOINT}/jobs/{job.job_id}",
-                json={"job_status": run_status["build_status"]},
-                timeout=5,
-            )
-        # TODO: Bad.
-        except OSError as e:
-            logger.error("OSError %s", e)
-        finally:
-            self.active_jobs.remove(job)
+            run_build(job.git_repository_url)
+            status = JobStatus.SUCCEEDED
+            logger.info("Job %s succeeded", job.job_id)
+        except (BuildError, CloneError) as e:
+            status = JobStatus.FAILED
+            logger.error("Job %s failed: %s", job.job_id, e)
+
+        requests.patch(
+            f"{API_ENDPOINT}/jobs/{job.job_id}",
+            json={"job_status": status},
+            timeout=5,
+        )
+        self.active_jobs.remove(job)
 
 
 if __name__ == "__main__":

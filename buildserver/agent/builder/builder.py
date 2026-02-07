@@ -2,101 +2,116 @@
 Functions for compiling C programs
 """
 
-import os
-import enum
-import subprocess
 import logging
+import subprocess
+import tempfile
 from pathlib import Path
 
-
+from buildserver import utils
 from buildserver.config import Config
-from buildserver.models.jobs import JobStatus
 
 config = Config()
-from buildserver import utils
 
 logging.basicConfig()
-logger = logging.getLogger(f"{__name__}")  # log format will be [MODULE: MSG]
-logger.setLevel(config.LOG_LEVEL)  # grab from config
-
-
-class BuildStatus(enum.Enum):
-    FAILED = "FAILED"
-    SUCCEEDED = "SUCCEEDED"
-    QUEUED = "QUEUED"
-    RUNNING = "RUNNING"
-
+logger = logging.getLogger(__name__)
+logger.setLevel(config.LOG_LEVEL)
 
 BUILD_CMD = "make"
-BUILD_DIR = Path(config.BUILD_DIR).resolve()
 
 
-def clone_repo(repo: str):
+class BuildError(Exception):
+    """Raised when a build fails."""
+
+    pass
+
+
+class CloneError(Exception):
+    """Raised when cloning a repository fails."""
+
+    pass
+
+
+def clone_repo(repo: str, build_dir: Path) -> str:
     """
-    Clone git repository into build directory
-    params:
-        repo: string with an expected format of a valid git protocol e.g. git@github.com:some-users/repository
-    raises:
-        OSError
-        CalledProcessError
+    Clone git repository into build directory.
+
+    Args:
+        repo: Git repository URL (git@ or https://)
+        build_dir: Directory to clone into
+
+    Returns:
+        The commit hash of the cloned repo.
+
+    Raises:
+        CloneError: If cloning fails.
     """
-    logger.info("Cloning %s into %s", repo, BUILD_DIR)
+    logger.info("Cloning %s into %s", repo, build_dir)
     try:
-        os.chdir(BUILD_DIR)
-    except OSError as e:
-        logger.error("Failed to change directory: %s", e.strerror)
-        raise e
-    subprocess.run(["/usr/bin/git", "clone", repo], check=True)
+        result = subprocess.run(
+            ["/usr/bin/git", "clone", repo],
+            cwd=build_dir,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise CloneError(f"Failed to clone {repo}: {e.stderr}") from e
+
+    repo_name = utils.get_dir_name(repo)
+    repo_path = build_dir / repo_name
+
     try:
-        repo = utils.get_dir_name(repo)
-        commit_hash = utils.get_commit_hash(Path(BUILD_DIR, repo), logger)
+        commit_hash = utils.get_commit_hash(repo_path, logger)
     except Exception as e:
-        logger.error("Failed to get commit hash: %s", str(e))
-    logger.info("Cloned %s at %s PWD: %s}", repo, commit_hash, Path.cwd())
+        raise CloneError(f"Failed to get commit hash: {e}") from e
+
+    logger.info("Cloned %s at %s", repo_name, commit_hash)
     return commit_hash
 
 
-def build(repo: str):
+def build(repo_path: Path) -> None:
     """
-    Compile C program into a binary
-    params:
-        repo: string with an expected format of a valid git protocol e.g. git@github.com:some-users/repository
-    raises:
-        OSError
-        CalledProcessError
+    Compile C program into a binary.
+
+    Args:
+        repo_path: Path to the cloned repository.
+
+    Raises:
+        BuildError: If compilation fails.
     """
-    logger.info("Building %s", repo)
+    logger.info("Building %s", repo_path)
     try:
-        os.chdir(Path(BUILD_DIR, repo))
-    except OSError as e:
-        logger.error("Failed to change directory: %s", e.strerror)
-        raise e
-    subprocess.run(BUILD_CMD, check=True)
+        subprocess.run(
+            BUILD_CMD,
+            cwd=repo_path,
+            check=True,
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise BuildError(f"Build failed: {e.stderr}") from e
 
 
-def run(repo: str):
+def run(repo: str) -> None:
     """
-    Clone and build C program
-    params:
-        repo: string with an expected format of a valid git protocol e.g. git@github.com:some-users/repository
-    raises:
-        OSError
-        CalledProcessError
+    Clone and build a C program in an isolated temp directory.
+
+    Args:
+        repo: Git repository URL.
+
+    Raises:
+        CloneError: If cloning fails.
+        BuildError: If compilation fails.
     """
+    build_dir = Path(tempfile.mkdtemp(prefix="job_"))
+    logger.info("Created temp build directory: %s", build_dir)
+
     try:
-        commit_hash = clone_repo(repo)
-    except Exception as e:
-        raise e
-    try:
-        build_path = utils.get_dir_name(repo)
-        build(build_path)
-        status = JobStatus.SUCCEEDED
-    except Exception as e:
-        logger.error("Failed to build program: %s", e)
-        status = JobStatus.FAILED
-        utils.cleanup_build_files(Path(BUILD_DIR, build_path))
-    return {
-        "git_repository_url": repo,
-        "commit_hash": commit_hash,
-        "build_status": status,
-    }
+        clone_repo(repo, build_dir)
+        repo_name = utils.get_dir_name(repo)
+        repo_path = build_dir / repo_name
+        build(repo_path)
+    except (CloneError, BuildError):
+        utils.cleanup_build_files(build_dir)
+        raise

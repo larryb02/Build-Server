@@ -2,13 +2,12 @@ import json
 from random import randint
 import threading
 import time
-import uuid
 from unittest.mock import patch
 
 import pytest
 
 from buildserver.agent.agent import Agent, BUILD_QUEUE
-from buildserver.models.jobs import JobStatus
+from buildserver.agent.types import JobStatus
 from buildserver.rmq.rmq import RabbitMQProducer
 
 
@@ -35,7 +34,7 @@ def _make_job_message(repo_url: str = "git@github.com:user/repo.git") -> bytes:
             "job_id": randint(0, 1000),
             "git_repository_url": repo_url,
             "commit_hash": "abc123",
-            "job_status": JobStatus.CREATED,
+            "job_status": JobStatus.QUEUED,
             "created_at": time.time(),
         }
     ).encode()
@@ -45,37 +44,25 @@ class TestJobSubmission:
 
     def test_agent_receives_and_executes_job(self, run_agent, producer):
         with (
-            patch("buildserver.agent.agent.builder") as mock_builder,
+            patch("buildserver.agent.agent.run_build") as mock_run_build,
             patch("buildserver.agent.agent.requests"),
         ):
-            mock_builder.run.return_value = {
-                "git_repository_url": "git@github.com:user/repo.git",
-                "commit_hash": "abc123",
-                "build_status": JobStatus.SUCCEEDED,
-            }
+            mock_run_build.return_value = None
 
             producer.publish(BUILD_QUEUE, _make_job_message())
             time.sleep(1)
 
-            mock_builder.run.assert_called_once()
-            result = mock_builder.run.return_value
-            assert result["build_status"] in (JobStatus.SUCCEEDED, JobStatus.FAILED)
+            mock_run_build.assert_called_once()
 
     def test_agent_executes_multiple_jobs(self, run_agent, producer):
         with (
-            patch("buildserver.agent.agent.builder") as mock_builder,
+            patch("buildserver.agent.agent.run_build") as mock_run_build,
             patch("buildserver.agent.agent.requests"),
         ):
-            mock_builder.run.return_value = {
-                "git_repository_url": "git@github.com:user/repo.git",
-                "commit_hash": "abc123",
-                "build_status": JobStatus.FAILED,
-            }
+            mock_run_build.return_value = None
 
             for _ in range(3):
                 producer.publish(BUILD_QUEUE, _make_job_message())
             time.sleep(2)
 
-            assert mock_builder.run.call_count == 3
-            result = mock_builder.run.return_value
-            assert result["build_status"] is not None
+            assert mock_run_build.call_count == 3
