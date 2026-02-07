@@ -1,34 +1,37 @@
 - [ ] Refactors
-	- [ ] API needs to become a proper control plane
 	- [ ] Move services back into api layer
 	- [ ] Aim for fine grained exception handling
 	- [ ] Configuration management
 		- [ ] Eventually may want support for more than just env files
-	- [ ] Builder
-		- [ ] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
-		- [ ] Need to fail fast
-		- [ ] Fix error handling ASAP.
+	- [x] Builder
+		- [x] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
+		- [x] Need to fail fast
+		- [x] Fix error handling ASAP.
 	- [ ] Agent
 		- [ ] Decoupling initiative
 			- [x] clear start semantics
 			- [x] clear stop
 			- [x] Communicate with api over HTTP
-			- [ ] Move out of buildserver?
+			- [ ] Move out of buildserver
 			- [ ] Create CLI
 				- [ ] should run as a Daemon
 		- [x] Replace in memory queue with distributed network queue
+	- [ ] Rebuilder
+		- [ ] communicate with API to register new builds
+		- [ ] Run as background thread in API
 - [x] Create devcontainer
 	- [x] compose file that spins up postgres and a distributed mq of choice
 - [ ] CI/CD
-	- [ ] On push?
-		- [ ] test, lint, format on push
+	- [x] On push?
+		- [x] test, lint, format on push
 	- [ ] On merge to main?
 		- [x] test, lint, format (sanity check?)
 		- [ ] stage new release
 			- maybe only on pr
 		- [ ] deploy new release
-- [ ] Versioning
-- [ ] Changelogs
+	- need to setup a good branching workflow
+- [x] Versioning
+- [x] Changelogs
 - [ ] Deployment
 - [ ] Monitoring
 - [ ] Documentation
