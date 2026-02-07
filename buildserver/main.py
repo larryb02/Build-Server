@@ -40,10 +40,15 @@ app.add_middleware(
 app.include_router(build_router)
 
 
+def _start_agent():
+    """Entry point for agent subprocess."""
+    Agent().start()
+
+
 def main():  # noqa: C0116
     init_db()
     executor = ProcessPoolExecutor()
-    executor.submit(Agent().start)
+    executor.submit(_start_agent)
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
