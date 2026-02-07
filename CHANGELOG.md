@@ -4,6 +4,9 @@
         - both now standalone binaries
     - improved error handling in builder
     - builder now creates temporary directories when running jobs
+- Known limitations:
+    - No scheduler: agent must be running before jobs are dispatched, jobs enqueued while the agent is down may fail unexpectedly
+    - Limited fault tolerance: no agent heartbeat or health checks, job status can become stale if the agent or API is unavailable
 # v0.0.0
 - Proof of concept CI System
 - Features:
