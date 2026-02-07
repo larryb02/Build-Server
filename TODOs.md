@@ -15,10 +15,15 @@
 			- [ ] Move out of buildserver
 			- [ ] Create CLI
 				- [ ] should run as a Daemon
+		- [ ] Scheduler service (0.1.x)
+			- [ ] Agent registration / heartbeat mechanism
+			- [ ] Control plane must verify node availability before dispatching work
 		- [x] Replace in memory queue with distributed network queue
 	- [ ] Rebuilder
 		- [ ] communicate with API to register new builds
 		- [ ] Run as background thread in API
+		- [ ] Webhook support: receive push events from VCS platforms (GitHub, GitLab, etc.) instead of polling
+			- [ ] Research webhook trigger mechanisms for different VCS platforms
 - [x] Create devcontainer
 	- [x] compose file that spins up postgres and a distributed mq of choice
 - [ ] CI/CD
