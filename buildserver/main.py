@@ -16,19 +16,7 @@ from buildserver.database.core import init_db
 
 config = Config()
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    ctx = {}
-    logging.basicConfig()
-    logging.getLogger("uvicorn").handlers.clear()
-    logger = logging.getLogger(f"{__name__}")
-    logger.setLevel(config.LOG_LEVEL)
-    ctx["logger"] = logger
-    yield ctx
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
