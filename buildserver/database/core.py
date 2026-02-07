@@ -38,6 +38,6 @@ class Base(DeclarativeBase):
 
 def init_db():
     """Create all database tables."""
-    from buildserver.api.builds.models import Job, Artifact  # noqa: F401
+    from buildserver.api.jobs.models import Job, Artifact  # noqa: F401
 
     Base.metadata.create_all(bind=engine)

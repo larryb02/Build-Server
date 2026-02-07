@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from buildserver.api.builds.models import Base
+from buildserver.api.jobs.models import Base
 from buildserver.config import Config
 
 config = Config()

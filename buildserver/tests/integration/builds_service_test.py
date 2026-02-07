@@ -1,7 +1,7 @@
 """Integration tests for builds service functions"""
 
-from buildserver.api.builds.models import JobCreate
-from buildserver.api.builds.models import JobStatus
+from buildserver.api.jobs.models import JobCreate
+from buildserver.api.jobs.models import JobStatus
 from buildserver.services.builds import (
     create_job,
     get_job_by_id,
