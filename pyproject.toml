@@ -20,6 +20,10 @@ test = [
     "httpx",
     "asgi-lifespan",
 ]
+docs = [
+    "sphinx",
+    "furo",
+]
 
 [project.urls]
 Homepage = "https://github.com/larryb02/Build-Server"
