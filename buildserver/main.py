@@ -2,7 +2,6 @@
 
 from concurrent.futures import ProcessPoolExecutor
 import logging
-from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
