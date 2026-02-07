@@ -2,7 +2,7 @@
 - ### Major refactors:
     - decoupled buildserver/agent and buildserver/api
         - both now standalone binaries
-    - improved error handling in builder module
+    - improved error handling in builder
     - builder now creates temporary directories when running jobs
 # v0.0.0
 - Proof of concept CI System
