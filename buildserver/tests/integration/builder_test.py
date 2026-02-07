@@ -7,7 +7,9 @@ from buildserver.agent.builder.builder import (
 )
 
 
-# pytestmark = pytest.mark.skip("all tests still WIP")
+pytestmark = pytest.mark.skip(
+    "skip until I create an environment where CI can invoke git."
+)
 
 
 class TestCloneRepo:
