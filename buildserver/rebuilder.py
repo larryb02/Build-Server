@@ -1,67 +1,71 @@
 """
 Rebuilder periodically checks for new commits on a repository
 and triggers new build jobs based on the state of the repository
+
+TODO: Polling is a stopgap. Ideally this gets replaced by webhooks
+triggered from VCS platforms (GitHub, GitLab, etc.) on push events.
+Need to research how each platform handles webhook configuration.
 """
 
 import logging
 import subprocess
+import time
 
-# from buildserver.agent.agent import Agent, JobType
-# from buildserver.services.builds import get_all_unique_builds, register
+import requests
+
 from buildserver.config import Config
+from buildserver.utils import compare_hashes, get_remote_hash
 
 config = Config()
-# from buildserver.api.builds.models import BuildCreate
 
+API_ENDPOINT = "http://localhost:8000"
 SLEEP_FOR = config.SLEEP_FOR
 
 logging.basicConfig()
-logger = logging.getLogger(f"{__name__}")
+logger = logging.getLogger(__name__)
 logger.setLevel(config.LOG_LEVEL)
 
 
-# class Rebuilder:
+def check_for_rebuild(job: dict, api_endpoint: str):
+    """Check if a job's repo has new commits and register a rebuild if so."""
+    repo_url = job["git_repository_url"]
+    local_hash = job.get("commit_hash")
+    if local_hash is None:
+        return
 
-#     def __init__(self):
+    try:
+        remote_hash = get_remote_hash(repo_url)
+    except subprocess.CalledProcessError as e:
+        logger.error("Failed to get remote hash for %s: %s", repo_url, e)
+        return
 
-# async def run(self):
-#     try:
-#         logger.info("Started rebuilder [%d]", id(asyncio.get_running_loop()))
-#         while True:
-#             await asyncio.sleep(SLEEP_FOR)
-#             logger.debug("Checking for new commits")
-#             builds = get_all_unique_builds()
-#             logger.debug("Got builds: %s", str(builds))
-#             for build in builds:
-#                 remote_url = build.git_repository_url
-#                 remote_hash = get_remote_hash(remote_url)
-#                 if not compare_hashes(
-#                     local_hash=build.commit_hash, remote_hash=remote_hash
-#                 ):
-#                     logger.info("%s got new commits. Rebuilding", remote_url)
-#                     await register(BuildCreate(git_repository_url=remote_url))
-#                     await self.agent.add_job(
-#                         JobType.BUILD_PROGRAM, (remote_url, build.build_id)
-#                     )
-#     except Exception as e:
-#         logger.error("Unknown error occurred: %s", e)
-#         raise e
+    if not compare_hashes(local_hash, remote_hash):
+        logger.info("%s has new commits. Rebuilding", repo_url)
+        try:
+            requests.post(
+                f"{api_endpoint}/jobs/register",
+                json={"git_repository_url": repo_url},
+                timeout=5,
+            )
+        except requests.RequestException as e:
+            logger.error("Failed to register rebuild for %s: %s", repo_url, e)
 
 
-def compare_hashes(local_hash: str, remote_hash: str):
-    logger.debug("Local: %s Remote: %s", local_hash, remote_hash)
-    return local_hash == remote_hash
-
-
-def get_remote_hash(remote_url: str) -> str:
-    # NOTE: going to create a command pattern that works like this ->
-    proc = subprocess.run(
-        ["/usr/bin/git", "ls-remote", remote_url, "HEAD"],
-        stdout=subprocess.PIPE,
-        check=True,
-    )
-    # git ls-remote output: ba8d19c10bb14810dbb663ae2455e6964cee0e41	HEAD,
-    # so we only take before the tab character
-    remote_hash = str(proc.stdout.split(b"\t")[0], encoding="utf-8")
-    logger.debug("Got hash for %s: %s", remote_url, remote_hash)
-    return remote_hash
+def run():
+    """Poll for new commits and register rebuild jobs."""
+    logger.info("Started rebuilder")
+    while True:
+        time.sleep(SLEEP_FOR)
+        logger.debug("Checking for new commits")
+        try:
+            resp = requests.get(
+                f"{API_ENDPOINT}/jobs", params={"latest": True}, timeout=5
+            )
+            resp.raise_for_status()
+            jobs = resp.json()
+            logger.debug("Got jobs: %s", jobs)
+            for job in jobs:
+                check_for_rebuild(job, API_ENDPOINT)
+        except requests.RequestException as e:
+            logger.error("Failed to fetch jobs: %s", e)
+            continue

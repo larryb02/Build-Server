@@ -52,6 +52,24 @@ def get_commit_hash(path: Path, logger: logging.Logger) -> str:
     return commit_hash
 
 
+def get_remote_hash(remote_url: str) -> str:
+    proc = subprocess.run(
+        ["/usr/bin/git", "ls-remote", remote_url, "HEAD"],
+        stdout=subprocess.PIPE,
+        check=True,
+    )
+    # git ls-remote output: ba8d19c10bb14810dbb663ae2455e6964cee0e41	HEAD
+    remote_hash = str(proc.stdout.split(b"\t")[0], encoding="utf-8")
+    logger.debug("Got hash for %s: %s", remote_url, remote_hash)
+    return remote_hash
+
+
+def compare_hashes(local_hash: str, remote_hash: str) -> bool:
+    # TODO: handle edge case where None is passed for either hash
+    logger.debug("Local: %s Remote: %s", local_hash, remote_hash)
+    return local_hash == remote_hash
+
+
 def cleanup_build_files(build_path: Path):
     """
     Cleanup a build directory after a build has completed

@@ -1,5 +1,6 @@
 import logging
 import subprocess
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -57,6 +58,40 @@ class TestGetCommitHash:
         log = logging.getLogger("test")
         with pytest.raises(OSError):
             utils.get_commit_hash(tmp_path / "nonexistent", log)
+
+
+class TestGetRemoteHash:
+
+    @patch("buildserver.utils.subprocess.run")
+    def test_returns_hash(self, mock_run):
+        expected_hash = "a" * 40
+        mock_run.return_value = MagicMock(stdout=f"{expected_hash}\tHEAD".encode())
+
+        result = utils.get_remote_hash("git@github.com:user/repo.git")
+
+        assert result == expected_hash
+        mock_run.assert_called_once_with(
+            ["/usr/bin/git", "ls-remote", "git@github.com:user/repo.git", "HEAD"],
+            stdout=subprocess.PIPE,
+            check=True,
+        )
+
+    @patch("buildserver.utils.subprocess.run")
+    def test_raises_on_failure(self, mock_run):
+        mock_run.side_effect = subprocess.CalledProcessError(1, "git")
+
+        with pytest.raises(subprocess.CalledProcessError):
+            utils.get_remote_hash("git@github.com:user/repo.git")
+
+
+class TestCompareHashes:
+
+    def test_matching_hashes(self):
+        hash = "a" * 40
+        assert utils.compare_hashes(hash, hash) is True
+
+    def test_different_hashes(self):
+        assert utils.compare_hashes("a" * 40, "b" * 40) is False
 
 
 class TestCleanupBuildFiles:

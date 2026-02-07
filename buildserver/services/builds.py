@@ -5,15 +5,16 @@ import logging
 from sqlalchemy import insert, or_, select, update
 
 from buildserver.config import Config
-from buildserver.database.core import DbSession, create_session
-from buildserver.api.builds.models import JobStatus
-from buildserver.api.builds.models import (
+from buildserver.database.core import DbSession
+from buildserver.api.jobs.models import JobStatus
+from buildserver.api.jobs.models import (
     Artifact,
     ArtifactCreate,
     Job,
     JobCreate,
     JobRead,
 )
+from buildserver.utils import get_remote_hash
 from buildserver.rmq.rmq import RabbitMQProducer
 
 config = Config()
@@ -43,11 +44,15 @@ def get_all_jobs(dbsession: DbSession):
     return records
 
 
-def create_job(job: JobCreate, dbsession: DbSession):
+def create_job(job: JobCreate, dbsession: DbSession, commit_hash: str | None = None):
     """Insert a new job record into the database."""
     stmt = (
         insert(Job)
-        .values(git_repository_url=job.git_repository_url, job_status=JobStatus.QUEUED)
+        .values(
+            git_repository_url=job.git_repository_url,
+            job_status=JobStatus.QUEUED,
+            commit_hash=commit_hash,
+        )
         .returning(
             Job.git_repository_url,
             Job.job_id,
@@ -65,7 +70,8 @@ def create_job(job: JobCreate, dbsession: DbSession):
 
 def register_job(repo: JobCreate, dbsession: DbSession) -> JobRead:
     """Create a new job and publish it to the build queue."""
-    job = JobRead(**dict(create_job(repo, dbsession)._mapping))
+    commit_hash = get_remote_hash(repo.git_repository_url)
+    job = JobRead(**dict(create_job(repo, dbsession, commit_hash)._mapping))
     publisher = RabbitMQProducer()
     publisher.publish("build_jobs", job.model_dump_json().encode())
     return job
@@ -121,14 +127,17 @@ def update_job_status(
     return JobRead(**record._mapping)
 
 
-def get_all_unique_jobs() -> list[JobRead]:
+def get_all_unique_jobs(dbsession: DbSession) -> list[JobRead]:
     """
     Retrieve the most recent job for each unique repository URL.
 
     A job is considered unique if its git_repository_url differs from others.
     Only includes jobs with SUCCEEDED or FAILED status.
+
+    TODO: service functions return data inconsistently — some return raw rows
+    (get_all_jobs), some return JobRead models (get_all_unique_jobs, get_job_by_id).
+    Standardize on one approach.
     """
-    db_session = create_session()
     stmt = (
         select(*Job.__table__.columns)
         .distinct(Job.git_repository_url)
@@ -140,7 +149,5 @@ def get_all_unique_jobs() -> list[JobRead]:
             )
         )
     )
-    jobs = db_session.execute(stmt).fetchall()
-    jobs = [JobRead(**job._mapping) for job in jobs]
-    db_session.close()
-    return jobs
+    jobs = dbsession.execute(stmt).fetchall()
+    return [JobRead(**job._mapping) for job in jobs]
