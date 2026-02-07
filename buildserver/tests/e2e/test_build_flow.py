@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from buildserver.models.jobs import JobStatus
+from buildserver.api.builds.models import JobStatus
 
 TEST_REPO = "git@github.com:larryb02/test.git"
 POLL_INTERVAL = 1  # seconds
