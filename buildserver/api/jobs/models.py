@@ -78,4 +78,4 @@ class Job(Base):
         String(40), nullable=True
     )  # add this after successful build
     job_status: Mapped[str] = mapped_column(Enum(JobStatus, name="jobstatus"))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)

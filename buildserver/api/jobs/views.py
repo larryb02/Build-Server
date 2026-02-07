@@ -2,16 +2,16 @@
 
 import logging
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.exceptions import RequestValidationError
 
-from buildserver.api.builds.models import JobCreate, JobRead
+from buildserver.api.jobs.models import JobCreate, JobRead, JobStatusUpdate
 from buildserver.database.core import DbSession
-from buildserver.api.builds.models import JobStatusUpdate
 from buildserver.services.builds import (
     register_job,
     get_job_by_id,
     get_all_jobs,
+    get_all_unique_jobs,
     update_job_status,
 )
 from buildserver.config import Config
@@ -43,9 +43,16 @@ def register(repo: JobCreate, dbsession: DbSession):
 
 
 @router.get("", response_model=list[JobRead])
-async def get_jobs(dbsession: DbSession) -> list[JobRead]:
+async def get_jobs(
+    dbsession: DbSession,
+    latest: bool = Query(
+        False, description="Return only the latest job per repository"
+    ),
+) -> list[JobRead]:
     """Retrieve all job records."""
     try:
+        if latest:
+            return get_all_unique_jobs(dbsession)
         jobs = list(job._mapping for job in get_all_jobs(dbsession))
     except Exception as e:
         logger.error(f"Failed to get jobs: {e}")
