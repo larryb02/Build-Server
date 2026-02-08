@@ -5,23 +5,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
-from buildserver.agent.builder.builder import run as run_build, BuildError, CloneError
-from buildserver.agent.types import Job, JobStatus
-from buildserver.config import Config
-from buildserver.rmq.rmq import RabbitMQConsumer
-
-config = Config()
+from runner.builder.builder import run as run_build, BuildError, CloneError
+from runner.types import Job, JobStatus
+from runner.config import LOG_LEVEL, APISERVER_HOST
+from runner.rmq.rmq import RabbitMQConsumer
 
 logging.basicConfig()
-logger = logging.getLogger(f"{__name__}")
-logger.setLevel(config.LOG_LEVEL)
+logger = logging.getLogger(__name__)
+logger.setLevel(LOG_LEVEL)
 
-TIMEOUT = config.TIMEOUT
 MAX_WORKERS = 4  # TODO: move to config
-
 BUILD_QUEUE = "build_jobs"
-# NOTE: hack for now will store in config once agent becomes separate binary
-API_ENDPOINT = "http://localhost:8000"
 
 
 class Agent:
@@ -74,7 +68,7 @@ class Agent:
         # from here agent needs to update status will just make calls to API for now
         # NOTE: for first iteration this is fine, ideally want to stream here
         requests.patch(
-            f"{API_ENDPOINT}/jobs/{job.job_id}",
+            f"{APISERVER_HOST}/jobs/{job.job_id}",
             json={"job_status": JobStatus.RUNNING},
             timeout=5,
         )
@@ -87,7 +81,7 @@ class Agent:
             logger.error("Job %s failed: %s", job.job_id, e)
 
         requests.patch(
-            f"{API_ENDPOINT}/jobs/{job.job_id}",
+            f"{APISERVER_HOST}/jobs/{job.job_id}",
             json={"job_status": status},
             timeout=5,
         )

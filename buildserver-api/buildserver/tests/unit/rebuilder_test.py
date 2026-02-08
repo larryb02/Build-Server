@@ -17,7 +17,7 @@ class TestCheckForRebuild:
             "commit_hash": "a" * 40,
         }
 
-        rebuilder.check_for_rebuild(job, "http://localhost:8000")
+        rebuilder.check_for_rebuild(job)
 
         mock_requests.post.assert_called_once_with(
             "http://localhost:8000/jobs/register",
@@ -35,7 +35,7 @@ class TestCheckForRebuild:
             "commit_hash": hash,
         }
 
-        rebuilder.check_for_rebuild(job, "http://localhost:8000")
+        rebuilder.check_for_rebuild(job)
 
         mock_requests.post.assert_not_called()
 
@@ -47,7 +47,7 @@ class TestCheckForRebuild:
             "commit_hash": None,
         }
 
-        rebuilder.check_for_rebuild(job, "http://localhost:8000")
+        rebuilder.check_for_rebuild(job)
 
         mock_get_remote_hash.assert_not_called()
         mock_requests.post.assert_not_called()
@@ -63,7 +63,7 @@ class TestCheckForRebuild:
             "commit_hash": "a" * 40,
         }
 
-        rebuilder.check_for_rebuild(job, "http://localhost:8000")
+        rebuilder.check_for_rebuild(job)
 
         mock_requests.post.assert_not_called()
 
@@ -81,4 +81,4 @@ class TestCheckForRebuild:
         }
 
         # should not raise
-        rebuilder.check_for_rebuild(job, "http://localhost:8000")
+        rebuilder.check_for_rebuild(job)

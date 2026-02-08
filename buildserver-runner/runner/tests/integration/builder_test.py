@@ -1,6 +1,6 @@
 import pytest
 
-from buildserver.agent.builder.builder import (
+from runner.builder.builder import (
     clone_repo,
     run,
     CloneError,

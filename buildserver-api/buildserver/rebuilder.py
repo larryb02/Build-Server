@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(config.LOG_LEVEL)
 
 
-def check_for_rebuild(job: dict, api_endpoint: str):
+def check_for_rebuild(job: dict):
     """Check if a job's repo has new commits and register a rebuild if so."""
     repo_url = job["git_repository_url"]
     local_hash = job.get("commit_hash")
@@ -43,7 +43,7 @@ def check_for_rebuild(job: dict, api_endpoint: str):
         logger.info("%s has new commits. Rebuilding", repo_url)
         try:
             requests.post(
-                f"{api_endpoint}/jobs/register",
+                f"{API_ENDPOINT}/jobs/register",
                 json={"git_repository_url": repo_url},
                 timeout=5,
             )
@@ -65,7 +65,7 @@ def run():
             jobs = resp.json()
             logger.debug("Got jobs: %s", jobs)
             for job in jobs:
-                check_for_rebuild(job, API_ENDPOINT)
+                check_for_rebuild(job)
         except requests.RequestException as e:
             logger.error("Failed to fetch jobs: %s", e)
             continue

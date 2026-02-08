@@ -6,9 +6,9 @@ from unittest.mock import patch
 
 import pytest
 
-from buildserver.agent.agent import Agent, BUILD_QUEUE
-from buildserver.agent.types import JobStatus
-from buildserver.rmq.rmq import RabbitMQProducer
+from runner.agent import Agent, BUILD_QUEUE
+from runner.types import JobStatus
+from runner.rmq.rmq import RabbitMQProducer
 
 
 @pytest.fixture()
@@ -44,8 +44,8 @@ class TestJobSubmission:
 
     def test_agent_receives_and_executes_job(self, run_agent, producer):
         with (
-            patch("buildserver.agent.agent.run_build") as mock_run_build,
-            patch("buildserver.agent.agent.requests"),
+            patch("runner.agent.run_build") as mock_run_build,
+            patch("runner.agent.requests"),
         ):
             mock_run_build.return_value = None
 
@@ -56,8 +56,8 @@ class TestJobSubmission:
 
     def test_agent_executes_multiple_jobs(self, run_agent, producer):
         with (
-            patch("buildserver.agent.agent.run_build") as mock_run_build,
-            patch("buildserver.agent.agent.requests"),
+            patch("runner.agent.run_build") as mock_run_build,
+            patch("runner.agent.requests"),
         ):
             mock_run_build.return_value = None
 

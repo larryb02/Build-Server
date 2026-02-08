@@ -7,14 +7,12 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from buildserver import utils
-from buildserver.config import Config
-
-config = Config()
+from runner import utils
+from runner.config import LOG_LEVEL
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(config.LOG_LEVEL)
+logger.setLevel(LOG_LEVEL)
 
 BUILD_CMD = "make"
 

@@ -3,8 +3,7 @@
 from sqlalchemy.orm import Session
 
 from buildserver.database.core import Base, engine
-import buildserver.builds.models
-import buildserver.repository.models
+import buildserver.api.jobs.models  # noqa: F401
 
 with Session(engine) as session:
     session.begin()
