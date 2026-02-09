@@ -69,7 +69,7 @@ Handles job execution.
 Background process that polls for new commits on registered repositories and triggers rebuilds via the API.
 
 !!! NOTE
-    Plans to convert this to a webhook
+    Plans to convert this into a webhook
 
 ### Artifact Store
 Structured directory that stores artifacts with the following pattern: `<commit_hash>/artifact`
