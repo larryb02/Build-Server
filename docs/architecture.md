@@ -18,12 +18,12 @@ graph LR
     RabbitMQ -->|consume job| Runner
 
     subgraph Runner
-        Runner[Agent]
+        Agent[Agent]
         Builder[Builder]
     end
 
-    Runner --> Builder
-    Runner -->API
+    Agent --> Builder
+    Agent --> API
 ```
 
 ## Job Lifecycle
