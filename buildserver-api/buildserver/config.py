@@ -11,7 +11,7 @@ LOG_LEVEL = config("LOG_LEVEL", default=logging.INFO)
 
 DATABASE_PORT = config("DATABASE_PORT", default=5432, cast=int)
 DATABASE_USER = config("DATABASE_USER", default="postgres")
-DATABASE_PASSWORD = config("DATABASE_PASSWORD", default="postgres", cast=Secret)
+DATABASE_PASSWORD = config("DATABASE_PASSWORD", default="example", cast=Secret)
 DATABASE_HOSTNAME = config("DATABASE_HOSTNAME", default="localhost")
 DATABASE_NAME = config("DATABASE_NAME", default="postgres")
 DATABASE_URI = (
