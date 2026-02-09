@@ -39,5 +39,5 @@
 - [ ] Deployment
 - [ ] Monitoring
 - [ ] Documentation
-	- [ ] Create website for documentation
-		- [ ] github pages could be good for this
+	- [x] Create website for documentation
+	- [ ] Update Getting Started
