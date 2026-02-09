@@ -5,14 +5,13 @@
 		- [x] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
 		- [x] Need to fail fast
 		- [x] Fix error handling ASAP.
-	- [ ] Agent
-		- [ ] Decoupling initiative
-			- [x] clear start semantics
-			- [x] clear stop
-			- [x] Communicate with api over HTTP
-			- [x] Move out of buildserver
-			- [x] Create CLI
-			- [ ] Update utils.py (move functions that belong to buildserver-runner out of buildserver)
+	- [x] Agent
+		- [x] clear start semantics
+		- [x] clear stop
+		- [x] Communicate with api over HTTP
+		- [x] Move out of buildserver
+		- [x] Create CLI
+		- [ ] Update utils.py (move functions that belong to buildserver-runner out of buildserver)
 		- [x] Replace in memory queue with distributed network queue
 	- [ ] Scheduler service (0.1.x)
 		- [ ] Agent registration / heartbeat mechanism
