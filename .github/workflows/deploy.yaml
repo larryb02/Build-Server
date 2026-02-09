@@ -6,7 +6,6 @@ on:
     paths:
       - "buildserver-api/**"
       - "buildserver-runner/**"
-      - "infra/docker/**"
   workflow_dispatch:
 
 env:
