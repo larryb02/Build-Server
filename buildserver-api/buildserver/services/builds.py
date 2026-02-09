@@ -4,7 +4,7 @@ import logging
 
 from sqlalchemy import insert, or_, select, update
 
-from buildserver.config import Config
+from buildserver.config import LOG_LEVEL
 from buildserver.database.core import DbSession
 from buildserver.api.jobs.models import JobStatus
 from buildserver.api.jobs.models import (
@@ -17,12 +17,9 @@ from buildserver.api.jobs.models import (
 from buildserver.utils import get_remote_hash
 from buildserver.rmq.rmq import RabbitMQProducer
 
-config = Config()
-
-
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(config.LOG_LEVEL)
+logger.setLevel(LOG_LEVEL)
 
 
 def get_job_by_id(dbsession: DbSession, job_id: int) -> JobRead | None:

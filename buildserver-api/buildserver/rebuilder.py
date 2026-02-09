@@ -13,17 +13,14 @@ import time
 
 import requests
 
-from buildserver.config import Config
+from buildserver.config import LOG_LEVEL, SLEEP_FOR
 from buildserver.utils import compare_hashes, get_remote_hash
 
-config = Config()
-
 API_ENDPOINT = "http://localhost:8000"
-SLEEP_FOR = config.SLEEP_FOR
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(config.LOG_LEVEL)
+logger.setLevel(LOG_LEVEL)
 
 
 def check_for_rebuild(job: dict):

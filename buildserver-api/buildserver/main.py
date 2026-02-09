@@ -9,11 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from buildserver.api.jobs.views import router as build_router
 from buildserver.rebuilder import run as run_rebuilder
 
-from buildserver.config import Config
 from buildserver.database.core import init_db
-
-
-config = Config()
 
 app = FastAPI()
 

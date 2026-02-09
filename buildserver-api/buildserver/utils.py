@@ -8,13 +8,11 @@ import subprocess
 import os
 import shutil
 
-from buildserver.config import Config
-
-config = Config()
+from buildserver.config import LOG_LEVEL
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(config.LOG_LEVEL)
+logger.setLevel(LOG_LEVEL)
 
 
 def get_dir_name(url: str):

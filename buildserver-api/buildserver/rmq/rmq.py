@@ -8,13 +8,17 @@ import pika
 import pika.channel
 import pika.spec
 
-from buildserver.config import Config
-
-config = Config()
+from buildserver.config import (
+    LOG_LEVEL,
+    RABBITMQ_HOST,
+    RABBITMQ_PORT,
+    RABBITMQ_USER,
+    RABBITMQ_PASSWORD,
+)
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(config.LOG_LEVEL)
+logger.setLevel(LOG_LEVEL)
 
 
 class RabbitMQConnection:
@@ -28,12 +32,10 @@ class RabbitMQConnection:
     @staticmethod
     def _get_connection_parameters() -> pika.ConnectionParameters:
         """Build connection parameters from application config."""
-        credentials = pika.PlainCredentials(
-            config.RABBITMQ_USER, str(config.RABBITMQ_PASSWORD)
-        )
+        credentials = pika.PlainCredentials(RABBITMQ_USER, str(RABBITMQ_PASSWORD))
         return pika.ConnectionParameters(
-            host=config.RABBITMQ_HOST,
-            port=config.RABBITMQ_PORT,
+            host=RABBITMQ_HOST,
+            port=RABBITMQ_PORT,
             credentials=credentials,
         )
 

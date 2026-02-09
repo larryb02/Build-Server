@@ -14,10 +14,10 @@ from buildserver.services.builds import (
     get_all_unique_jobs,
     update_job_status,
 )
-from buildserver.config import Config
+from buildserver.config import LOG_LEVEL
 
 logger = logging.getLogger(__name__)
-logger.setLevel(Config().LOG_LEVEL)
+logger.setLevel(LOG_LEVEL)
 
 router = APIRouter(prefix="/jobs")
 
