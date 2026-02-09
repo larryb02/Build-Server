@@ -18,7 +18,7 @@
 ### IaC
 - Terraform
   - Provisioning EC2 instances
-  - Bootstrapping Kubernetes clusters
+  - Deploying Kubernetes clusters
   - Networking (VPC, security groups, etc.)
 
 ### Containerization

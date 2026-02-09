@@ -1,31 +1,85 @@
 # Architecture
 
-## API
+## Overview
+
+``` mermaid
+graph LR
+    Client([Client]) -->|REST| API
+
+    subgraph Control Plane
+        API[APIServer]
+        Rebuilder[Rebuilder]
+    end
+
+    API -->|publish job| RabbitMQ[(RabbitMQ)]
+    API -->|read/write| PostgreSQL[(PostgreSQL)]
+    Rebuilder -->API
+
+    RabbitMQ -->|consume job| Runner
+
+    subgraph Runner
+        Runner[Agent]
+        Builder[Builder]
+    end
+
+    Runner --> Builder
+    Runner -->API
+```
+
+## Job Lifecycle
+
+``` mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as API
+    participant Q as RabbitMQ
+    participant R as Runner Agent
+    participant G as Git Remote
+
+    C->>A: POST /jobs/register
+    A->>A: Create job record (QUEUED)
+    A->>Q: Publish job to build_jobs queue
+    A->>C: 200 OK (job metadata)
+
+    R->>Q: Consume job
+    R->>A: PATCH /jobs/{id} (RUNNING)
+    R->>G: Clone repository
+    R->>R: Execute build
+    alt Build succeeds
+        R->>A: PATCH /jobs/{id} (SUCCEEDED)
+    else Build fails
+        R->>A: PATCH /jobs/{id} (FAILED)
+    end
+```
+
+## Components
+
+### API
 REST API that exposes an interface for a client to communicate with the build server system.
 
 Built using FastAPI framework.
 
-## Build Agent
+### Runner
 Long running process that consumes jobs from a message queue and executes builds.
 
-The build agent:
+### Builder
+Handles job execution.
 
-- Maintains connection to RabbitMQ
-- Executes build jobs in isolated temp directories
-- Reports status back to API via HTTP
+### Rebuilder
+Background process that polls for new commits on registered repositories and triggers rebuilds via the API.
 
-## Builder
-Handles cloning repositories and running build commands.
+!!! NOTE
+    Plans to convert this to a webhook
 
-## Rebuilder
-Background task that checks for new commits for any builds known to the server.
-
-## Artifact Repository
+### Artifact Store
 Structured directory that stores artifacts with the following pattern: `<commit_hash>/artifact`
 
-Ideally the artifact repository should be able to exist locally, on a file server, or on a cloud based object store such as Amazon S3 (WIP).
+Ideally the artifact store should be able to exist locally, on a file server, or on a cloud based object store such as Amazon S3 (WIP).
 
-## Database
+!!! NOTE
+    Artifact Storage will undergo a major overhaul and will not be included in v0.1.x
+
+### Database
 PostgreSQL server with tables:
 
 - **Job** - Stores metadata about jobs such as status, repository URL, and commit hash
