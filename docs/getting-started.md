@@ -6,6 +6,9 @@
 - PostgreSQL
 - RabbitMQ
 
+!!! Warning
+    These instructions are out of date
+
 ## Environment Variables
 
 Store this `.env` in `/buildserver`:
