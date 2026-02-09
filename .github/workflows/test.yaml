@@ -8,7 +8,6 @@ on:
 jobs:
   check-with-pre-commit:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,7 +20,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,30 +28,20 @@ jobs:
       - name: Install dependencies
         run: pip install pylint
       - name: lint
-        run: pylint --exit-zero buildserver/
+        run: pylint --exit-zero buildserver/ buildserver-runner/
 
-  unit-test:
+  test:
     runs-on: ubuntu-latest
     needs: [lint, check-with-pre-commit]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: |
-          pip install --upgrade setuptools pip; \
-          pip install pytest; \
-          pip install -e .[test]
-      - name: Create env file
-        run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
-      - name: Run unit tests
-        run: pytest -xv buildserver/tests/unit
-
-  integration-test:
-    runs-on: ubuntu-latest
-    needs: [lint, check-with-pre-commit]
+    strategy:
+      matrix:
+        package:
+          - name: buildserver
+            path: buildserver
+            test-path: buildserver/src/buildserver/tests
+          - name: buildserver-runner
+            path: buildserver-runner
+            test-path: buildserver-runner/runner/tests
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -66,33 +54,10 @@ jobs:
       - name: Create env file
         run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
       - name: Install dependencies
+        working-directory: ${{ matrix.package.path }}
         run: |
           pip install --upgrade setuptools pip; \
           pip install pytest; \
           pip install -e .[test]
-      - name: Run integration tests
-        run: pytest -xv buildserver/tests/integration
-
-  e2e-test:
-    runs-on: ubuntu-latest
-    needs: [lint, check-with-pre-commit]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: docker/setup-docker-action@v4
-      - name: Setup external services
-        run: |
-          docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=example postgres; \
-          docker run --rm -d -p 5672:5672 rabbitmq
-      - name: Create env file
-        run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
-      - name: Install dependencies
-        run: |
-          pip install --upgrade setuptools pip; \
-          pip install pytest; \
-          pip install -e .[test]
-      - run: mkdir ./build # hack until build dir becomes ephemeral
-      - name: Run e2e tests
-        run: pytest -xv buildserver/tests/e2e
+      - name: Run tests (${{ matrix.package.name }})
+        run: pytest -xv ${{ matrix.package.test-path }}
