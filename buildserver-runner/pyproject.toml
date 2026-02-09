@@ -9,7 +9,7 @@ dependencies = [
     "pika",
     "requests",
     "typer",
-    "pydantic-settings",
+    "starlette",
 ]
 
 [project.optional-dependencies]
