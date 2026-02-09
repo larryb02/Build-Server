@@ -10,6 +10,7 @@ dependencies = [
     "requests",
     "typer",
     "starlette",
+    "pydantics",
 ]
 
 [project.optional-dependencies]
