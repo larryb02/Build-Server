@@ -215,5 +215,6 @@ hello/
 # ide specific
 .vscode/
 
-#macos.
+# misc.
 .DS_Store
+.local/
