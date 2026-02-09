@@ -55,4 +55,4 @@ jobs:
           pip install pytest; \
           pip install -e .[test]
       - name: Run tests
-        run: pytest -xv buildserver/src/buildserver/tests
+        run: pytest -xv buildserver-api/buildserver/tests
