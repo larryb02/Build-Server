@@ -1,0 +1,58 @@
+name: Buildserver API
+
+on:
+  push:
+    paths:
+      - "buildserver/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "buildserver/**"
+
+jobs:
+  check-with-pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install pre-commit
+      - name: Check with pre-commit
+        run: pre-commit run --all-files
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install pylint
+      - name: lint
+        run: pylint --exit-zero buildserver/
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [lint, check-with-pre-commit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Setup external services
+        run: |
+          docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=example postgres; \
+          docker run --rm -d -p 5672:5672 rabbitmq
+      - name: Create env file
+        run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
+      - name: Install dependencies
+        working-directory: buildserver
+        run: |
+          pip install --upgrade setuptools pip; \
+          pip install pytest; \
+          pip install -e .[test]
+      - name: Run tests
+        run: pytest -xv buildserver/src/buildserver/tests

@@ -1,9 +1,13 @@
-name: Tests
+name: Buildserver Runner
 
 on:
   push:
+    paths:
+      - "buildserver-runner/**"
   pull_request:
     branches: [main]
+    paths:
+      - "buildserver-runner/**"
 
 jobs:
   check-with-pre-commit:
@@ -28,20 +32,11 @@ jobs:
       - name: Install dependencies
         run: pip install pylint
       - name: lint
-        run: pylint --exit-zero buildserver/ buildserver-runner/
+        run: pylint --exit-zero buildserver-runner/
 
   test:
     runs-on: ubuntu-latest
     needs: [lint, check-with-pre-commit]
-    strategy:
-      matrix:
-        package:
-          - name: buildserver
-            path: buildserver
-            test-path: buildserver/src/buildserver/tests
-          - name: buildserver-runner
-            path: buildserver-runner
-            test-path: buildserver-runner/runner/tests
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -49,15 +44,14 @@ jobs:
           python-version: "3.12"
       - name: Setup external services
         run: |
-          docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=example postgres; \
           docker run --rm -d -p 5672:5672 rabbitmq
       - name: Create env file
         run: echo "${{ secrets.DEV_ENV_FILE }}" > .env
       - name: Install dependencies
-        working-directory: ${{ matrix.package.path }}
+        working-directory: buildserver-runner
         run: |
           pip install --upgrade setuptools pip; \
           pip install pytest; \
           pip install -e .[test]
-      - name: Run tests (${{ matrix.package.name }})
-        run: pytest -xv ${{ matrix.package.test-path }}
+      - name: Run tests
+        run: pytest -xv buildserver-runner/runner/tests
