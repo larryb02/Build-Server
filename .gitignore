@@ -214,3 +214,6 @@ hello/
 
 # ide specific
 .vscode/
+
+#macos.
+.DS_Store
