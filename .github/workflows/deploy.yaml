@@ -23,16 +23,12 @@ jobs:
         include:
           - name: buildserver-api
             dockerfile: infra/docker/api.Dockerfile
-            env_secret: API_ENV_FILE
             version_file: buildserver-api/version.txt
           - name: buildserver-runner
             dockerfile: infra/docker/runner.Dockerfile
-            env_secret: RUNNER_ENV_FILE
             version_file: buildserver-runner/version.txt
     steps:
       - uses: actions/checkout@v4
-      - name: Create env file
-        run: echo "${{ secrets[matrix.env_secret] }}" > .env
       - name: Get version
         run: echo "VERSION=$(cat ${{ matrix.version_file }})" >> "$GITHUB_ENV"
       - uses: docker/login-action@v3

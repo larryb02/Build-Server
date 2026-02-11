@@ -1,6 +1,7 @@
 - [ ] Refactors
 	- [ ] Move services back into api layer
 	- [ ] Aim for fine grained exception handling
+	- [ ] Config: support ENV variables with CLI arg overrides (remove .env file dependency)
 	- [x] Builder
 		- [x] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
 		- [x] Need to fail fast

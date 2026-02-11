@@ -6,8 +6,9 @@ RUN pip install --target /app/dist .
 
 FROM python:3.12.12-slim
 
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/dist /app/dist
-COPY .env .env
 ENV PYTHONPATH=/app/dist
 ENV PATH=/app/dist/bin:$PATH
 
