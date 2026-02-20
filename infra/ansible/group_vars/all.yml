@@ -1,0 +1,24 @@
+---
+namespace: buildserver
+
+# buildserver-api
+api_image: ghcr.io/larryb02/buildserver-api:latest
+api_port: 8000
+api_replicas: 1
+
+# buildserver-runner
+runner_image: ghcr.io/larryb02/buildserver-runner:latest
+runner_replicas: 1
+
+# Database
+database_hostname: postgres
+database_port: "5432"
+database_user: postgres
+database_password: example
+database_name: postgres
+
+# RabbitMQ
+rabbitmq_host: rabbitmq
+rabbitmq_port: "5672"
+rabbitmq_user: guest
+rabbitmq_password: guest

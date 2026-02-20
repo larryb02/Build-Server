@@ -1,0 +1,72 @@
+---
+- name: Deploy buildserver-api
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: buildserver-api
+        namespace: "{{ namespace }}"
+        labels:
+          app: buildserver-api
+      spec:
+        replicas: "{{ api_replicas }}"
+        selector:
+          matchLabels:
+            app: buildserver-api
+        template:
+          metadata:
+            labels:
+              app: buildserver-api
+          spec:
+            containers:
+              - name: buildserver-api
+                image: "{{ api_image }}"
+                ports:
+                  - containerPort: "{{ api_port }}"
+                envFrom:
+                  - configMapRef:
+                      name: buildserver-config
+                  - secretRef:
+                      name: buildserver-secrets
+
+- name: Create buildserver-api Service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: buildserver-api
+        namespace: "{{ namespace }}"
+      spec:
+        type: ClusterIP
+        selector:
+          app: buildserver-api
+        ports:
+          - port: "{{ api_port }}"
+            targetPort: "{{ api_port }}"
+
+- name: Create buildserver-api Ingress
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: buildserver-api
+        namespace: "{{ namespace }}"
+        annotations:
+          kubernetes.io/ingress.class: traefik
+      spec:
+        rules:
+          - http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: buildserver-api
+                      port:
+                        number: "{{ api_port }}"

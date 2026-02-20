@@ -3,9 +3,7 @@
     "service": "dev",
     "workspaceFolder": "/workspace",
     "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": { "moby": false},
-        "ghcr.io/devcontainers/features/terraform:1": {},
-        "ghcr.io/devcontainers-extra/features/ansible": {}
+        "ghcr.io/devcontainers/features/docker-in-docker:2": { "moby": false}
     },
     "customizations": {
         "vscode": {
@@ -26,5 +24,5 @@
     "remoteEnv": {
         "PYTHONPATH": "${containerWorkspaceFolder}:${containerEnv:PYTHONPATH}"
     },
-    "postCreateCommand": "pip install -e ./buildserver-api[test] -e ./buildserver-runner[test] && pip install pylint pre-commit && pre-commit install"
+    "postCreateCommand": "bash .devcontainer/post-create.sh"
 }

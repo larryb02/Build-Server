@@ -1,0 +1,39 @@
+---
+- name: Create namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+    state: present
+
+- name: Create ConfigMap
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: buildserver-config
+        namespace: "{{ namespace }}"
+      data:
+        DATABASE_HOSTNAME: "{{ database_hostname }}"
+        DATABASE_PORT: "{{ database_port }}"
+        DATABASE_USER: "{{ database_user }}"
+        DATABASE_NAME: "{{ database_name }}"
+        RABBITMQ_HOST: "{{ rabbitmq_host }}"
+        RABBITMQ_PORT: "{{ rabbitmq_port }}"
+        RABBITMQ_USER: "{{ rabbitmq_user }}"
+
+- name: Create Secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: buildserver-secrets
+        namespace: "{{ namespace }}"
+      type: Opaque
+      data:
+        DATABASE_PASSWORD: "{{ database_password | b64encode }}"
+        RABBITMQ_PASSWORD: "{{ rabbitmq_password | b64encode }}"

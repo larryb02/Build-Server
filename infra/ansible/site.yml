@@ -1,0 +1,10 @@
+---
+- name: Deploy Build Server to Kubernetes
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  roles:
+    - common
+    - buildserver-api
+    - buildserver-runner

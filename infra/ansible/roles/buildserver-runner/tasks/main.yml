@@ -1,0 +1,32 @@
+---
+- name: Deploy buildserver-runner
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: buildserver-runner
+        namespace: "{{ namespace }}"
+        labels:
+          app: buildserver-runner
+      spec:
+        replicas: "{{ runner_replicas }}"
+        selector:
+          matchLabels:
+            app: buildserver-runner
+        template:
+          metadata:
+            labels:
+              app: buildserver-runner
+          spec:
+            containers:
+              - name: buildserver-runner
+                image: "{{ runner_image }}"
+                env:
+                  - APISERVER_HOST: "{{ apiserver_host }}"
+                envFrom:
+                  - configMapRef:
+                      name: buildserver-config
+                  - secretRef:
+                      name: buildserver-secrets
