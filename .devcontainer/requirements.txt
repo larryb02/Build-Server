@@ -1,0 +1,6 @@
+ansible
+# dependencies for kubernetes.core module
+kubernetes >= 24.2.0
+PyYAML >= 3.11
+jsonpatch
+ansible-dev-tools
