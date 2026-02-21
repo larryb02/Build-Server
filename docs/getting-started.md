@@ -1,74 +1,49 @@
 # Getting Started
 
-## Requirements
+## Running Locally with k3d
 
-- Python 3.12+
+k3d is used to run a lightweight Kubernetes cluster locally inside Docker. This allows you to deploy and test the full Build Server stack on your machine without any cloud infrastructure.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [VS Code](https://code.visualstudio.com/) with the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension
+
+## Setup
+
+Clone the repository and open it in VS Code. When prompted, reopen in the dev container. The container will automatically:
+
+- Install `k3d` and `kubectl`
+- Create a local k3d cluster (`dev`) with 2 agent nodes
+- Install Ansible and its dependencies (`ansible`, `kubernetes`, `PyYAML`, `jsonpatch`, `ansible-dev-tools`)
+- Install buildserver-api and buildserver-runner packages
+
+If you prefer not to use the dev container, install the above dependencies manually.
+
+### Deploying to the Cluster
+
+Once inside the dev container, deploy all services to the local k3d cluster using Ansible:
+
+```bash
+ansible-playbook infra/ansible/site.yml
+```
+
+This deploys the following into the `buildserver` namespace:
+
 - PostgreSQL
 - RabbitMQ
+- buildserver-api
+- buildserver-runner
 
-!!! Warning
-    These instructions are out of date
+### Submitting a Job
 
-## Environment Variables
-
-Store this `.env` in `/buildserver`:
-
-```
-DATABASE_PORT=
-DATABASE_HOSTNAME=
-DATABASE_USER=
-DATABASE_PASSWORD=
-DATABASE_NAME=
-
-LOG_LEVEL=DEBUG
-
-RABBITMQ_HOST=
-RABBITMQ_PORT=
-RABBITMQ_USER=
-RABBITMQ_PASSWORD=
-
-ARTIFACT_REPOSITORY_ROOT=
-```
-
-## Installation
-
-Clone repository:
+With the cluster running, submit a repository for building via the API:
 
 ```bash
-git clone git@github.com:larryb02/Build-Server.git
-```
-
-Setup a virtual environment:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-Install package:
-
-```bash
-pip install -e .
-```
-
-## Running the API
-
-```bash
-buildserver
-```
-
-## Running the Agent
-
-```bash
-buildserver-agent
-```
-
-## Kicking Off Builds
-
-To register repositories for builds, use the REST API:
-
-```bash
-curl -X POST http://localhost:8000/jobs/register \
+curl -X POST http://<cluster-ip>/jobs/register \
   -H "Content-Type: application/json" \
-  -d '{"git_repository_url": "git@github.com:user/repo.git"}'
+  -d '{"git_repository_url": "https://github.com/user/repo.git"}'
 ```
+
+!!! warning
+    All builds will currently fail as `make` is not installed in the runner container. User-defined script execution is the next planned feature.
