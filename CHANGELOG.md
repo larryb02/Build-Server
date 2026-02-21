@@ -8,6 +8,7 @@
     - No scheduler: agent must be running before jobs are dispatched, jobs enqueued while the agent is down may fail unexpectedly
     - Limited fault tolerance: no agent heartbeat or health checks, job status can become stale if the agent or API is unavailable
     - Rebuilder will not shutdown gracefully
+    - All builds will fail: `make` is not installed in the runner container. This is an intentional omission — in the interest of rapid iteration, build tooling will not be added to the container as user-defined script execution is the next planned feature
 # v0.0.0
 - Proof of concept CI System
 - Features:
