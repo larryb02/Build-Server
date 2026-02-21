@@ -1,2 +1,2 @@
 ---
-apiserver_host: ""
+apiserver_host: "http://buildserver-api:{{ api_port }}"

@@ -1,13 +1,13 @@
 ---
 - name: Deploy buildserver-runner
   kubernetes.core.k8s:
-    state: present
+    state: "{{ k8s_state }}"
     definition:
       apiVersion: apps/v1
       kind: Deployment
       metadata:
         name: buildserver-runner
-        namespace: "{{ namespace }}"
+        namespace: "{{ cluster_namespace }}"
         labels:
           app: buildserver-runner
       spec:
@@ -23,8 +23,12 @@
             containers:
               - name: buildserver-runner
                 image: "{{ runner_image }}"
+                imagePullPolicy: "{{ image_pull_policy }}"
                 env:
-                  - APISERVER_HOST: "{{ apiserver_host }}"
+                  - name: APISERVER_HOST
+                    value: "{{ apiserver_host }}"
+                  - name: LOG_LEVEL
+                    value: DEBUG
                 envFrom:
                   - configMapRef:
                       name: buildserver-config

@@ -1,5 +1,8 @@
 ---
-namespace: buildserver
+# default values for ease when running locally or in ci
+cluster_namespace: buildserver
+k8s_state: present
+image_pull_policy: Always
 
 # buildserver-api
 api_image: ghcr.io/larryb02/buildserver-api:latest

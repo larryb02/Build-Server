@@ -3,18 +3,18 @@
   kubernetes.core.k8s:
     api_version: v1
     kind: Namespace
-    name: "{{ namespace }}"
+    name: "{{ cluster_namespace }}"
     state: present
 
 - name: Create ConfigMap
   kubernetes.core.k8s:
-    state: present
+    state: "{{ k8s_state }}"
     definition:
       apiVersion: v1
       kind: ConfigMap
       metadata:
         name: buildserver-config
-        namespace: "{{ namespace }}"
+        namespace: "{{ cluster_namespace }}"
       data:
         DATABASE_HOSTNAME: "{{ database_hostname }}"
         DATABASE_PORT: "{{ database_port }}"
@@ -26,13 +26,13 @@
 
 - name: Create Secret
   kubernetes.core.k8s:
-    state: present
+    state: "{{ k8s_state }}"
     definition:
       apiVersion: v1
       kind: Secret
       metadata:
         name: buildserver-secrets
-        namespace: "{{ namespace }}"
+        namespace: "{{ cluster_namespace }}"
       type: Opaque
       data:
         DATABASE_PASSWORD: "{{ database_password | b64encode }}"

@@ -1,0 +1,50 @@
+---
+- name: Deploy postgres
+  kubernetes.core.k8s:
+    state: "{{ k8s_state }}"
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: postgres
+        namespace: "{{ cluster_namespace }}"
+        labels:
+          app: postgres
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: postgres
+        template:
+          metadata:
+            labels:
+              app: postgres
+          spec:
+            containers:
+              - name: postgres
+                image: postgres
+                env:
+                  - name: POSTGRES_USER
+                    value: "{{ database_user }}"
+                  - name: POSTGRES_PASSWORD
+                    value: "{{ database_password }}"
+                  - name: POSTGRES_DB
+                    value: "{{ database_name }}"
+                ports:
+                  - containerPort: 5432
+
+- name: Create postgres Service
+  kubernetes.core.k8s:
+    state: "{{ k8s_state }}"
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ database_hostname }}"
+        namespace: "{{ cluster_namespace }}"
+      spec:
+        selector:
+          app: postgres
+        ports:
+          - port: "{{ database_port | int }}"
+            targetPort: 5432

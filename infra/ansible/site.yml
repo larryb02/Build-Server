@@ -6,5 +6,7 @@
 
   roles:
     - common
+    - postgres
+    - rabbitmq
     - buildserver-api
     - buildserver-runner

@@ -1,13 +1,13 @@
 ---
 - name: Deploy buildserver-api
   kubernetes.core.k8s:
-    state: present
+    state: "{{ k8s_state }}"
     definition:
       apiVersion: apps/v1
       kind: Deployment
       metadata:
         name: buildserver-api
-        namespace: "{{ namespace }}"
+        namespace: "{{ cluster_namespace }}"
         labels:
           app: buildserver-api
       spec:
@@ -23,6 +23,7 @@
             containers:
               - name: buildserver-api
                 image: "{{ api_image }}"
+                imagePullPolicy: "{{ image_pull_policy }}"
                 ports:
                   - containerPort: "{{ api_port }}"
                 envFrom:
@@ -33,13 +34,13 @@
 
 - name: Create buildserver-api Service
   kubernetes.core.k8s:
-    state: present
+    state: "{{ k8s_state }}"
     definition:
       apiVersion: v1
       kind: Service
       metadata:
         name: buildserver-api
-        namespace: "{{ namespace }}"
+        namespace: "{{ cluster_namespace }}"
       spec:
         type: ClusterIP
         selector:
@@ -50,13 +51,13 @@
 
 - name: Create buildserver-api Ingress
   kubernetes.core.k8s:
-    state: present
+    state: "{{ k8s_state }}"
     definition:
       apiVersion: networking.k8s.io/v1
       kind: Ingress
       metadata:
         name: buildserver-api
-        namespace: "{{ namespace }}"
+        namespace: "{{ cluster_namespace }}"
         annotations:
           kubernetes.io/ingress.class: traefik
       spec:

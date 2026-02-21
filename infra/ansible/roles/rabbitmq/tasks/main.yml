@@ -1,0 +1,48 @@
+---
+- name: Deploy rabbitmq
+  kubernetes.core.k8s:
+    state: "{{ k8s_state }}"
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: rabbitmq
+        namespace: "{{ cluster_namespace }}"
+        labels:
+          app: rabbitmq
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: rabbitmq
+        template:
+          metadata:
+            labels:
+              app: rabbitmq
+          spec:
+            containers:
+              - name: rabbitmq
+                image: rabbitmq
+                env:
+                  - name: RABBITMQ_DEFAULT_USER
+                    value: "{{ rabbitmq_user }}"
+                  - name: RABBITMQ_DEFAULT_PASS
+                    value: "{{ rabbitmq_password }}"
+                ports:
+                  - containerPort: 5672
+
+- name: Create rabbitmq Service
+  kubernetes.core.k8s:
+    state: "{{ k8s_state }}"
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: "{{ rabbitmq_host }}"
+        namespace: "{{ cluster_namespace }}"
+      spec:
+        selector:
+          app: rabbitmq
+        ports:
+          - port: "{{ rabbitmq_port | int }}"
+            targetPort: 5672
