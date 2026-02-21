@@ -2,7 +2,6 @@
 
 import logging
 from concurrent.futures import ThreadPoolExecutor
-
 import requests
 
 from runner.builder.builder import run as run_build, BuildError, CloneError
@@ -67,11 +66,19 @@ class Agent:
         self.active_jobs.append(job)
         # from here agent needs to update status will just make calls to API for now
         # NOTE: for first iteration this is fine, ideally want to stream here
-        requests.patch(
-            f"{APISERVER_HOST}/jobs/{job.job_id}",
-            json={"job_status": JobStatus.RUNNING},
-            timeout=5,
-        )
+        logger.debug("We made it here...")
+        try:
+            requests.patch(
+                f"{APISERVER_HOST}/jobs/{job.job_id}",
+                json={"job_status": JobStatus.RUNNING},
+                timeout=5,
+            )
+        # can't return anything if you can't reach the server
+        # this is fine for now because implementation will be changing soon
+        # but hanging jobs will exist in database -- are they drained from rabbitmq?
+        except requests.exceptions.RequestException as e:
+            logger.error("Failed to make request: %s", e)
+            return
         try:
             run_build(job.git_repository_url)
             status = JobStatus.SUCCEEDED
@@ -79,12 +86,15 @@ class Agent:
         except (BuildError, CloneError) as e:
             status = JobStatus.FAILED
             logger.error("Job %s failed: %s", job.job_id, e)
-
-        requests.patch(
-            f"{APISERVER_HOST}/jobs/{job.job_id}",
-            json={"job_status": status},
-            timeout=5,
-        )
+        try:
+            requests.patch(
+                f"{APISERVER_HOST}/jobs/{job.job_id}",
+                json={"job_status": status},
+                timeout=5,
+            )
+        except requests.exceptions.RequestException as e:
+            logger.error("Failed to make request: %s", e)
+            return
         self.active_jobs.remove(job)
 
 
