@@ -38,7 +38,6 @@ data "aws_ami" "amzlinux" {
 resource "aws_instance" "bastion" {
   ami                    = data.aws_ami.amzlinux.id
   instance_type          = var.instance_type
-  iam_instance_profile   = aws_iam_instance_profile.bastion.name
   vpc_security_group_ids = [aws_security_group.bastion.id]
 
   tags = {
