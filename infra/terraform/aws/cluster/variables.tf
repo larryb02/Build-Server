@@ -16,7 +16,7 @@ variable "agent_count" {
   default     = 2
 }
 
-variable "public_key_path" {
-  description = "Path to SSH public key"
-  type        = string
-}
+# variable "public_key_path" {
+#   description = "Path to SSH public key"
+#   type        = string
+# }

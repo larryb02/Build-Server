@@ -1,3 +1,7 @@
+data "aws_security_group" "bastion" {
+  name = "bastion"
+}
+
 resource "aws_security_group" "k3s-server" {
   name        = "k3s-server"
   description = "Firewall rules for k3s-server nodes"
@@ -43,7 +47,8 @@ resource "aws_vpc_security_group_ingress_rule" "k3s_server_https" {
 
 resource "aws_vpc_security_group_ingress_rule" "k3s_server_k3s_api" {
   security_group_id = aws_security_group.k3s-server.id
-  cidr_ipv4         = "0.0.0.0/0"
+  referenced_security_group_id = data.aws_security_group.bastion
+  # cidr_ipv4         = "0.0.0.0/0"
   from_port         = 6443
   to_port           = 6443
   ip_protocol       = "tcp"
@@ -78,13 +83,6 @@ resource "aws_vpc_security_group_egress_rule" "k3s_server_allow_all_ipv6" {
 }
 
 #k3s-agent rules
-resource "aws_vpc_security_group_ingress_rule" "k3s_agent_ssh_from_server" {
-  security_group_id            = aws_security_group.k3s-agent.id
-  referenced_security_group_id = aws_security_group.k3s-server.id
-  from_port                    = 22
-  to_port                      = 22
-  ip_protocol                  = "tcp"
-}
 
 resource "aws_vpc_security_group_egress_rule" "k3s_agent_allow_all_ipv4" {
   security_group_id = aws_security_group.k3s-agent.id
