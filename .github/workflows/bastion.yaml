@@ -14,9 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: hashicorp/setup-terraform@v3
-    - run: terraform -chdir=$CLUSTER_DIR init
-    - run: terraform -chdir=$CLUSTER_DIR validate
-    - run: terraform -chdir=$CLUSTER_DIR apply -auto-approve
+    - run: |
+      terraform -chdir=$CLUSTER_DIR init; \
+      terraform -chdir=$CLUSTER_DIR validate; \
+      terraform -chdir=$CLUSTER_DIR apply -auto-approve
 
   bootstrap_bastion:
     runs-on: ubuntu-latest
