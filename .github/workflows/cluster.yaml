@@ -1,23 +1,47 @@
 name: Manage k3s cluster
 
 on:
+  push:
+    branches:
+      - development
+      - main
+    paths:
+      - "infra/terraform/aws/cluster/**"
   workflow_dispatch:
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: us-west-1
   CLUSTER_DIR: infra/terraform/aws/cluster
 
 jobs:
-  create_cluster:
+  plan:
+    if: github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: hashicorp/setup-terraform@v3
-    - run: \
-        terraform -chdir=$CLUSTER_DIR init
-        terraform -chdir=$CLUSTER_DIR validate
-        terraform -chdir=$CLUSTER_DIR apply -auto-approve
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: |
+          terraform -chdir=$CLUSTER_DIR init
+          terraform -chdir=$CLUSTER_DIR validate
+          terraform -chdir=$CLUSTER_DIR plan -out=tfplan
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bastion-tfplan
+          path: ${{ env.CLUSTER_DIR }}/tfplan
+
+  apply:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - uses: actions/download-artifact@v4
+        with:
+          name: bastion-tfplan
+          path: ${{ env.CLUSTER_DIR }}
+      - run: terraform -chdir=$CLUSTER_DIR apply tfplan
 
   bootstrap_cluster:
     runs-on: ubuntu-latest
