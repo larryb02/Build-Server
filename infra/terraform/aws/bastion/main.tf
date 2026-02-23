@@ -43,5 +43,5 @@ resource "aws_instance" "bastion" {
   tags = {
     Name = "bastion"
     Role = "bastion-host"
-  }
+  } # test
 }
