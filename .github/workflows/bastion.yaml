@@ -1,4 +1,4 @@
-name: Manage k3s cluster
+name: Manage bastion host
 
 on:
   workflow_dispatch:
