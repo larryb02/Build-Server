@@ -47,7 +47,7 @@ resource "aws_vpc_security_group_ingress_rule" "k3s_server_https" {
 
 resource "aws_vpc_security_group_ingress_rule" "k3s_server_k3s_api" {
   security_group_id = aws_security_group.k3s-server.id
-  referenced_security_group_id = data.aws_security_group.bastion
+  referenced_security_group_id = data.aws_security_group.bastion.id
   # cidr_ipv4         = "0.0.0.0/0"
   from_port         = 6443
   to_port           = 6443
