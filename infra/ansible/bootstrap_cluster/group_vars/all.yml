@@ -1,0 +1,5 @@
+---
+ansible_user: ec2-user
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+k3s_version: v1.32.1+k3s1

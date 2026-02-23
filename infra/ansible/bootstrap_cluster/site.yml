@@ -1,0 +1,16 @@
+---
+- name: Bootstrap k3s server
+  hosts: k3s_server
+  gather_facts: false
+  become: true
+
+  roles:
+    - k3s_server
+
+- name: Bootstrap k3s agents
+  hosts: k3s_agent
+  gather_facts: false
+  become: true
+
+  roles:
+    - k3s_agent

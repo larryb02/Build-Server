@@ -1,0 +1,17 @@
+---
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-west-1
+filters:
+  tag:Name:
+    - k3s-server
+    - k3s-agent-*
+  instance-state-name: running
+keyed_groups:
+  - key: tags.Role
+    prefix: k3s
+    separator: _
+hostnames:
+  - private-ip-address
+compose:
+  ansible_host: private_ip_address
