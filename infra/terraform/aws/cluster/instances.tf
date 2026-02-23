@@ -23,15 +23,9 @@ data "aws_ami" "amzlinux" {
   }
 }
 
-# resource "aws_key_pair" "buildserver" {
-#   key_name   = "buildserver"
-#   public_key = file(var.public_key_path)
-# }
-
 resource "aws_instance" "server" {
   ami                    = data.aws_ami.amzlinux.id
   instance_type          = var.instance_type
-  # key_name               = aws_key_pair.buildserver.key_name
   vpc_security_group_ids = [aws_security_group.k3s-server.id]
 
   tags = {
@@ -44,7 +38,6 @@ resource "aws_instance" "agent" {
   count                  = var.agent_count
   ami                    = data.aws_ami.amzlinux.id
   instance_type          = var.instance_type
-  # key_name               = aws_key_pair.buildserver.key_name
   vpc_security_group_ids = [aws_security_group.k3s-agent.id]
 
   tags = {
