@@ -45,6 +45,6 @@ jobs:
 
   bootstrap_cluster:
     runs-on: ubuntu-latest
-    needs: [create_cluster]
+    needs: [apply]
     steps:
       - run: echo 'running ansible playbook here'
