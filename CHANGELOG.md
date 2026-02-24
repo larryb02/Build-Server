@@ -1,3 +1,5 @@
+# v0.0.2:
+- Enforce HTTPS for git repository URLs
 # v0.0.1
 - Major refactors:
     - decoupled buildserver/agent and buildserver/api
