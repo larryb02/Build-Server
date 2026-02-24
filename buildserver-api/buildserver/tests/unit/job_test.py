@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 
 from buildserver.api.jobs.models import JobStatus
 from buildserver.api.jobs.service import validate
-from buildserver.services.builds import update_job_status
+from buildserver.api.jobs.service import update_job_status
 
 
 class TestUpdateJobStatus:

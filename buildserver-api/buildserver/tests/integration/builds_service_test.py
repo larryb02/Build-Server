@@ -2,7 +2,7 @@
 
 from buildserver.api.jobs.models import JobCreate
 from buildserver.api.jobs.models import JobStatus
-from buildserver.services.builds import (
+from buildserver.api.jobs.service import (
     create_job,
     get_job_by_id,
     get_all_jobs,

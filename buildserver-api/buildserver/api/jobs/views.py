@@ -6,15 +6,15 @@ from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.exceptions import RequestValidationError
 
 from buildserver.api.jobs.models import JobCreate, JobRead, JobStatusUpdate
-from buildserver.api.jobs.service import validate
-from buildserver.database.core import DbSession
-from buildserver.services.builds import (
+from buildserver.api.jobs.service import (
+    validate,
     register_job,
     get_job_by_id,
     get_all_jobs,
     get_all_unique_jobs,
     update_job_status,
 )
+from buildserver.database.core import DbSession
 from buildserver.config import LOG_LEVEL
 
 logger = logging.getLogger(__name__)
