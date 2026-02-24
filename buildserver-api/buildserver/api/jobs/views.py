@@ -52,7 +52,7 @@ async def get_jobs(
         jobs = list(job._mapping for job in get_all_jobs(dbsession))
     except Exception as e:
         logger.error(f"Failed to get jobs: {e}")
-    return jobs[:10]  # make sure to sort by date descending
+    return jobs
 
 
 @router.get("/{job_id}", response_model=JobRead)
