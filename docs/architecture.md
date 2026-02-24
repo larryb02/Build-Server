@@ -57,19 +57,14 @@ sequenceDiagram
 ### API
 REST API that exposes an interface for a client to communicate with the build server system.
 
-Built using FastAPI framework.
-
 ### Runner
-Long running process that consumes jobs from a message queue and executes builds.
-
-### Builder
-Handles job execution.
+Execution nodes responsible for consuming and running jobs from the queue.
 
 ### Rebuilder
-Background process that polls for new commits on registered repositories and triggers rebuilds via the API.
+Background task that polls for new commits on registered repositories and triggers rebuilds via the API.
 
 !!! NOTE
-    Plans to convert this into a webhook
+    Plans to convert this into a webhook by 1.0.0
 
 ### Artifact Store
 Structured directory that stores artifacts with the following pattern: `<commit_hash>/artifact`

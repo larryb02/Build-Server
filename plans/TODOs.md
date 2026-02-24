@@ -1,6 +1,5 @@
 - [ ] Refactors
 	- [ ] Move services back into api layer
-	- [ ] Aim for fine grained exception handling
 	- [ ] Config: support ENV variables with CLI arg overrides (remove .env file dependency)
 	- [x] Builder
 		- [x] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
@@ -23,21 +22,15 @@
 		- [ ] Webhook support (pre-1.0): receive push events from VCS platforms instead of polling
 			- [ ] Auto-register webhooks via API (e.g. GitHub POST /repos/{owner}/{repo}/hooks) on job registration
 			- [ ] Requires user token with admin:repo_hook scope
-- [x] Create devcontainer
-	- [x] compose file that spins up postgres and a distributed mq of choice
-- [ ] CI/CD
+- [x] CI/CD
 	- [x] On push?
 		- [x] test, lint, format on push
-	- [ ] On merge to main?
+	- [x] On push to main?
 		- [x] test, lint, format (sanity check?)
-		- [ ] stage new release
-			- maybe only on pr
-		- [ ] deploy new release
-	- need to setup a good branching workflow
+		- [x] deploy new release
 - [x] Versioning
 - [x] Changelogs
 - [ ] Deployment
+	- [ ] Finish automated deployment of cluster
+	- [ ] Add deployment of application to CI once cluster is setup
 - [ ] Monitoring
-- [ ] Documentation
-	- [x] Create website for documentation
-	- [ ] Update Getting Started

@@ -28,6 +28,9 @@ Once inside the dev container, deploy all services to the local k3d cluster usin
 ansible-playbook infra/ansible/site.yml
 ```
 
+!!! note
+    To remove application from the cluster run `ansible-playbook infra/ansible/site.yml -e "k8s_state=absent"`
+
 This deploys the following into the `buildserver` namespace:
 
 - PostgreSQL
