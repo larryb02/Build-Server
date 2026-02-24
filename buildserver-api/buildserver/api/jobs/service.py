@@ -25,9 +25,9 @@ logger.setLevel(LOG_LEVEL)
 
 def validate(repo_url: str):
     if repo_url == "":
-        raise RequestValidationError("Url may not be blank")
+        raise ValueError("Url may not be blank")
     if not repo_url.startswith("https://"):
-        raise RequestValidationError("Url must be https protocol")
+        raise ValueError("Url must be https protocol")
 
 
 def get_job_by_id(dbsession: DbSession, job_id: int) -> JobRead | None:

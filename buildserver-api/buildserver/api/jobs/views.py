@@ -3,7 +3,6 @@
 import logging
 
 from fastapi import APIRouter, HTTPException, Query, status
-from fastapi.exceptions import RequestValidationError
 
 from buildserver.api.jobs.models import JobCreate, JobRead, JobStatusUpdate
 from buildserver.api.jobs.service import (
@@ -30,7 +29,7 @@ def register(repo: JobCreate, dbsession: DbSession):
     """
     try:
         validate(repo.git_repository_url)
-    except RequestValidationError as e:
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=[{"msg": str(e)}],
