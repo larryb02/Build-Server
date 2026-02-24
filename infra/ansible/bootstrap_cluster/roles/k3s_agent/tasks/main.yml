@@ -1,10 +1,15 @@
 ---
-# - name: Install k3s agent
-#   shell: >
-#     curl -sfL https://get.k3s.io |
-#     INSTALL_K3S_VERSION={{ k3s_version }}
-#     K3S_URL=https://{{ hostvars[groups['k3s_server'][0]]['k3s_server_ip'] }}:6443
-#     K3S_TOKEN={{ hostvars[groups['k3s_server'][0]]['k3s_token'] }}
-#     sh - s - agent
-#   args:
-#     creates: /usr/local/bin/k3s
+- name: Download k3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: '0744'
+
+- name: Install k3s agent
+  ansible.builtin.command: /tmp/k3s-install.sh
+  args:
+    creates: /usr/local/bin/k3s
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    K3S_URL: "https://{{ hostvars[groups['k3s_server'][0]]['k3s_server_ip'] }}:6443"
+    K3S_TOKEN: "{{ hostvars[groups['k3s_server'][0]]['k3s_server_token'] }}"
