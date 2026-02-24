@@ -36,12 +36,12 @@ data "aws_ami" "amzlinux" {
 }
 
 resource "aws_instance" "bastion" {
-  ami                    = data.aws_ami.amzlinux.id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.bastion.id]
+  ami                         = data.aws_ami.amzlinux.id
+  instance_type               = var.instance_type
+  vpc_security_group_ids      = [aws_security_group.bastion.id]
 
   tags = {
     Name = "bastion"
     Role = "bastion-host"
-  } # test
+  }
 }
