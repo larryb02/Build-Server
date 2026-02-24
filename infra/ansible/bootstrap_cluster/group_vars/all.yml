@@ -1,5 +1,5 @@
 ---
-ansible_user: ec2-user
-ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+ansible_connection: community.aws.aws_ssm
+ansible_aws_ssm_region: us-west-1
 
 k3s_version: v1.32.1+k3s1
