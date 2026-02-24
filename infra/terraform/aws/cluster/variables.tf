@@ -15,3 +15,8 @@ variable "agent_count" {
   type        = number
   default     = 2
 }
+
+variable "public_key_path" {
+  description = "public key path"
+  type        = string
+}
