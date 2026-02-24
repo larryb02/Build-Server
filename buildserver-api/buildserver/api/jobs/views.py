@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.exceptions import RequestValidationError
 
 from buildserver.api.jobs.models import JobCreate, JobRead, JobStatusUpdate
+from buildserver.api.jobs.service import validate
 from buildserver.database.core import DbSession
 from buildserver.services.builds import (
     register_job,
@@ -20,11 +21,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
 
 router = APIRouter(prefix="/jobs")
-
-
-def validate(repo_url: str):
-    if repo_url == "":
-        raise RequestValidationError("Url may not be blank")
 
 
 @router.post("/register", response_model=JobRead)
