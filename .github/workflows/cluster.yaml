@@ -22,13 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
+      - run: echo "${{ secrets.CLUSTER_PUBLIC_KEY }}" > /tmp/cluster.pub
       - run: |
           terraform -chdir=$CLUSTER_DIR init
           terraform -chdir=$CLUSTER_DIR validate
-          terraform -chdir=$CLUSTER_DIR plan -out=tfplan
+          terraform -chdir=$CLUSTER_DIR plan -out=tfplan -var="public_key_path=/tmp/cluster.pub"
       - uses: actions/upload-artifact@v4
         with:
-          name: bastion-tfplan
+          name: cluster-tfplan
           path: ${{ env.CLUSTER_DIR }}/tfplan
 
   apply:
@@ -39,7 +40,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - uses: actions/download-artifact@v4
         with:
-          name: bastion-tfplan
+          name: cluster-tfplan
           path: ${{ env.CLUSTER_DIR }}
       - run: terraform -chdir=$CLUSTER_DIR apply tfplan
 
@@ -47,4 +48,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [apply]
     steps:
-      - run: echo 'running ansible playbook here'
+      # assuming that aws-cli, ansible-playbook, git, and the project exist on the bastion already -- not ideal at all
+      - name: Bootstrap k3s cluster via bastion
+        run: |
+          aws ssm send-command \
+            --instance-id ${{ secrets.BASTION_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands=[
+              "cd ~/Build-Server && git pull",
+              "ansible-playbook -i infra/ansible/bootstrap_cluster/inventory/aws_ec2.yml infra/ansible/bootstrap_cluster/site.yml"
+            ] \
+            --output text \
+            --query "Command.CommandId"
