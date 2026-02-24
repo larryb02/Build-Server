@@ -50,9 +50,10 @@ async def get_jobs(
         if latest:
             return get_all_unique_jobs(dbsession)
         jobs = list(job._mapping for job in get_all_jobs(dbsession))
+        return jobs
+    # TODO: catch useful exceptions here and handle accordingly
     except Exception as e:
         logger.error(f"Failed to get jobs: {e}")
-    return jobs
 
 
 @router.get("/{job_id}", response_model=JobRead)
