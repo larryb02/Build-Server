@@ -36,6 +36,7 @@ def _make_job_message(repo_url: str = "git@github.com:user/repo.git") -> bytes:
             "commit_hash": "abc123",
             "job_status": JobStatus.QUEUED,
             "created_at": time.time(),
+            "script": "exit 0",
         }
     ).encode()
 

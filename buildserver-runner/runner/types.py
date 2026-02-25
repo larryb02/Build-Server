@@ -25,3 +25,4 @@ class Job(BaseModel):
     commit_hash: Optional[str]
     job_status: JobStatus
     created_at: datetime
+    script: str

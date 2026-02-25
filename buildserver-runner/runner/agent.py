@@ -80,7 +80,7 @@ class Agent:
             logger.error("Failed to make request: %s", e)
             return
         try:
-            run_build(job.git_repository_url)
+            run_build(job)
             status = JobStatus.SUCCEEDED
             logger.info("Job %s succeeded", job.job_id)
         except (BuildError, CloneError) as e:

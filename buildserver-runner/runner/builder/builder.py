@@ -2,6 +2,7 @@
 Functions for compiling C programs
 """
 
+import os
 import logging
 import subprocess
 import tempfile
@@ -9,12 +10,33 @@ from pathlib import Path
 
 from runner import utils
 from runner.config import LOG_LEVEL
+from runner.types import Job
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
 
 BUILD_CMD = "make"
+
+
+def _run_script(script: str, cwd: Path = None):
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as f:
+        f.write("#!/bin/bash\n" + script)
+        script_path = Path(f.name)
+
+    os.chmod(script_path, 0o755)
+
+    with subprocess.Popen(
+        [str(script_path)],
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    ) as proc:
+        for line in proc.stdout:
+            logger.info(line.rstrip())
+    if proc.returncode != 0:
+        raise BuildError(f"Script exited with code {proc.returncode}")
 
 
 class BuildError(Exception):
@@ -27,6 +49,9 @@ class CloneError(Exception):
     """Raised when cloning a repository fails."""
 
     pass
+
+
+# TODO: support switching to branch build job is scheduled for
 
 
 def clone_repo(repo: str, build_dir: Path) -> str:
@@ -67,49 +92,23 @@ def clone_repo(repo: str, build_dir: Path) -> str:
     return commit_hash
 
 
-def build(repo_path: Path) -> None:
+def run(payload: Job) -> None:
     """
-    Compile C program into a binary.
-
-    Args:
-        repo_path: Path to the cloned repository.
-
-    Raises:
-        BuildError: If compilation fails.
-    """
-    logger.info("Building %s", repo_path)
-    try:
-        subprocess.run(
-            BUILD_CMD,
-            cwd=repo_path,
-            check=True,
-            capture_output=True,
-            text=True,
-            shell=True,
-        )
-    except subprocess.CalledProcessError as e:
-        raise BuildError(f"Build failed: {e.stderr}") from e
-
-
-def run(repo: str) -> None:
-    """
-    Clone and build a C program in an isolated temp directory.
+    Clone and run a script in an isolated temp directory.
 
     Args:
         repo: Git repository URL.
 
     Raises:
         CloneError: If cloning fails.
-        BuildError: If compilation fails.
+        BuildError: If script execution fails.
     """
     build_dir = Path(tempfile.mkdtemp(prefix="job_"))
     logger.info("Created temp build directory: %s", build_dir)
 
     try:
-        clone_repo(repo, build_dir)
-        repo_name = utils.get_dir_name(repo)
-        repo_path = build_dir / repo_name
-        build(repo_path)
+        clone_repo(payload.git_repository_url, build_dir)
+        _run_script(payload.script, build_dir)
     except (CloneError, BuildError):
         utils.cleanup_build_files(build_dir)
         raise
