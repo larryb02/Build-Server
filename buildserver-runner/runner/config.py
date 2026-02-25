@@ -6,7 +6,7 @@ from starlette.datastructures import Secret
 config = Config(".env")
 
 LOG_LEVEL = config("LOG_LEVEL", default=logging.INFO)
-RABBITMQ_HOST = config("RABBITMQ_HOST", default="localhost")
+RABBITMQ_HOST = config("RABBITMQ_HOST", default="rabbitmq")
 RABBITMQ_USER = config("RABBITMQ_USER", default="guest")
 RABBITMQ_PASS = config("RABBITMQ_PASS", default="guest", cast=Secret)
 RABBITMQ_PORT = config("RABBITMQ_PORT", default=5672)
