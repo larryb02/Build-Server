@@ -16,13 +16,12 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
 
-BUILD_CMD = "make"
+SCRIPT_FILE = ".buildserver.sh"
 
 
-def _run_script(script: str, cwd: Path = None):
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".sh", delete=False) as f:
-        f.write("#!/bin/bash\n" + script)
-        script_path = Path(f.name)
+def _run_script(script_path: Path, cwd: Path = None):
+    if not script_path.exists():
+        raise BuildError(f"Build script not found: {script_path}")
 
     os.chmod(script_path, 0o755)
 
@@ -108,7 +107,7 @@ def run(payload: Job) -> None:
 
     try:
         clone_repo(payload.git_repository_url, build_dir)
-        _run_script(payload.script, build_dir)
+        _run_script(build_dir / SCRIPT_FILE, build_dir)
     except (CloneError, BuildError):
         utils.cleanup_build_files(build_dir)
         raise

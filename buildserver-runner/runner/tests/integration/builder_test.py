@@ -4,15 +4,20 @@ from runner.builder.builder import clone_repo, run, _run_script, CloneError, Bui
 
 
 class TestRunScript:
-    def test_empty_script(self):
-        _run_script("")
-
-    def test_script_pass(self):
-        _run_script("exit 0\n")
-
-    def test_script_fail(self):
+    def test_script_not_found(self, tmp_path):
         with pytest.raises(BuildError):
-            _run_script("exit 1\n")
+            _run_script(tmp_path / "missing.sh")
+
+    def test_script_pass(self, tmp_path):
+        script = tmp_path / ".buildserver.sh"
+        script.write_text("#!/bin/bash\nexit 0\n")
+        _run_script(script)
+
+    def test_script_fail(self, tmp_path):
+        script = tmp_path / ".buildserver.sh"
+        script.write_text("#!/bin/bash\nexit 1\n")
+        with pytest.raises(BuildError):
+            _run_script(script)
 
 
 @pytest.mark.skip("skip until I create an environment where CI can invoke git.")
