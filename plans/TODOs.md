@@ -1,3 +1,11 @@
+## 0.0.x (pre-0.1.0)
+- [ ] Builder isolation abstraction
+	- [ ] Introduce a base `Builder` class and a `ShellBuilder` subclass
+		- `ShellBuilder` bootstraps the execution environment (e.g. sets up cwd, permissions, env vars) before running the repo's build script
+		- Lays groundwork for future executor types
+	- [ ] Scheduler implementation
+
+## General
 - [ ] Refactors
 	- [ ] Move services back into api layer
 	- [ ] Config: support ENV variables with CLI arg overrides (remove .env file dependency)
