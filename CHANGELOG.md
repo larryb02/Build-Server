@@ -1,5 +1,6 @@
 # v0.0.2:
 - Enforce HTTPS for git repository URLs
+- Runner now supports user-defined script execution
 # v0.0.1
 - Major refactors:
     - decoupled buildserver/agent and buildserver/api
