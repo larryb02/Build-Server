@@ -18,5 +18,5 @@
         }
     },
     // "postCreateCommand": "bash .devcontainer/post-create.sh"
-    "initializeCommand": "sh init.sh"
+    "initializeCommand": "sh .devcontainer/init.sh"
 }
