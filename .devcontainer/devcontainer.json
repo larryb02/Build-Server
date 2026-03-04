@@ -1,7 +1,13 @@
 {
-    "dockerComposeFile": "docker-compose.yml",
-    "service": "dev",
-    "workspaceFolder": "/workspace",
+    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "features": {
+        "ghcr.io/devcontainers/features/postgres:1": {
+            "postgresPassword": "example"
+        },
+        "ghcr.io/devcontainers-contrib/features/rabbitmq:1": {}
+    },
+    "runArgs": ["--shm-size=128m"],
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "customizations": {
         "vscode": {
             "extensions": [
