@@ -10,3 +10,14 @@
     - rabbitmq
     - buildserver-api
     - buildserver-runner
+
+- name: Deploy External Services for Dev/Test
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags: [dev]
+
+  roles:
+    - common
+    - postgres
+    - rabbitmq
