@@ -2,29 +2,28 @@
 
 import logging
 
-from starlette.config import Config as StarletteConfig
-from starlette.datastructures import Secret
+from dynaconf import Dynaconf
 
-config = StarletteConfig(".env")
+settings = Dynaconf(envvar_prefix="BS")
 
-LOG_LEVEL = config("LOG_LEVEL", default=logging.INFO)
+LOG_LEVEL = settings.get("LOG_LEVEL", logging.INFO)
 
-DATABASE_PORT = config("DATABASE_PORT", default=5432, cast=int)
-DATABASE_USER = config("DATABASE_USER", default="postgres")
-DATABASE_PASSWORD = config("DATABASE_PASSWORD", default="example", cast=Secret)
-DATABASE_HOSTNAME = config("DATABASE_HOSTNAME", default="localhost")
-DATABASE_NAME = config("DATABASE_NAME", default="postgres")
+DATABASE_PORT = settings.get("DATABASE_PORT", 5432)
+DATABASE_USER = settings.get("DATABASE_USER", "postgres")
+DATABASE_PASSWORD = settings.get("DATABASE_PASSWORD", "example")
+DATABASE_HOSTNAME = settings.get("DATABASE_HOSTNAME", "localhost")
+DATABASE_NAME = settings.get("DATABASE_NAME", "postgres")
 DATABASE_URI = (
     f"postgresql+psycopg2://{DATABASE_USER}:{DATABASE_PASSWORD}"
     f"@{DATABASE_HOSTNAME}:{DATABASE_PORT}/{DATABASE_NAME}"
 )
 
-SLEEP_FOR = config("SLEEP_FOR", default=60 * 15, cast=int)
-TIMEOUT = config("TIMEOUT", default=60, cast=int)
+SLEEP_FOR = settings.get("SLEEP_FOR", 60 * 15)
+TIMEOUT = settings.get("TIMEOUT", 60)
 
-RABBITMQ_HOST = config("RABBITMQ_HOST", default="rabbitmq")
-RABBITMQ_PORT = config("RABBITMQ_PORT", default=5672, cast=int)
-RABBITMQ_USER = config("RABBITMQ_USER", default="guest")
-RABBITMQ_PASSWORD = config("RABBITMQ_PASSWORD", default="guest", cast=Secret)
+RABBITMQ_HOST = settings.get("RABBITMQ_HOST", "rabbitmq")
+RABBITMQ_PORT = settings.get("RABBITMQ_PORT", 5672)
+RABBITMQ_USER = settings.get("RABBITMQ_USER", "guest")
+RABBITMQ_PASSWORD = settings.get("RABBITMQ_PASSWORD", "guest")
 
-ARTIFACT_REPOSITORY_ROOT = config("ARTIFACT_REPOSITORY_ROOT", default="")
+ARTIFACT_REPOSITORY_ROOT = settings.get("ARTIFACT_REPOSITORY_ROOT", "")

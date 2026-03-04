@@ -9,8 +9,8 @@ dependencies = [
     "pika",
     "requests",
     "typer",
-    "starlette",
     "pydantic",
+    "dynaconf",
 ]
 
 [project.optional-dependencies]

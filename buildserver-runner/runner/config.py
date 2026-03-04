@@ -1,13 +1,12 @@
 import logging
 
-from starlette.config import Config
-from starlette.datastructures import Secret
+from dynaconf import Dynaconf
 
-config = Config(".env")
+settings = Dynaconf(envvar_prefix="BS")
 
-LOG_LEVEL = config("LOG_LEVEL", default=logging.INFO)
-RABBITMQ_HOST = config("RABBITMQ_HOST", default="rabbitmq")
-RABBITMQ_USER = config("RABBITMQ_USER", default="guest")
-RABBITMQ_PASS = config("RABBITMQ_PASS", default="guest", cast=Secret)
-RABBITMQ_PORT = config("RABBITMQ_PORT", default=5672)
-APISERVER_HOST = config("APISERVER_HOST", default="http://localhost:8000")
+LOG_LEVEL = settings.get("LOG_LEVEL", logging.INFO)
+RABBITMQ_HOST = settings.get("RABBITMQ_HOST", "rabbitmq")
+RABBITMQ_USER = settings.get("RABBITMQ_USER", "guest")
+RABBITMQ_PASSWORD = settings.get("RABBITMQ_PASSWORD", "guest")
+RABBITMQ_PORT = settings.get("RABBITMQ_PORT", 5672)
+APISERVER_HOST = settings.get("APISERVER_HOST", "http://localhost:8000")

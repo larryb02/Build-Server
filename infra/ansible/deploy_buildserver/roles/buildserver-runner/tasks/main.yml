@@ -25,9 +25,9 @@
                 image: "{{ runner_image }}"
                 imagePullPolicy: "{{ image_pull_policy }}"
                 env:
-                  - name: APISERVER_HOST
+                  - name: BS_APISERVER_HOST
                     value: "{{ apiserver_host }}"
-                  - name: LOG_LEVEL
+                  - name: BS_LOG_LEVEL
                     value: DEBUG
                 envFrom:
                   - configMapRef:

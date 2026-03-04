@@ -16,13 +16,13 @@
         name: buildserver-config
         namespace: "{{ cluster_namespace }}"
       data:
-        DATABASE_HOSTNAME: "{{ database_hostname }}"
-        DATABASE_PORT: "{{ database_port }}"
-        DATABASE_USER: "{{ database_user }}"
-        DATABASE_NAME: "{{ database_name }}"
-        RABBITMQ_HOST: "{{ rabbitmq_host }}"
-        RABBITMQ_PORT: "{{ rabbitmq_port }}"
-        RABBITMQ_USER: "{{ rabbitmq_user }}"
+        BS_DATABASE_HOSTNAME: "{{ database_hostname }}"
+        BS_DATABASE_PORT: "{{ database_port }}"
+        BS_DATABASE_USER: "{{ database_user }}"
+        BS_DATABASE_NAME: "{{ database_name }}"
+        BS_RABBITMQ_HOST: "{{ rabbitmq_host }}"
+        BS_RABBITMQ_PORT: "{{ rabbitmq_port }}"
+        BS_RABBITMQ_USER: "{{ rabbitmq_user }}"
 
 - name: Create Secret
   kubernetes.core.k8s:
@@ -35,5 +35,5 @@
         namespace: "{{ cluster_namespace }}"
       type: Opaque
       data:
-        DATABASE_PASSWORD: "{{ database_password | b64encode }}"
-        RABBITMQ_PASSWORD: "{{ rabbitmq_password | b64encode }}"
+        BS_DATABASE_PASSWORD: "{{ database_password | b64encode }}"
+        BS_RABBITMQ_PASSWORD: "{{ rabbitmq_password | b64encode }}"

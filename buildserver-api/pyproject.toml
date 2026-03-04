@@ -11,6 +11,7 @@ dependencies = [
     "psycopg2-binary",
     "pika",
     "requests",
+    "dynaconf",
 ]
 
 [project.optional-dependencies]
