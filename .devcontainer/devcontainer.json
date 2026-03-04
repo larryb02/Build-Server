@@ -1,7 +1,9 @@
 {
     "image": "mcr.microsoft.com/devcontainers/python:3.12",
     "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {}
     },
+    "remoteUser": "vscode",
     "runArgs": ["--shm-size=128m"],
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "customizations": {
