@@ -4,8 +4,8 @@
         "ghcr.io/devcontainers/features/common-utils:2": {}
     },
     "remoteUser": "vscode",
-    "runArgs": ["--shm-size=128m"],
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    // "runArgs": ["--shm-size=128m"],
+    // "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -15,7 +15,7 @@
                 "redhat.vscode-yaml"
             ],
             "settings": {
-                "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
+                // "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
             }
         }
     },
