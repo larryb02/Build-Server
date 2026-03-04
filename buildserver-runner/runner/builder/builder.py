@@ -107,6 +107,7 @@ def run(payload: Job) -> None:
 
     try:
         clone_repo(payload.git_repository_url, build_dir)
+        # TODO: not in the right directory
         _run_script(build_dir / SCRIPT_FILE, build_dir)
     except (CloneError, BuildError):
         utils.cleanup_build_files(build_dir)

@@ -27,3 +27,4 @@ RABBITMQ_USER = settings.get("RABBITMQ_USER", "guest")
 RABBITMQ_PASSWORD = settings.get("RABBITMQ_PASSWORD", "guest")
 
 ARTIFACT_REPOSITORY_ROOT = settings.get("ARTIFACT_REPOSITORY_ROOT", "")
+GRPC_PORT = settings.get("GRPC_PORT", default="50052")

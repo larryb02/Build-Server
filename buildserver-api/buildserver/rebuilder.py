@@ -48,11 +48,11 @@ def check_for_rebuild(job: dict):
             logger.error("Failed to register rebuild for %s: %s", repo_url, e)
 
 
-def run():
+def run(stop_event):
     """Poll for new commits and register rebuild jobs."""
     logger.info("Started rebuilder")
-    while True:
-        time.sleep(SLEEP_FOR)
+    while not stop_event.is_set():
+        stop_event.wait(timeout=SLEEP_FOR)
         logger.debug("Checking for new commits")
         try:
             resp = requests.get(

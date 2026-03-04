@@ -12,6 +12,7 @@ dependencies = [
     "pika",
     "requests",
     "dynaconf",
+    "grpcio",
 ]
 
 [project.optional-dependencies]
