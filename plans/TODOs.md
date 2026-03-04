@@ -4,6 +4,7 @@
 		- `ShellBuilder` bootstraps the execution environment (e.g. sets up cwd, permissions, env vars) before running the repo's build script
 		- Lays groundwork for future executor types
 	- [ ] Scheduler implementation
+	- [ ] Runner registration
 
 ## General
 - [ ] Refactors
