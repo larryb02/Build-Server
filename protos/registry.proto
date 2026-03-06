@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package registry;
+
+import "google/protobuf/timestamp.proto";
+
+service Registry {
+  // Runner-facing RPCs
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc Deregister(DeregisterRequest) returns (DeregisterResponse);
+
+  // Scheduler-facing RPCs
+  rpc ListAvailable(ListAvailableRequest) returns (ListAvailableResponse);
+
+  // Admin RPCs (called by the REST API)
+  rpc GenerateRegistrationToken(GenerateRegistrationTokenRequest) returns (GenerateRegistrationTokenResponse);
+}
+
+// --- Runner-facing ---
+
+message RegisterRequest {
+  string token = 1;
+  string name  = 2;
+}
+
+message RegisterResponse {
+  int32 runner_id = 1;
+}
+
+message HeartbeatRequest {
+  int32 runner_id = 1;
+}
+
+message HeartbeatResponse {}
+
+message DeregisterRequest {
+  int32 runner_id = 1;
+}
+
+message DeregisterResponse {}
+
+// --- Scheduler-facing ---
+
+message ListAvailableRequest {}
+
+message RunnerInfo {
+  int32 runner_id                         = 1;
+  string name                             = 2;
+  google.protobuf.Timestamp last_heartbeat = 3;
+}
+
+message ListAvailableResponse {
+  repeated RunnerInfo runners = 1;
+}
+
+// --- Admin ---
+
+message GenerateRegistrationTokenRequest {}
+
+message GenerateRegistrationTokenResponse {
+  string token                          = 1;
+  google.protobuf.Timestamp expires_at  = 2;
+}

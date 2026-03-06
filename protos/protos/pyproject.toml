@@ -1,0 +1,17 @@
+[project]
+name = "buildserver-protos"
+version = "0.0.0"
+description = "Generated gRPC stubs for Build Server services"
+requires-python = ">=3.12"
+dependencies = [
+    "grpcio",
+    "protobuf",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = [".."]
+include = ["protos*"]
