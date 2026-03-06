@@ -17,7 +17,7 @@
                 "anthropic.claude-code"
             ],
             "settings": {
-                "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
+                "python.defaultInterpreterPath": "/usr/local/bin/python"
             }
         }
     },
