@@ -12,10 +12,12 @@
                 "ms-python.python",
                 "ms-python.vscode-pylance",
                 "ms-python.pylint",
-                "redhat.vscode-yaml"
+                "redhat.vscode-yaml",
+                "postman.postman-for-vscode",
+                "anthropic.claude-code"
             ],
             "settings": {
-                // "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
+                "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python"
             }
         }
     },
