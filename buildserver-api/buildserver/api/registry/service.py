@@ -33,10 +33,11 @@ class Registry(registry_pb2_grpc.RegistryServicer):
         runner = Runner(
             name=request.name,
             runner_token_hash=token_hash,
-            health=registry_pb2.RunnerStatus.UNKNOWN,
+            health=registry_pb2.RunnerHealth.UNKNOWN,
         )
         with session_context() as session:
             try:
+                runner_id = runner.runner_id
                 session.add(runner)
                 session.flush()
             except DBAPIError as exc:
@@ -45,13 +46,13 @@ class Registry(registry_pb2_grpc.RegistryServicer):
                 context.abort(grpc.StatusCode.INTERNAL, "failed to register runner")
         with self._token_lock:
             self._pending_tokens.pop(request.token, None)
-        logger.debug("registered runner: %s", runner)
+        # logger.debug("registered runner: %s", runner)
         return registry_pb2.RegisterResponse(
             runner=registry_pb2.RunnerInfo(
-                runner_id=runner.runner_id,
+                runner_id=runner_id,
                 name=request.name,
                 token=request.token,
-                health=registry_pb2.RunnerStatus.UNKNOWN,
+                health=registry_pb2.RunnerHealth.UNKNOWN,
             )
         )
 
@@ -78,7 +79,7 @@ class Registry(registry_pb2_grpc.RegistryServicer):
             try:
                 runners = (
                     session.query(Runner)
-                    .filter(Runner.status == registry_pb2.RunnerStatus.HEALTHY)
+                    .filter(Runner.health == registry_pb2.RunnerHealth.HEALTHY)
                     .all()
                 )
                 result = [
@@ -86,7 +87,7 @@ class Registry(registry_pb2_grpc.RegistryServicer):
                         runner_id=r.runner_id,
                         name=r.name,
                         token=r.runner_token_hash,
-                        status=r.status,
+                        health=r.health,
                     )
                     for r in runners
                 ]
