@@ -10,6 +10,10 @@
 - [ ] Refactors
 	- [ ] Move services back into api layer
 	- [ ] Config: support ENV variables with CLI arg overrides (remove .env file dependency)
+	- [ ] Unify `get_session` and `create_session` to eliminate duplication (same function for REST and gRPC DI)
+	- [ ] Standardize jobs service return types (some return raw rows, some return `JobRead` models)
+		- Convert SQL queries over to ORM style
+	- [ ] Document that `api_url` expects a gRPC-compatible address (`host:port`), not `http://`
 	- [x] Builder
 		- [x] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
 		- [x] Need to fail fast
@@ -22,6 +26,9 @@
 		- [x] Create CLI
 		- [ ] Update utils.py (move functions that belong to buildserver-runner out of buildserver)
 		- [x] Replace in memory queue with distributed network queue
+	- [ ] Tests
+		- [ ] Switch registry tests to unit tests (mock DB, mock gRPC context)
+		- [ ] Add `db_session_ctx` and `grpc_context` fixtures to conftest
 	- [ ] Scheduler service (0.1.x)
 		- [ ] Agent registration / heartbeat mechanism
 		- [ ] Control plane must verify node availability before dispatching work
