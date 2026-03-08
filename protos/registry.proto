@@ -8,7 +8,7 @@ service Registry {
   // Runner-facing RPCs
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
-  rpc Deregister(DeregisterRequest) returns (DeregisterResponse);
+  rpc Unregister(UnregisterRequest) returns (UnregisterResponse);
 
   // Scheduler-facing RPCs
   rpc ListAvailable(ListAvailableRequest) returns (ListAvailableResponse);
@@ -25,7 +25,7 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-  int32 runner_id = 1;
+  RunnerInfo runner = 1;
 }
 
 message HeartbeatRequest {
@@ -34,11 +34,11 @@ message HeartbeatRequest {
 
 message HeartbeatResponse {}
 
-message DeregisterRequest {
+message UnregisterRequest {
   int32 runner_id = 1;
 }
 
-message DeregisterResponse {}
+message UnregisterResponse {}
 
 // --- Scheduler-facing ---
 
@@ -47,11 +47,18 @@ message ListAvailableRequest {}
 message RunnerInfo {
   int32 runner_id                         = 1;
   string name                             = 2;
-  google.protobuf.Timestamp last_heartbeat = 3;
+  string token                            = 3;
+  RunnerHealth health                     = 4;
 }
 
 message ListAvailableResponse {
   repeated RunnerInfo runners = 1;
+}
+
+enum RunnerHealth {
+  UNKNOWN   = 0;
+  UNHEALTHY = 1;
+  HEALTHY   = 2;
 }
 
 // --- Admin ---
@@ -60,5 +67,6 @@ message GenerateRegistrationTokenRequest {}
 
 message GenerateRegistrationTokenResponse {
   string token                          = 1;
-  google.protobuf.Timestamp expires_at  = 2;
+  google.protobuf.Timestamp created_at  = 2;
+  google.protobuf.Timestamp expires_at  = 3;
 }
