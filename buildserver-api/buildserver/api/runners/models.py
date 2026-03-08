@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Enum
+from sqlalchemy import String, Integer
 from protos.registry_pb2 import RunnerHealth
 
 from buildserver.database.core import Base
@@ -19,6 +19,4 @@ class Runner(Base):
     runner_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40))
     runner_token_hash: Mapped[str] = mapped_column(String(64))
-    health: Mapped[RunnerHealth] = mapped_column(
-        Enum(RunnerHealth)
-    )  # maps to RunnerStatus enum
+    health: Mapped[int] = mapped_column(Integer, default=RunnerHealth.UNKNOWN)
