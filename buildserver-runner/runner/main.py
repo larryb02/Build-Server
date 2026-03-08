@@ -1,13 +1,19 @@
 import logging
 
+import grpc
 import typer
+from protos import registry_pb2, registry_pb2_grpc
 
-from runner.config import LOG_LEVEL
+from runner.config import (
+    LOG_LEVEL,
+    CONFIG_PATH,
+    create_runner_config,
+    init_runner_config,
+)
 from runner.agent import Agent
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(LOG_LEVEL)
 
 
 def version_callback(value: bool):
@@ -35,7 +41,31 @@ def main(
 
 @app.command(name="start", help="Start buildserver-runner")
 def start_runner():
+    init_runner_config()
     Agent().start()
+
+
+@app.command(name="register", help="register runner to server")
+def register(
+    name: str = typer.Option(None, "--name", "-n", help="Runner name"),
+    token: str = typer.Option(..., "--token", "-t", help="Registration token"),
+    url: str = typer.Option(..., "--url", "-u", help="Buildserver API URL"),
+):
+    # TODO: Add interactive prompts
+    channel = grpc.insecure_channel(f"{url}")
+    registry = registry_pb2_grpc.RegistryStub(channel)
+    try:
+        response = registry.Register(
+            registry_pb2.RegisterRequest(name=name, token=token)
+        )
+        # write response to a toml file
+        create_runner_config(
+            token=response.runner.token, name=response.runner.name, api_url=url
+        )
+        logger.info("config written to %s", CONFIG_PATH)
+    except grpc.RpcError as exc:
+        # TODO: check status codes and/or create custom statuses to improve UX
+        logger.error(exc)
 
 
 if __name__ == "__main__":
