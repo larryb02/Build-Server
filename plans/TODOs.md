@@ -7,25 +7,12 @@
 	- [ ] Runner registration
 
 ## General
+- [ ] Automated protobuf compilation
 - [ ] Refactors
-	- [ ] Move services back into api layer
 	- [ ] Config: support ENV variables with CLI arg overrides (remove .env file dependency)
-	- [ ] Unify `get_session` and `create_session` to eliminate duplication (same function for REST and gRPC DI)
 	- [ ] Standardize jobs service return types (some return raw rows, some return `JobRead` models)
 		- Convert SQL queries over to ORM style
 	- [ ] Document that `api_url` expects a gRPC-compatible address (`host:port`), not `http://`
-	- [x] Builder
-		- [x] 'build' directory should be ephemeral, create it on a new job, remove it once work is done
-		- [x] Need to fail fast
-		- [x] Fix error handling ASAP.
-	- [x] Agent
-		- [x] clear start semantics
-		- [x] clear stop
-		- [x] Communicate with api over HTTP
-		- [x] Move out of buildserver
-		- [x] Create CLI
-		- [ ] Update utils.py (move functions that belong to buildserver-runner out of buildserver)
-		- [x] Replace in memory queue with distributed network queue
 	- [ ] Tests
 		- [ ] Switch registry tests to unit tests (mock DB, mock gRPC context)
 		- [ ] Add `db_session_ctx` and `grpc_context` fixtures to conftest
@@ -33,8 +20,6 @@
 		- [ ] Agent registration / heartbeat mechanism
 		- [ ] Control plane must verify node availability before dispatching work
 	- [ ] Rebuilder
-		- [x] communicate with API to register new builds
-		- [x] Run as background thread in API
 		- [ ] Webhook support (pre-1.0): receive push events from VCS platforms instead of polling
 			- [ ] Auto-register webhooks via API (e.g. GitHub POST /repos/{owner}/{repo}/hooks) on job registration
 			- [ ] Requires user token with admin:repo_hook scope
@@ -46,7 +31,7 @@
 		- [x] deploy new release
 - [x] Versioning
 - [x] Changelogs
-- [ ] Deployment
-	- [ ] Finish automated deployment of cluster
-	- [ ] Add deployment of application to CI once cluster is setup
+- [x] Deployment
+	- [x] Finish automated deployment of cluster
+	- [x] Add deployment of application to CI once cluster is setup
 - [ ] Monitoring
