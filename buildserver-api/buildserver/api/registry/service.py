@@ -33,7 +33,7 @@ class Registry(registry_pb2_grpc.RegistryServicer):
         runner = Runner(
             name=request.name,
             runner_token_hash=token_hash,
-            health=registry_pb2.RunnerHealth.UNKNOWN,
+            health=registry_pb2.RunnerHealth.OFFLINE,
         )
         with session_context() as session:
             try:
@@ -52,7 +52,7 @@ class Registry(registry_pb2_grpc.RegistryServicer):
                 runner_id=runner_id,
                 name=request.name,
                 token=request.token,
-                health=registry_pb2.RunnerHealth.UNKNOWN,
+                health=registry_pb2.RunnerHealth.OFFLINE,
             )
         )
 

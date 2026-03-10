@@ -56,7 +56,7 @@ message ListAvailableResponse {
 }
 
 enum RunnerHealth {
-  UNKNOWN   = 0;
+  OFFLINE   = 0;
   UNHEALTHY = 1;
   HEALTHY   = 2;
 }
