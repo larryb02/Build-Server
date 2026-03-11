@@ -25,7 +25,9 @@ logger = logging.getLogger(__name__)
 
 def _create_grpc_server() -> grpc.Server:
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    registry_pb2_grpc.add_RegistryServicer_to_server(Registry(), server)
+    registry = Registry()
+    registry.start()
+    registry_pb2_grpc.add_RegistryServicer_to_server(registry, server)
     reflection.enable_server_reflection(
         (
             registry_pb2.DESCRIPTOR.services_by_name["Registry"].full_name,

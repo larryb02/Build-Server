@@ -4,12 +4,7 @@ import grpc
 import typer
 from protos import registry_pb2, registry_pb2_grpc
 
-from runner.config import (
-    LOG_LEVEL,
-    CONFIG_PATH,
-    create_runner_config,
-    init_runner_config,
-)
+from runner.config import LOG_LEVEL, CONFIG_PATH, create_runner_config
 from runner.agent import Agent
 
 logging.basicConfig()
@@ -41,8 +36,11 @@ def main(
 
 @app.command(name="start", help="Start buildserver-runner")
 def start_runner():
-    init_runner_config()
-    Agent().start()
+    try:
+        Agent().start()
+    except RuntimeError as exc:
+        logger.error(exc)
+        print("No runner registered.")
 
 
 @app.command(name="register", help="register runner to server")
@@ -66,6 +64,7 @@ def register(
     except grpc.RpcError as exc:
         # TODO: check status codes and/or create custom statuses to improve UX
         logger.error(exc)
+        print("Failed to register runner")
 
 
 if __name__ == "__main__":

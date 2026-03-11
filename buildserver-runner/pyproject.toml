@@ -12,6 +12,7 @@ dependencies = [
     "pydantic",
     "dynaconf",
     "toml",
+    "tenacity",
 ]
 
 [project.optional-dependencies]

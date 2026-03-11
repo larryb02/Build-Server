@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 service Registry {
   // Runner-facing RPCs
   rpc Register(RegisterRequest) returns (RegisterResponse);
-  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc Heartbeat(stream HeartbeatMessage) returns (stream HeartbeatMessage);
   rpc Unregister(UnregisterRequest) returns (UnregisterResponse);
 
   // Scheduler-facing RPCs
@@ -28,14 +28,13 @@ message RegisterResponse {
   RunnerInfo runner = 1;
 }
 
-message HeartbeatRequest {
-  int32 runner_id = 1;
+message HeartbeatMessage {
+  string runner_token = 1;
+  string message  = 2;
 }
 
-message HeartbeatResponse {}
-
 message UnregisterRequest {
-  int32 runner_id = 1;
+  int32 runner_token = 1;
 }
 
 message UnregisterResponse {}
