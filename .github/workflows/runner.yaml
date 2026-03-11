@@ -53,7 +53,7 @@ jobs:
         run: |
           pip install --upgrade setuptools pip; \
           pip install pytest grpcio-tools; \
-          python -m grpc_tools.protoc \ # temporary block until i create Makefile or some build system
+          python -m grpc_tools.protoc  # temporary block until i create Makefile or some build system \
           -Iprotos=./protos --python_out=./protos \
           --grpc_python_out=./protos ./protos/registry.proto; \
           pip install -e ../protos/protos; \
