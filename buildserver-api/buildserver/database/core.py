@@ -14,7 +14,7 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_recycle=1800,
 )
-session_factory = sessionmaker(bind=engine)
+session_factory = sessionmaker(bind=engine, expire_on_commit=False)
 SessionLocal = scoped_session(session_factory)
 
 
