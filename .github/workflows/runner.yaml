@@ -49,7 +49,7 @@ jobs:
       - name: Create env file
         run: echo "${{ secrets.RUNNER_ENV_FILE }}" > buildserver-runner/.env
       - name: Install dependencies
-        working-directory: buildserver-runner
+        # working-directory: buildserver-runner
         run: |
           pip install --upgrade setuptools pip; \
           pip install pytest grpcio-tools; \
@@ -57,7 +57,7 @@ jobs:
           -Iprotos=./protos --python_out=./protos \
           --grpc_python_out=./protos ./protos/registry.proto; \
           pip install -e ../protos/protos; \
-          pip install -e .[test]
+          pip install -e ./buildserver-runner[test]
       - name: Run tests
         working-directory: buildserver-runner
         run: pytest -xv runner/tests
