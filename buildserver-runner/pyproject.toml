@@ -13,6 +13,7 @@ dependencies = [
     "dynaconf",
     "toml",
     "tenacity",
+    "grpcio>=1.18.0",
 ]
 
 [project.optional-dependencies]
