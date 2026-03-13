@@ -50,6 +50,7 @@ def get_commit_hash(path: Path, logger: logging.Logger) -> str:
     return commit_hash
 
 
+# TODO: should be catching exceptions
 def get_remote_hash(remote_url: str) -> str:
     proc = subprocess.run(
         ["/usr/bin/git", "ls-remote", remote_url, "HEAD"],
