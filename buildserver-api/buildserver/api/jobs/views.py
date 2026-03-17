@@ -3,11 +3,12 @@
 import logging
 
 from fastapi import APIRouter, HTTPException, Query, status
+from sqlalchemy.exc import DBAPIError
 
 from buildserver.api.jobs.models import JobCreate, JobRead, JobStatusUpdate
 from buildserver.api.jobs.service import (
     validate,
-    register_job,
+    create_job,
     get_job_by_id,
     get_all_jobs,
     get_all_unique_jobs,
@@ -20,19 +21,26 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/jobs")
 
 
-@router.post("/register", response_model=JobRead)
-def register(repo: JobCreate, dbsession: DbSession):
+@router.post("", response_model=JobRead)
+def create_new_job(repo: JobCreate, dbsession: DbSession):
     """
-    Registers a new program to be built
+    Creates a new job to be executed
     """
     try:
         validate(repo.git_repository_url)
+        job = JobRead(**create_job(repo, dbsession)._mapping)
+        if not job:
+            logger.error("failed to create job")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=[{"msg": str(e)}],
-        )
-    return register_job(repo, dbsession)
+        ) from e
+    except DBAPIError as e:
+        logger.error(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from e
+    return job
 
 
 @router.get("", response_model=list[JobRead])
