@@ -49,8 +49,10 @@ def get_all_jobs(dbsession: DbSession):
     return records
 
 
-def create_job(job: JobCreate, dbsession: DbSession, commit_hash: str | None = None):
+def create_job(job: JobCreate, dbsession: DbSession):
     """Insert a new job record into the database."""
+    # NOTE: update this once runner receives? or set here
+    commit_hash = get_remote_hash(job.git_repository_url)
     stmt = (
         insert(Job)
         .values(
