@@ -14,10 +14,8 @@ from buildserver.api.jobs.service import (
     update_job_status,
 )
 from buildserver.database.core import DbSession
-from buildserver.config import LOG_LEVEL
 
 logger = logging.getLogger(__name__)
-logger.setLevel(LOG_LEVEL)
 
 router = APIRouter(prefix="/jobs")
 
