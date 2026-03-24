@@ -3,22 +3,28 @@
 	- [ ] Introduce a base `Builder` class and a `ShellBuilder` subclass
 		- `ShellBuilder` bootstraps the execution environment (e.g. sets up cwd, permissions, env vars) before running the repo's build script
 		- Lays groundwork for future executor types
-	- [ ] Scheduler implementation
-	- [ ] Runner registration
+	- [x] Scheduler implementation
+		- Schedule() rpc method gets hit
+		- check for available runners
+		- choose a scheduling algorithm
+		- dispatch to runner
+	- [x] Runner registration
 
 ## General
 - [ ] Automated protobuf compilation
+	- revisit how/where i generate my protobufs
 - [ ] Refactors
 	- [ ] Config: support ENV variables with CLI arg overrides (remove .env file dependency)
 	- [ ] Standardize jobs service return types (some return raw rows, some return `JobRead` models)
 		- Convert SQL queries over to ORM style
+		- Revisit all sql queries using 1.0 style and execute()
 	- [ ] Document that `api_url` expects a gRPC-compatible address (`host:port`), not `http://`
 	- [ ] Tests
 		- [ ] Switch registry tests to unit tests (mock DB, mock gRPC context)
 		- [ ] Add `db_session_ctx` and `grpc_context` fixtures to conftest
 	- [ ] Scheduler service (0.1.x)
-		- [ ] Agent registration / heartbeat mechanism
-		- [ ] Control plane must verify node availability before dispatching work
+		- [x] Agent registration / heartbeat mechanism
+		- [x] Control plane must verify node availability before dispatching work
 	- [ ] Rebuilder
 		- [ ] Webhook support (pre-1.0): receive push events from VCS platforms instead of polling
 			- [ ] Auto-register webhooks via API (e.g. GitHub POST /repos/{owner}/{repo}/hooks) on job registration

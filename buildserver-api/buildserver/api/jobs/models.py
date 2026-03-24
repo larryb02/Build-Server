@@ -5,7 +5,7 @@ from enum import Enum as PyEnum
 from typing import Optional
 
 from pydantic import BaseModel
-from sqlalchemy import DateTime, String, Enum
+from sqlalchemy import DateTime, String, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from buildserver.database.core import Base
@@ -18,7 +18,6 @@ class JobStatus(str, PyEnum):
     SUCCEEDED = "SUCCEEDED"
     QUEUED = "QUEUED"
     RUNNING = "RUNNING"
-    CREATED = "CREATED"
 
 
 class JobStatusUpdate(BaseModel):
@@ -78,4 +77,7 @@ class Job(Base):
         String(40), nullable=True
     )  # add this after successful build
     job_status: Mapped[str] = mapped_column(Enum(JobStatus, name="jobstatus"))
+    runner_id: Mapped[int] = mapped_column(
+        ForeignKey("runner.runner_id"), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)

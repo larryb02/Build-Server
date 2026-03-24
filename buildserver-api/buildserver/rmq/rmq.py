@@ -77,7 +77,7 @@ class RabbitMQConsumer(RabbitMQConnection):
         self._on_message: Callable[[bytes], None] | None = None
         self._prefetch_count: int = 1
 
-    def start(
+    def consume(
         self, queue: str, on_message: Callable[[bytes], None], prefetch_count: int = 1
     ) -> None:
         """Connect to RabbitMQ and begin consuming from the given queue.

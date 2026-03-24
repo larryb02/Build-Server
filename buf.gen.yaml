@@ -1,0 +1,13 @@
+version: v2
+managed:
+  enabled: true
+# inputs:
+#   - directory: protos/
+plugins:
+  - remote: buf.build/grpc/python:v1.78.1
+    out: protos/protos
+    opt: paths=source_relative
+  - remote: buf.build/protocolbuffers/pyi:v34.0
+    out: protos/protos
+  - remote: buf.build/protocolbuffers/python:v34.0
+    out: protos/protos

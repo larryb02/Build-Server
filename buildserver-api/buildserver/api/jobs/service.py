@@ -75,13 +75,11 @@ def create_job(job: JobCreate, dbsession: DbSession):
     return record
 
 
-def register_job(repo: JobCreate, dbsession: DbSession) -> JobRead:
-    """Create a new job and publish it to the build queue."""
-    commit_hash = get_remote_hash(repo.git_repository_url)
-    job = JobRead(**dict(create_job(repo, dbsession, commit_hash)._mapping))
-    publisher = RabbitMQProducer()
-    publisher.publish("build_jobs", job.model_dump_json().encode())
-    return job
+# def register_job(repo: JobCreate, dbsession: DbSession) -> JobRead:
+#     """Create a new job and publish it to the build queue."""
+#     commit_hash = get_remote_hash(repo.git_repository_url)
+#     job = JobRead(**create_job(repo, dbsession, commit_hash)._mapping)
+#     return job
 
 
 def create_artifact(artifact: ArtifactCreate, dbsession: DbSession):
