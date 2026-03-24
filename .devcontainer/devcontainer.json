@@ -1,11 +1,11 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "dockerComposeFile": "compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {}
     },
     "remoteUser": "vscode",
-    // "runArgs": ["--shm-size=128m"],
-    // "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     "customizations": {
         "vscode": {
             "extensions": [
