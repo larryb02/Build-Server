@@ -35,7 +35,7 @@ class Agent:
         # self._executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
         self._heartbeat_executor = ThreadPoolExecutor(max_workers=1)
         self.active_jobs: list[Job] = []
-        self._workers = ThreadPoolExecutor(max_workers=MAX_WORKERS)
+        # self._workers = ThreadPoolExecutor(max_workers=MAX_WORKERS)
         self._stop_event = threading.Event()
         self._grpc_channel = None
 
@@ -56,18 +56,9 @@ class Agent:
         try:
             # TODO: switch over to threading.Thread for this
             self._heartbeat_executor.submit(self._heartbeat)
-            # request work
-            threading.Thread(target=self._request_work).start()
-            # self._rmq.start(BUILD_QUEUE, self._on_message, prefetch_count=MAX_WORKERS)
+            threading.Thread(target=self._request_work, daemon=True).start()
         except KeyboardInterrupt:
             self.stop()
-
-    def _submit_job(self):
-        def fake_task():
-            logger.debug("Hello!")
-
-        with self._workers as executor:
-            executor.submit(fake_task)
 
     def _request_work(self):
         scheduler = scheduler_pb2_grpc.SchedulerStub(self._grpc_channel)
@@ -84,7 +75,10 @@ class Agent:
                     logger.debug("no jobs")
                     continue
                 logger.debug("got job: %s", job)
-                self._submit_job()  # NOTE: just a stub for now
+                # NOTE: Shutdown ungracefully fine for now. No worker pools for now -- also fine.
+                threading.Thread(
+                    target=self._handle_job, args=(job,), daemon=True
+                ).start()
             except grpc.RpcError as exc:
                 logger.error(exc)
 
@@ -120,6 +114,10 @@ class Agent:
                 logger.debug("heartbeat pong: runner_token=%s", response.runner_token)
 
         connect()
+
+    def _handle_job(self, job):
+        """Execute a build job. Runs in a worker thread."""
+        logger.info("handling job: %s", job)
 
     # def _on_message(self, body: bytes):
     #     """Submit job to worker pool. Returns immediately to keep ioloop responsive."""
