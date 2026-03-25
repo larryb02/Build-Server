@@ -2,7 +2,7 @@ import logging
 import threading
 
 import grpc
-from protos import scheduler_pb2, scheduler_pb2_grpc, registry_pb2, registry_pb2_grpc
+from protos import scheduler_pb2, scheduler_pb2_grpc
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy import select, update
 
@@ -28,6 +28,8 @@ class Scheduler(scheduler_pb2_grpc.SchedulerServicer):
                 # make sure runner fits some set of criteria then assign job if there is one
                 logger.debug("JobRequest from %s", request.runner_token)
                 with session_context() as session:
+                    # NOTE: need to check runner capacity as well
+                    # -- just revisit data model to support this
                     # get runner metadata
                     # TODO: convert this to a service function
                     runner = (
@@ -35,8 +37,6 @@ class Scheduler(scheduler_pb2_grpc.SchedulerServicer):
                         .filter(Runner.runner_token_hash == request.runner_token)
                         .first()
                     )
-                    # check for jobs where status == QUEUED
-                    # and job isn't assigned
                     stmt = (
                         select(Job)
                         .where(Job.job_status == JobStatus.QUEUED)
@@ -46,7 +46,6 @@ class Scheduler(scheduler_pb2_grpc.SchedulerServicer):
                     if not res:
                         logger.debug("no jobs")
                         return scheduler_pb2.JobResponse()
-                    # we got jobs -- assign one to runner
                     logger.debug("assigning job: %s", res)
                     stmt = (
                         update(Job)
@@ -59,9 +58,6 @@ class Scheduler(scheduler_pb2_grpc.SchedulerServicer):
                         job_id=res.job_id, git_repository_url=res.git_repository_url
                     )
                 )
-            except DBAPIError as exc:
-                logger.error(exc)
-                context.abort(grpc.StatusCode.INTERNAL, "failed to process request")
-            except grpc.RpcError as exc:
+            except (grpc.RpcError, DBAPIError) as exc:
                 logger.error(exc)
                 context.abort(grpc.StatusCode.INTERNAL, "failed to process request")
