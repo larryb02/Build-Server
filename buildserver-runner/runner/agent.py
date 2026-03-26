@@ -2,7 +2,7 @@
 
 import json
 import logging
-from concurrent.futures import ThreadPoolExecutor, CancelledError
+from concurrent.futures import ThreadPoolExecutor
 import threading
 import time
 
@@ -11,16 +11,11 @@ from protos import registry_pb2, registry_pb2_grpc, scheduler_pb2_grpc, schedule
 from tenacity import retry, retry_if_exception_type, wait_exponential, before_sleep_log
 
 from runner.builder.builder import run as run_build, BuildError, CloneError
-from runner.types import Job, JobStatus
 from runner.config import LOG_LEVEL, APISERVER_HOST, RUNNER_TOKEN, GRPC_SERVICE_CONFIG
 
-# from runner.rmq.rmq import RabbitMQConsumer
 
-logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(LOG_LEVEL)
 
-MAX_WORKERS = 4  # TODO: move to config
 BUILD_QUEUE = "build_jobs"
 HEARTBEAT_TIMER = 1
 
@@ -31,11 +26,7 @@ class Agent:
     """
 
     def __init__(self):
-        # self._rmq = RabbitMQConsumer()
-        # self._executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
         self._heartbeat_executor = ThreadPoolExecutor(max_workers=1)
-        self.active_jobs: list[Job] = []
-        # self._workers = ThreadPoolExecutor(max_workers=MAX_WORKERS)
         self._stop_event = threading.Event()
         self._grpc_channel = None
 
@@ -62,35 +53,34 @@ class Agent:
 
     def _request_work(self):
         scheduler = scheduler_pb2_grpc.SchedulerStub(self._grpc_channel)
-        sleep_for = 15
+        sleep_for = 1
         while True:
             time.sleep(sleep_for)
             logger.debug("requesting work...")
             try:
-                job = scheduler.RequestJob(
+                res = scheduler.RequestJob(
                     scheduler_pb2.JobRequest(runner_token=RUNNER_TOKEN)
                 )
                 # if got a job add to queue then a runner will pick it up
-                if not job.HasField("job"):
+                if not res.HasField("job"):
                     logger.debug("no jobs")
                     continue
-                logger.debug("got job: %s", job)
+                logger.debug("got job: %s", res)
                 # NOTE: Shutdown ungracefully fine for now. No worker pools for now -- also fine.
                 threading.Thread(
-                    target=self._handle_job, args=(job,), daemon=True
+                    target=self._handle_job, args=(res.job,), daemon=True
                 ).start()
             except grpc.RpcError as exc:
                 logger.error(exc)
 
     def stop(self):
-        """Stop the agent and close the RabbitMQ connection."""
         logger.info("stopping agent...")
         self._stop_event.set()
         if self._grpc_channel:
             self._grpc_channel.close()
         self._heartbeat_executor.shutdown(wait=True)
-        # self._rmq.stop()
 
+    # TODO: simple rpc better solution?
     def _heartbeat(self):
         @retry(
             retry=retry_if_exception_type(grpc.RpcError),
@@ -118,9 +108,6 @@ class Agent:
     def _handle_job(self, job):
         """Execute a build job. Runs in a worker thread."""
         logger.info("handling job: %s", job)
-        #     # from here agent needs to update status will just make calls to API for now
-        # NOTE: for first iteration this is fine, ideally want to stream here
-        logger.debug("We made it here...")
         try:
             run_build(job)
             logger.info("Job %s succeeded", job.job_id)

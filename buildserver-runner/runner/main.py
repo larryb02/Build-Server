@@ -7,7 +7,7 @@ from protos import registry_pb2, registry_pb2_grpc
 from runner.config import LOG_LEVEL, CONFIG_PATH, create_runner_config
 from runner.agent import Agent
 
-logging.basicConfig()
+logging.basicConfig(level=LOG_LEVEL, force=True)
 logger = logging.getLogger(__name__)
 
 
