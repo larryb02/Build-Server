@@ -19,8 +19,8 @@ from buildserver.api.runners.views import router as runners_router
 from buildserver.config import GRPC_PORT, LOG_LEVEL
 from buildserver.database.core import init_db
 from buildserver.rebuilder import run as run_rebuilder
-from buildserver.api.registry.service import Registry
-from buildserver.api.scheduler.service import Scheduler
+from buildserver.registry.service import Registry
+from buildserver.scheduler.service import Scheduler
 
 logging.basicConfig(level=LOG_LEVEL, force=True)
 logger = logging.getLogger(__name__)
