@@ -118,51 +118,14 @@ class Agent:
     def _handle_job(self, job):
         """Execute a build job. Runs in a worker thread."""
         logger.info("handling job: %s", job)
-
-    # def _on_message(self, body: bytes):
-    #     """Submit job to worker pool. Returns immediately to keep ioloop responsive."""
-    #     self._executor.submit(self._handle_job, body)
-
-    # def _handle_job(self, body: bytes):
-    #     """Execute a build job. Runs in a worker thread."""
-    #     logger.info("received data %s", body)
-    #     job = Job.model_validate_json(body)
-    #     # since queue limits amount of messages consumed
-    #     # should be fine to immediately start executing a job
-    #     # NOTE: not thread safe
-    #     self.active_jobs.append(job)
-    #     # from here agent needs to update status will just make calls to API for now
-    #     # NOTE: for first iteration this is fine, ideally want to stream here
-    #     logger.debug("We made it here...")
-    #     try:
-    #         requests.patch(
-    #             f"{APISERVER_HOST}/jobs/{job.job_id}",
-    #             json={"job_status": JobStatus.RUNNING},
-    #             timeout=5,
-    #         )
-    #     # can't return anything if you can't reach the server
-    #     # this is fine for now because implementation will be changing soon
-    #     # but hanging jobs will exist in database -- are they drained from rabbitmq?
-    #     except requests.exceptions.RequestException as e:
-    #         logger.error("Failed to make request: %s", e)
-    #         return
-    #     try:
-    #         run_build(job)
-    #         status = JobStatus.SUCCEEDED
-    #         logger.info("Job %s succeeded", job.job_id)
-    #     except (BuildError, CloneError) as e:
-    #         status = JobStatus.FAILED
-    #         logger.error("Job %s failed: %s", job.job_id, e)
-    #     try:
-    #         requests.patch(
-    #             f"{APISERVER_HOST}/jobs/{job.job_id}",
-    #             json={"job_status": status},
-    #             timeout=5,
-    #         )
-    #     except requests.exceptions.RequestException as e:
-    #         logger.error("Failed to make request: %s", e)
-    #         return
-    #     self.active_jobs.remove(job)
+        #     # from here agent needs to update status will just make calls to API for now
+        # NOTE: for first iteration this is fine, ideally want to stream here
+        logger.debug("We made it here...")
+        try:
+            run_build(job)
+            logger.info("Job %s succeeded", job.job_id)
+        except (BuildError, CloneError) as e:
+            logger.error("Job %s failed: %s", job.job_id, e)
 
 
 if __name__ == "__main__":
