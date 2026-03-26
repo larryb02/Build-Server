@@ -42,7 +42,7 @@ class Scheduler(scheduler_pb2_grpc.SchedulerServicer):
                         .where(Job.job_status == JobStatus.QUEUED)
                         .where(Job.runner_id == None)
                     )
-                    res = session.scalars(stmt).one_or_none()
+                    res = session.scalars(stmt).first()
                     if not res:
                         logger.debug("no jobs")
                         return scheduler_pb2.JobResponse()
