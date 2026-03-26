@@ -14,8 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from grpc_reflection.v1alpha import reflection
 import protos
 
-from buildserver.api.jobs.views import router as build_router
-from buildserver.api.runners.views import router as runners_router
+from buildserver.api import api_router
 from buildserver.config import GRPC_PORT, LOG_LEVEL
 from buildserver.database.core import init_db
 from buildserver.rebuilder import run as run_rebuilder
@@ -69,8 +68,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(build_router)
-app.include_router(runners_router)
+app.include_router(api_router)
 
 
 def main():  # noqa: C0116
