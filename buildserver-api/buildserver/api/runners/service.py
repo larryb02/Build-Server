@@ -49,7 +49,6 @@ def _check_runner_health() -> None:
 
 
 def register_runner(token: str, name: str, dbsession: DbSession) -> Runner:
-    # token_hash = hashlib.sha256(token.encode()).hexdigest()
     runner = Runner(name=name, runner_token_hash=token)
     try:
         dbsession.add(runner)

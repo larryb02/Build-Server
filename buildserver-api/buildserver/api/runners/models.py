@@ -18,6 +18,10 @@ class RunnerHealth(IntEnum):
     HEALTHY = 2
 
 
+class RegisterResponse(BaseModel):
+    pass
+
+
 class RegisterRequest(BaseModel):
     token: str
     name: str

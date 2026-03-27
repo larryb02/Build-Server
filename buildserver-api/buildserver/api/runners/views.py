@@ -40,7 +40,7 @@ def send_heartbeat(token: HeartbeatRequest, dbsession: DbSession):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from exc
 
 
-@router.post("/token", response_model=GenerateTokenResponse)
+@router.post("/register", response_model=GenerateTokenResponse)
 def generate_token(dbsession: DbSession):
     """Generate a runner registration token."""
     token = generate_registration_token(dbsession)
