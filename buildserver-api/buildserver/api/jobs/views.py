@@ -5,8 +5,16 @@ import logging
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy.exc import DBAPIError
 
-from buildserver.api.jobs.models import JobCreate, JobRead, JobStatusUpdate
+from buildserver.api.jobs.models import (
+    JobCreate,
+    JobRead,
+    JobResponse,
+    JobStatus,
+    JobStatusUpdate,
+    JobRequest,
+)
 from buildserver.api.jobs.service import (
+    assign_job,
     validate,
     create_job,
     get_job_by_id,
@@ -14,11 +22,35 @@ from buildserver.api.jobs.service import (
     get_all_unique_jobs,
     update_job_status,
 )
+from buildserver.api.runners.service import get_runner_by_token
 from buildserver.database.core import DbSession
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/jobs")
+
+
+@router.post(
+    "/request", response_model=JobResponse, status_code=status.HTTP_202_ACCEPTED
+)
+def request_job(token: JobRequest, dbsession: DbSession):
+    try:
+        runner = get_runner_by_token(token.token, dbsession)
+        # NOTE: eventually should pass filters as params
+        job = assign_job(runner.runner_id, dbsession)
+        if not job:
+            return JobResponse(job=None)
+        return JobResponse(
+            job=JobRead(
+                job_id=job.job_id,
+                git_repository_url=job.git_repository_url,
+                commit_hash=job.commit_hash,
+                job_status=JobStatus(job.job_status),
+                created_at=job.created_at,
+            )
+        )
+    except DBAPIError as exc:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from exc
 
 
 @router.post("", response_model=JobRead)
@@ -54,23 +86,35 @@ async def get_jobs(
     try:
         if latest:
             return get_all_unique_jobs(dbsession)
-        jobs = list(job._mapping for job in get_all_jobs(dbsession))
+        jobs = list(JobRead(**job._mapping) for job in get_all_jobs(dbsession))
         return jobs
     # TODO: catch useful exceptions here and handle accordingly
     except Exception as e:
         logger.error(f"Failed to get jobs: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from e
 
 
 @router.get("/{job_id}", response_model=JobRead)
 def get_job(job_id: int, dbsession: DbSession) -> JobRead:
     """Retrieve a single job by ID."""
-    job = get_job_by_id(dbsession, job_id)
-    if job is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Job with id {job_id} not found",
+    try:
+        job = get_job_by_id(job_id, dbsession)
+        if not job:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Job with id {job_id} not found",
+            )
+        # TODO: improve data modeling
+        logger.debug("id: %s job: %s", job_id, job)
+        return JobRead(
+            job_id=job.job_id,
+            git_repository_url=job.git_repository_url,
+            job_status=JobStatus(job.job_status),
+            commit_hash=None,
+            created_at=job.created_at,
         )
-    return job
+    except DBAPIError as exc:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from exc
 
 
 @router.patch("/{job_id}", response_model=JobRead)

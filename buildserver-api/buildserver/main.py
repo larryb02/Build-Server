@@ -2,45 +2,20 @@
 
 import logging
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 
-import grpc
-import protos.scheduler_pb2
-import protos.scheduler_pb2_grpc
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from grpc_reflection.v1alpha import reflection
-import protos
 
 from buildserver.api import api_router
-from buildserver.config import GRPC_PORT, LOG_LEVEL
+from buildserver.api.runners.service import run_health_monitor
+from buildserver.config import LOG_LEVEL
 from buildserver.database.core import init_db
 from buildserver.rebuilder import run as run_rebuilder
-from buildserver.registry.service import Registry
-from buildserver.scheduler.service import Scheduler
 
 logging.basicConfig(level=LOG_LEVEL, force=True)
 logger = logging.getLogger(__name__)
-
-
-def _create_grpc_server() -> grpc.Server:
-    server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    registry = Registry()
-    registry.start()
-    protos.registry_pb2_grpc.add_RegistryServicer_to_server(registry, server)
-    protos.scheduler_pb2_grpc.add_SchedulerServicer_to_server(Scheduler(), server)
-    reflection.enable_server_reflection(
-        (
-            protos.registry_pb2.DESCRIPTOR.services_by_name["Registry"].full_name,
-            protos.scheduler_pb2.DESCRIPTOR.services_by_name["Scheduler"].full_name,
-            reflection.SERVICE_NAME,
-        ),
-        server,
-    )
-    server.add_insecure_port(f"[::]:{GRPC_PORT}")
-    return server
 
 
 @asynccontextmanager
@@ -50,13 +25,12 @@ async def lifespan(app: FastAPI):
         target=run_rebuilder, args=(stop_event,), daemon=True
     )
     rebuilder_thread.start()
-    grpc_server = _create_grpc_server()
-    grpc_server.start()
-    logger.info("gRPC server started on port %s", GRPC_PORT)
+    health_monitor_thread = threading.Thread(
+        target=run_health_monitor, args=(stop_event,), daemon=True
+    )
+    health_monitor_thread.start()
     yield
     stop_event.set()
-    grpc_server.stop(grace=None)
-    logger.info("gRPC server stopped")
 
 
 app = FastAPI(lifespan=lifespan)

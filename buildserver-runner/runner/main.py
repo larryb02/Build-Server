@@ -1,8 +1,10 @@
 import logging
 
-import grpc
+# import grpc
+import httpx
 import typer
-from protos import registry_pb2, registry_pb2_grpc
+
+# from protos import registry_pb2, registry_pb2_grpc
 
 from runner.config import LOG_LEVEL, CONFIG_PATH, create_runner_config
 from runner.agent import Agent
@@ -50,21 +52,19 @@ def register(
     url: str = typer.Option(..., "--url", "-u", help="Buildserver API URL"),
 ):
     # TODO: Add interactive prompts
-    channel = grpc.insecure_channel(f"{url}")
-    registry = registry_pb2_grpc.RegistryStub(channel)
     try:
-        response = registry.Register(
-            registry_pb2.RegisterRequest(name=name, token=token)
-        )
-        # write response to a toml file
-        create_runner_config(
-            token=response.runner.token, name=response.runner.name, api_url=url
-        )
-        logger.info("config written to %s", CONFIG_PATH)
-    except grpc.RpcError as exc:
         # TODO: check status codes and/or create custom statuses to improve UX
-        logger.error(exc)
-        print("Failed to register runner")
+        r = httpx.post(
+            url=f"{url}/api/v1/runners/",
+            headers={"Content-Type": "application/json"},
+            json={"token": token, "name": name},
+            follow_redirects=True,
+        )
+        r.raise_for_status()
+        create_runner_config(token=token, name=name, api_url=url)
+    except httpx.HTTPError as exc:
+        logger.debug(exc)
+        print("Failed to register runner: %s", exc)
 
 
 if __name__ == "__main__":

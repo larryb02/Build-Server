@@ -1,23 +1,21 @@
 """Agent is an execution node"""
 
-import json
 import logging
-from concurrent.futures import ThreadPoolExecutor
 import threading
 import time
 
-import grpc
-from protos import registry_pb2, registry_pb2_grpc, scheduler_pb2_grpc, scheduler_pb2
+import httpx
+from pydantic import ValidationError
 from tenacity import retry, retry_if_exception_type, wait_exponential, before_sleep_log
 
 from runner.builder.builder import run as run_build, BuildError, CloneError
-from runner.config import LOG_LEVEL, APISERVER_HOST, RUNNER_TOKEN, GRPC_SERVICE_CONFIG
+from runner.config import APISERVER_HOST, RUNNER_TOKEN
+from runner.types import Job
 
 
 logger = logging.getLogger(__name__)
 
-BUILD_QUEUE = "build_jobs"
-HEARTBEAT_TIMER = 1
+HEARTBEAT_INTERVAL = 10
 
 
 class Agent:
@@ -26,9 +24,7 @@ class Agent:
     """
 
     def __init__(self):
-        self._heartbeat_executor = ThreadPoolExecutor(max_workers=1)
         self._stop_event = threading.Event()
-        self._grpc_channel = None
 
     def start(self):
         """Start consuming from the build queue. Blocks the calling thread."""
@@ -37,82 +33,79 @@ class Agent:
                 "runner is not registered - run 'buildserver-runner register' first"
             )
         logger.info("starting agent...")
-        self._grpc_channel = grpc.insecure_channel(
-            APISERVER_HOST,
-            options=[
-                ("grpc.enable_retries", 1),
-                ("grpc.service_config", json.dumps(GRPC_SERVICE_CONFIG)),
-            ],
-        )
         try:
-            # TODO: switch over to threading.Thread for this
-            self._heartbeat_executor.submit(self._heartbeat)
-            threading.Thread(target=self._request_work, daemon=True).start()
+            threads = [
+                threading.Thread(target=self._heartbeat, daemon=True),
+                threading.Thread(target=self._request_work, daemon=True),
+            ]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join()
         except KeyboardInterrupt:
             self.stop()
 
     def _request_work(self):
-        scheduler = scheduler_pb2_grpc.SchedulerStub(self._grpc_channel)
-        sleep_for = 1
-        while True:
+        sleep_for = 3
+        while not self._stop_event.is_set():
             time.sleep(sleep_for)
             logger.debug("requesting work...")
+            # TODO: port to REST
             try:
-                res = scheduler.RequestJob(
-                    scheduler_pb2.JobRequest(runner_token=RUNNER_TOKEN)
-                )
-                # if got a job add to queue then a runner will pick it up
-                if not res.HasField("job"):
-                    logger.debug("no jobs")
-                    continue
-                logger.debug("got job: %s", res)
-                # NOTE: Shutdown ungracefully fine for now. No worker pools for now -- also fine.
-                threading.Thread(
-                    target=self._handle_job, args=(res.job,), daemon=True
-                ).start()
-            except grpc.RpcError as exc:
-                logger.error(exc)
+                with httpx.Client() as client:
+                    r = client.post(
+                        f"{APISERVER_HOST}/api/v1/jobs/request",
+                        json={"token": RUNNER_TOKEN},
+                    )
+                    r.raise_for_status()
+                    job = r.json().get("job")
+                    logger.debug("got %s", job)
+                    if not job:
+                        logger.debug("no jobs")
+                        continue
+                    # NOTE: Shutdown ungracefully fine for now.
+                    # No worker pools for now -- also fine.
+                    threading.Thread(
+                        target=self._handle_job, args=(job,), daemon=True
+                    ).start()
+            except httpx.HTTPError as exc:
+                logger.error("failed to request work: %s", exc)
 
     def stop(self):
         logger.info("stopping agent...")
         self._stop_event.set()
-        if self._grpc_channel:
-            self._grpc_channel.close()
-        self._heartbeat_executor.shutdown(wait=True)
 
-    # TODO: simple rpc better solution?
+    @retry(
+        retry=retry_if_exception_type(httpx.HTTPError),
+        wait=wait_exponential(multiplier=1, min=1, max=60),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+    )
     def _heartbeat(self):
-        @retry(
-            retry=retry_if_exception_type(grpc.RpcError),
-            wait=wait_exponential(multiplier=1, min=1, max=60),
-            before_sleep=before_sleep_log(logger, logging.WARNING),
-        )
-        # NOTE: delayed cancellation on keyboard interrupt while waiting for next retry attempt
-        def connect():
-            registry = registry_pb2_grpc.RegistryStub(self._grpc_channel)
-
-            def send_ping():
-                while not self._stop_event.is_set():
-                    self._stop_event.wait(timeout=HEARTBEAT_TIMER)
-                    logger.debug("sending ping")
-                    yield registry_pb2.HeartbeatMessage(
-                        runner_token=RUNNER_TOKEN, message="PING"
+        while not self._stop_event.is_set():
+            if self._stop_event.is_set():
+                break
+            self._stop_event.wait(timeout=HEARTBEAT_INTERVAL)
+            logger.debug("sending heartbeat")
+            with httpx.Client() as client:
+                try:
+                    r = client.post(
+                        f"{APISERVER_HOST}/api/v1/runners/heartbeat",
+                        json={"token": RUNNER_TOKEN},
                     )
-
-            logger.debug("attempting to connect to server")
-            for response in registry.Heartbeat(send_ping()):
-                logger.debug("heartbeat pong: runner_token=%s", response.runner_token)
-
-        connect()
+                    r.raise_for_status()
+                except httpx.HTTPError as exc:
+                    logger.error("failed to send heartbeat: %s", exc)
 
     def _handle_job(self, job):
-        """Execute a build job. Runs in a worker thread."""
+        """Execute a job. Runs in a worker thread."""
         logger.info("handling job: %s", job)
         try:
-            run_build(job)
+            run_build(Job.model_validate(job))
             logger.info("Job %s succeeded", job.job_id)
-        except (BuildError, CloneError) as e:
-            logger.error("Job %s failed: %s", job.job_id, e)
+        except ValidationError as exc:
+            logger.error(exc)
+        except (BuildError, CloneError) as exc:
+            logger.error("Job failed: %s", exc)
 
 
 if __name__ == "__main__":

@@ -81,3 +81,11 @@ class Job(Base):
         ForeignKey("runner.runner_id"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+
+
+class JobResponse(BaseModel):
+    job: Optional[JobRead]
+
+
+class JobRequest(BaseModel):
+    token: str

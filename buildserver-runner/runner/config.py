@@ -17,22 +17,6 @@ APISERVER_HOST = settings.get("RUNNERS.API_URL", None)
 RUNNER_TOKEN = settings.get("RUNNERS.TOKEN", None)
 
 
-GRPC_SERVICE_CONFIG = {
-    "methodConfig": [
-        {
-            "name": [{"service": "registry.Registry"}],
-            "retryPolicy": {
-                "maxAttempts": 5,
-                "initialBackoff": "0.1s",
-                "maxBackoff": "1s",
-                "backoffMultiplier": 2,
-                "retryableStatusCodes": ["UNAVAILABLE"],
-            },
-        }
-    ]
-}
-
-
 def create_runner_config(token, name, api_url):
     """Write runner config to config.toml."""
     if not CONFIG_PATH.exists():

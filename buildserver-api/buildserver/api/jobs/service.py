@@ -2,10 +2,9 @@
 
 import logging
 
-from fastapi.exceptions import RequestValidationError
 from sqlalchemy import insert, or_, select, update
+from sqlalchemy.exc import DBAPIError
 
-from buildserver.config import LOG_LEVEL
 from buildserver.database.core import DbSession
 from buildserver.api.jobs.models import JobStatus
 from buildserver.api.jobs.models import (
@@ -16,11 +15,42 @@ from buildserver.api.jobs.models import (
     JobRead,
 )
 from buildserver.utils import get_remote_hash
-from buildserver.rmq.rmq import RabbitMQProducer
 
-logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(LOG_LEVEL)
+
+
+def assign_job(runner_id: int, dbsession: DbSession) -> Job | None:
+    try:
+        selected_job = (
+            select(Job.job_id)
+            .where(Job.job_status == JobStatus.QUEUED)
+            .where(Job.runner_id == None)
+            .limit(1)
+        )
+        job = dbsession.scalars(
+            update(Job)
+            .where(Job.job_id == selected_job)
+            .values(runner_id=runner_id)
+            .returning(Job)
+        ).first()
+        logger.debug("scheduling job %s to runner %s", job, runner_id)
+        return job
+    except DBAPIError as exc:
+        logger.error(exc)
+        raise exc
+
+
+def get_available_jobs(dbsession: DbSession) -> list[Job]:
+    try:
+        res = dbsession.scalars(
+            select(Job)
+            .where(Job.job_status == JobStatus.QUEUED)
+            .where(Job.runner_id == None)
+        ).all()
+        return list(res)
+    except DBAPIError as exc:
+        logger.debug(exc)
+        raise exc
 
 
 def validate(repo_url: str):
@@ -30,23 +60,26 @@ def validate(repo_url: str):
         raise ValueError("Url must be https protocol")
 
 
-def get_job_by_id(dbsession: DbSession, job_id: int) -> JobRead | None:
+def get_job_by_id(job_id: int, dbsession: DbSession) -> Job | None:
     """Retrieve a single job by ID."""
-    stmt = select(*Job.__table__.columns).where(Job.job_id == job_id)
-    record = dbsession.execute(stmt).one_or_none()
-    if record is None:
-        return None
-    return JobRead(**record._mapping)
+    try:
+        job = dbsession.get(Job, job_id)
+        logger.debug("Got record: %s", job)
+        return job
+    except DBAPIError as exc:
+        logger.error(exc)
+        raise exc
 
 
 def get_all_jobs(dbsession: DbSession):
     """Retrieve all job records from the database."""
     stmt = select(*Job.__table__.columns)
     try:
-        records = dbsession.execute(stmt).fetchall()
-    except Exception as e:
-        raise e
-    return records
+        records = dbsession.scalars(stmt).all()
+        return records
+    except DBAPIError as exc:
+        logger.error(exc)
+        raise exc
 
 
 def create_job(job: JobCreate, dbsession: DbSession):
