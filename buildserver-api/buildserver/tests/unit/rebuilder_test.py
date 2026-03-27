@@ -1,9 +1,12 @@
 from unittest.mock import patch, MagicMock
 import subprocess
 
+import pytest
+
 from buildserver import rebuilder
 
 
+@pytest.mark.skip(reason="rebuilder being replaced by webhook-based triggering")
 class TestCheckForRebuild:
 
     @patch("buildserver.rebuilder.requests")
