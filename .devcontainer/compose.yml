@@ -13,8 +13,6 @@ services:
       BS_DATABASE_NAME: app
       BS_SLEEP_FOR: 900
       BS_TIMEOUT: 60
-      BS_ARTIFACT_REPOSITORY_ROOT: ""
-      BS_GRPC_PORT: 50052
     depends_on:
       - db
 
