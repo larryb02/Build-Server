@@ -9,10 +9,6 @@ CONFIG_PATH = Path(Path.home() / ".bs" / "config.toml")
 settings = Dynaconf(envvar_prefix="BS", settings_files=[CONFIG_PATH])
 
 LOG_LEVEL = settings.get("LOG_LEVEL", logging.INFO)
-RABBITMQ_HOST = settings.get("RABBITMQ_HOST", "rabbitmq")
-RABBITMQ_USER = settings.get("RABBITMQ_USER", "guest")
-RABBITMQ_PASSWORD = settings.get("RABBITMQ_PASSWORD", "guest")
-RABBITMQ_PORT = settings.get("RABBITMQ_PORT", 5672)
 APISERVER_HOST = settings.get("RUNNERS.API_URL", None)
 RUNNER_TOKEN = settings.get("RUNNERS.TOKEN", None)
 

@@ -9,6 +9,7 @@ from sqlalchemy.exc import DBAPIError
 
 from buildserver.api.runners.models import PendingTokens, Runner, RunnerHealth
 from buildserver.database.core import DbSession, session_context
+from buildserver.api.auth.service import create_jwt
 
 logger = logging.getLogger(__name__)
 EXPIRES_IN = timedelta(minutes=60)
@@ -48,16 +49,17 @@ def _check_runner_health() -> None:
             runner.health = RunnerHealth.OFFLINE
 
 
-def register_runner(token: str, name: str, dbsession: DbSession) -> Runner:
-    runner = Runner(name=name, runner_token_hash=token)
+def register_runner(name: str, reg_token: str, dbsession: DbSession) -> str:
+    runner = Runner(name=name)
     try:
         dbsession.add(runner)
         dbsession.flush()
         pending = dbsession.scalars(
-            select(PendingTokens).where(PendingTokens.token == token)
+            select(PendingTokens).where(PendingTokens.token == reg_token)
         ).one_or_none()
         dbsession.delete(pending)
-        return runner
+        token = create_jwt(data={"sub": str(runner.runner_id)})
+        return token
     except DBAPIError as exc:
         logger.error(exc)
         raise exc
@@ -102,14 +104,10 @@ def generate_registration_token(dbsession: DbSession) -> PendingTokens:
         raise exc
 
 
-def get_runner_by_token(token_hash: str, dbsession: DbSession) -> Runner:
+def get_runner_by_id(runner_id: int, dbsession: DbSession) -> Runner | None:
     try:
-        res = dbsession.scalars(
-            select(Runner).where(Runner.runner_token_hash == token_hash)
-        ).one_or_none()
-        if res:
-            # so linter stops complaining
-            return res
+        runner = dbsession.get(Runner, runner_id)
+        return runner
     except DBAPIError as exc:
         logger.error("failed to get runner by token: %s", exc)
         raise exc

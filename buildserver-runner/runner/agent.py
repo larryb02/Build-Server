@@ -55,7 +55,7 @@ class Agent:
                 with httpx.Client() as client:
                     r = client.post(
                         f"{APISERVER_HOST}/api/v1/jobs/request",
-                        json={"token": RUNNER_TOKEN},
+                        headers={"Authorization": f"Bearer {RUNNER_TOKEN}"},
                     )
                     r.raise_for_status()
                     job = r.json().get("job")
@@ -90,7 +90,7 @@ class Agent:
                 try:
                     r = client.post(
                         f"{APISERVER_HOST}/api/v1/runners/heartbeat",
-                        json={"token": RUNNER_TOKEN},
+                        headers={"Authorization": f"Bearer {RUNNER_TOKEN}"},
                     )
                     r.raise_for_status()
                 except httpx.HTTPError as exc:

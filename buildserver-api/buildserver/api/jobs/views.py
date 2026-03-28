@@ -2,16 +2,16 @@
 
 import logging
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import DBAPIError
 
+from buildserver.api.auth.service import get_token_payload
 from buildserver.api.jobs.models import (
     JobCreate,
     JobRead,
     JobResponse,
     JobStatus,
     JobStatusUpdate,
-    JobRequest,
 )
 from buildserver.api.jobs.service import (
     assign_job,
@@ -22,7 +22,7 @@ from buildserver.api.jobs.service import (
     get_all_unique_jobs,
     update_job_status,
 )
-from buildserver.api.runners.service import get_runner_by_token
+from buildserver.api.runners.service import get_runner_by_id
 from buildserver.database.core import DbSession
 
 logger = logging.getLogger(__name__)
@@ -33,22 +33,24 @@ router = APIRouter(prefix="/jobs")
 @router.post(
     "/request", response_model=JobResponse, status_code=status.HTTP_202_ACCEPTED
 )
-def request_job(token: JobRequest, dbsession: DbSession):
+def request_job(dbsession: DbSession, payload: dict = Depends(get_token_payload)):
     try:
-        runner = get_runner_by_token(token.token, dbsession)
+        runner_id = int(payload.get("sub"))
+        runner = get_runner_by_id(runner_id, dbsession)
         # NOTE: eventually should pass filters as params
-        job = assign_job(runner.runner_id, dbsession)
-        if not job:
-            return JobResponse(job=None)
-        return JobResponse(
-            job=JobRead(
-                job_id=job.job_id,
-                git_repository_url=job.git_repository_url,
-                commit_hash=job.commit_hash,
-                job_status=JobStatus(job.job_status),
-                created_at=job.created_at,
+        if runner:
+            job = assign_job(runner.runner_id, dbsession)
+            if not job:
+                return JobResponse(job=None)
+            return JobResponse(
+                job=JobRead(
+                    job_id=job.job_id,
+                    git_repository_url=job.git_repository_url,
+                    commit_hash=job.commit_hash,
+                    job_status=JobStatus(job.job_status),
+                    created_at=job.created_at,
+                )
             )
-        )
     except DBAPIError as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from exc
 

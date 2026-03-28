@@ -85,7 +85,3 @@ class Job(Base):
 
 class JobResponse(BaseModel):
     job: Optional[JobRead]
-
-
-class JobRequest(BaseModel):
-    token: str

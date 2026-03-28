@@ -19,11 +19,11 @@ class RunnerHealth(IntEnum):
 
 
 class RegisterResponse(BaseModel):
-    pass
+    auth_token: str
 
 
 class RegisterRequest(BaseModel):
-    token: str
+    reg_token: str
     name: str
 
 
@@ -54,6 +54,6 @@ class Runner(Base):
     __tablename__ = "runner"
     runner_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40))
-    runner_token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    # runner_token_hash: Mapped[str] = mapped_column(String(64), unique=True)
     health: Mapped[int] = mapped_column(Integer, default=RunnerHealth.OFFLINE)
     last_seen: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)

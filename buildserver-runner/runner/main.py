@@ -8,6 +8,7 @@ import typer
 
 from runner.config import LOG_LEVEL, CONFIG_PATH, create_runner_config
 from runner.agent import Agent
+from runner import get_version
 
 logging.basicConfig(level=LOG_LEVEL, force=True)
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def version_callback(value: bool):
     if value:
-        print("buildserver-runner 0.1.0")
+        print(get_version())
         raise typer.Exit()
 
 
@@ -57,11 +58,13 @@ def register(
         r = httpx.post(
             url=f"{url}/api/v1/runners/",
             headers={"Content-Type": "application/json"},
-            json={"token": token, "name": name},
+            json={"reg_token": token, "name": name},
             follow_redirects=True,
         )
         r.raise_for_status()
-        create_runner_config(token=token, name=name, api_url=url)
+        auth_token = r.json().get("auth_token")
+        logger.debug("auth_token: %s", auth_token)
+        create_runner_config(token=auth_token, name=name, api_url=url)
     except httpx.HTTPError as exc:
         logger.debug(exc)
         print("Failed to register runner: %s", exc)
