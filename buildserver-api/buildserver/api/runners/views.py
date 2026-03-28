@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 def send_heartbeat(dbsession: DbSession, payload: dict = Depends(get_token_payload)):
     try:
         # TODO: create some types when this is fully fleshed out so linter stops yelling
-        runner_id = int(payload.get("sub"))
+        runner_id = int(payload.get("sub"))  # type: ignore
         # NOTE: call this inside update_runner_health so we're not making 3 queries
         runner = get_runner_by_id(runner_id, dbsession)
         if not runner:
