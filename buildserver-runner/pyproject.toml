@@ -7,7 +7,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "pika",
-    "requests",
+    "httpx",
     "typer",
     "pydantic",
     "dynaconf",
@@ -29,7 +29,7 @@ Homepage = "https://github.com/larryb02/Build-Server"
 Issues = "https://github.com/larryb02/Build-Server/issues"
 
 [project.scripts]
-buildserver-runner = "runner.main:app"
+buildserver-runner = "runner.cli:app"
 
 [tool.setuptools.dynamic]
 version = {file = "version.txt"}
