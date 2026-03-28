@@ -3,11 +3,11 @@ name: Buildserver API
 on:
   push:
     paths:
-      - "buildserver/**"
+      - "buildserver-api/**"
   pull_request:
     branches: [main]
     paths:
-      - "buildserver/**"
+      - "buildserver-api/**"
   workflow_dispatch:
 
 jobs:
