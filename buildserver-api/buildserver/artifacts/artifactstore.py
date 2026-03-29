@@ -6,8 +6,8 @@ import re
 import shutil
 from pathlib import Path
 
-from buildserver import utils
-from buildserver.config import Config
+from .. import utils
+from ..config import Config
 
 config = Config()
 

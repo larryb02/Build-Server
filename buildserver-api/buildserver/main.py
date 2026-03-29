@@ -8,11 +8,12 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from buildserver.api import api_router
-from buildserver.api.runners.service import run_health_monitor
-from buildserver.config import LOG_LEVEL
-from buildserver.database.core import init_db
-from buildserver.rebuilder import run as run_rebuilder
+from . import __version__
+from .api import api_router
+from .api.runners.service import run_health_monitor
+from .config import LOG_LEVEL
+from .database.core import init_db
+from .rebuilder import run as run_rebuilder
 
 logging.basicConfig(level=LOG_LEVEL, force=True)
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ async def lifespan(app: FastAPI):
     stop_event.set()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title="Build Server", lifespan=lifespan, version=__version__)
 
 app.add_middleware(
     CORSMiddleware,

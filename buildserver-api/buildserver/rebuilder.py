@@ -13,8 +13,8 @@ import time
 
 import requests
 
-from buildserver.config import LOG_LEVEL, SLEEP_FOR
-from buildserver.utils import compare_hashes, get_remote_hash
+from .config import LOG_LEVEL, SLEEP_FOR
+from .utils import compare_hashes, get_remote_hash
 
 API_ENDPOINT = "http://localhost:8000/api/v1"
 

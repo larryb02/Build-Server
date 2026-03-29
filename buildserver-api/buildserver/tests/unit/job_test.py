@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from buildserver.api.jobs.models import JobStatus
-from buildserver.api.jobs.service import validate
-from buildserver.api.jobs.service import update_job_status
+from ...api.jobs.models import JobStatus
+from ...api.jobs.service import validate
+from ...api.jobs.service import update_job_status
 
 
 class TestUpdateJobStatus:

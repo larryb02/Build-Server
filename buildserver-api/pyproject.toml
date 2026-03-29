@@ -21,6 +21,7 @@ test = [
     "pytest-asyncio",
     "httpx",
     "asgi-lifespan",
+    "testcontainers[postgres]"
 ]
 docs = [
     "mkdocs",

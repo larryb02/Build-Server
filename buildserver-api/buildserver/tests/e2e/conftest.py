@@ -5,8 +5,8 @@ import pytest_asyncio
 import httpx
 from asgi_lifespan import LifespanManager
 
-from buildserver.database.core import engine, Base
-from buildserver.main import app
+from ...database.core import engine, Base
+from ...main import app
 
 
 @pytest.fixture(scope="session", autouse=True)

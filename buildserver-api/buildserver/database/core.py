@@ -5,7 +5,7 @@ from typing import Annotated, Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session, Session
 from fastapi import Depends
-from buildserver.config import DATABASE_URI
+from ..config import DATABASE_URI
 
 engine = create_engine(
     DATABASE_URI,
@@ -40,6 +40,6 @@ class Base(DeclarativeBase):
 
 def init_db():
     """Create all database tables."""
-    import buildserver.database.models  # noqa: F401
+    from . import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)

@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from buildserver.api.runners.models import Runner, RunnerHealth
-from buildserver.api.runners.service import (
+from ...api.runners.models import Runner, RunnerHealth
+from ...api.runners.service import (
     _check_runner_health,
     generate_registration_token,
     get_all_runners,
@@ -33,7 +33,7 @@ class TestRegister:
         assert validate_registration_token("nonexistent-token", dbsession) is False
 
     def test_invalid_token_expired(self, dbsession):
-        from buildserver.api.runners.models import PendingTokens
+        from ...api.runners.models import PendingTokens
 
         expired = PendingTokens(
             token="expired-token",

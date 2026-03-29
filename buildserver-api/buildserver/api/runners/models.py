@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer, DateTime
 
-from buildserver.database.core import Base
+from ...database.core import Base
 
 
 class HeartbeatRequest(BaseModel):

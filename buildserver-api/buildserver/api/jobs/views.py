@@ -5,15 +5,15 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import DBAPIError
 
-from buildserver.api.auth.service import get_token_payload
-from buildserver.api.jobs.models import (
+from ..auth.service import get_token_payload
+from .models import (
     JobCreate,
     JobRead,
     JobResponse,
     JobStatus,
     JobStatusUpdate,
 )
-from buildserver.api.jobs.service import (
+from .service import (
     assign_job,
     validate,
     create_job,
@@ -22,8 +22,8 @@ from buildserver.api.jobs.service import (
     get_all_unique_jobs,
     update_job_status,
 )
-from buildserver.api.runners.service import get_runner_by_id
-from buildserver.database.core import DbSession
+from ..runners.service import get_runner_by_id
+from ...database.core import DbSession
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,16 @@ async def get_jobs(
     try:
         if latest:
             return get_all_unique_jobs(dbsession)
-        jobs = list(JobRead(**job._mapping) for job in get_all_jobs(dbsession))
+        jobs = list(
+            JobRead(
+                job_id=job.job_id,
+                git_repository_url=job.git_repository_url,
+                job_status=JobStatus(job.job_status),
+                commit_hash=job.commit_hash,
+                created_at=job.created_at,
+            )
+            for job in get_all_jobs(dbsession)
+        )
         return jobs
     # TODO: catch useful exceptions here and handle accordingly
     except Exception as e:
@@ -112,7 +121,7 @@ def get_job(job_id: int, dbsession: DbSession) -> JobRead:
             job_id=job.job_id,
             git_repository_url=job.git_repository_url,
             job_status=JobStatus(job.job_status),
-            commit_hash=None,
+            commit_hash=job.commit_hash,
             created_at=job.created_at,
         )
     except DBAPIError as exc:

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import DateTime, String, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from buildserver.database.core import Base
+from ...database.core import Base
 
 
 class JobStatus(str, PyEnum):

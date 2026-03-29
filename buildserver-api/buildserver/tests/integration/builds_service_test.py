@@ -7,9 +7,9 @@
 
 import pytest
 
-from buildserver.api.jobs.models import JobCreate
-from buildserver.api.jobs.models import JobStatus
-from buildserver.api.jobs.service import (
+from ...api.jobs.models import JobCreate
+from ...api.jobs.models import JobStatus
+from ...api.jobs.service import (
     create_job,
     get_job_by_id,
     get_all_jobs,

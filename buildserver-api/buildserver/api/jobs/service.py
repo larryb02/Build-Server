@@ -5,16 +5,16 @@ import logging
 from sqlalchemy import insert, or_, select, update
 from sqlalchemy.exc import DBAPIError
 
-from buildserver.database.core import DbSession
-from buildserver.api.jobs.models import JobStatus
-from buildserver.api.jobs.models import (
+from ...database.core import DbSession
+from .models import JobStatus
+from .models import (
     Artifact,
     ArtifactCreate,
     Job,
     JobCreate,
     JobRead,
 )
-from buildserver.utils import get_remote_hash
+from ...utils import get_remote_hash
 
 logger = logging.getLogger(__name__)
 
@@ -73,9 +73,8 @@ def get_job_by_id(job_id: int, dbsession: DbSession) -> Job | None:
 
 def get_all_jobs(dbsession: DbSession):
     """Retrieve all job records from the database."""
-    stmt = select(*Job.__table__.columns)
     try:
-        records = dbsession.scalars(stmt).all()
+        records = dbsession.scalars(select(Job)).all()
         return records
     except DBAPIError as exc:
         logger.error(exc)

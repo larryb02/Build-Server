@@ -14,15 +14,15 @@ from .service import (
     update_runner_health,
     validate_registration_token,
 )
-from buildserver.api.runners.models import (
+from .models import (
     RegisterRequest,
     GenerateTokenResponse,
     RegisterResponse,
     RunnerRead,
     RunnerHealth,
 )
-from buildserver.database.core import DbSession
-from buildserver.api.auth.service import get_token_payload
+from ...database.core import DbSession
+from ..auth.service import get_token_payload
 
 router = APIRouter(prefix="/runners")
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ def create_runner(runner: RegisterRequest, dbsession: DbSession):
         if not validate_registration_token(runner.reg_token, dbsession):
             logger.error("invalid token")
             # TODO: need finer grained responses for better status code handling
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
         res = register_runner(runner.name, runner.reg_token, dbsession)
         return RegisterResponse(auth_token=res)
