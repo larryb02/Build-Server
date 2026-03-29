@@ -8,22 +8,18 @@ graph LR
 
     subgraph Control Plane
         API[APIServer]
-        Rebuilder[Rebuilder]
     end
 
-    API -->|publish job| RabbitMQ[(RabbitMQ)]
     API -->|read/write| PostgreSQL[(PostgreSQL)]
-    Rebuilder -->API
-
-    RabbitMQ -->|consume job| Runner
 
     subgraph Runner
         Agent[Agent]
         Builder[Builder]
     end
 
+    Agent -->|poll for jobs| API
     Agent --> Builder
-    Agent --> API
+    Agent -->|status updates| API
 ```
 
 ## Job Lifecycle
@@ -32,23 +28,25 @@ graph LR
 sequenceDiagram
     participant C as Client
     participant A as API
-    participant Q as RabbitMQ
     participant R as Runner Agent
     participant G as Git Remote
 
-    C->>A: POST /jobs/register
+    C->>A: POST /api/v1/jobs
     A->>A: Create job record (QUEUED)
-    A->>Q: Publish job to build_jobs queue
     A->>C: 200 OK (job metadata)
 
-    R->>Q: Consume job
-    R->>A: PATCH /jobs/{id} (RUNNING)
+    loop Poll for work
+        R->>A: POST /api/v1/jobs/request
+        A->>R: Job payload (or empty)
+    end
+
+    R->>A: PATCH /api/v1/jobs/{id} (RUNNING)
     R->>G: Clone repository
-    R->>R: Execute build
+    R->>R: Execute job
     alt Build succeeds
-        R->>A: PATCH /jobs/{id} (SUCCEEDED)
+        R->>A: PATCH /api/v1/jobs/{id} (SUCCEEDED)
     else Build fails
-        R->>A: PATCH /jobs/{id} (FAILED)
+        R->>A: PATCH /api/v1/jobs/{id} (FAILED)
     end
 ```
 
