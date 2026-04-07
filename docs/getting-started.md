@@ -31,8 +31,6 @@ All database options can also be provided via environment variables:
 
 ### Submitting a Job
 
-With the cluster running, submit a repository for building via the API:
-
 ```bash
 curl -X POST https://<hostname>/api/v1/jobs \
   -H "Content-Type: application/json" \

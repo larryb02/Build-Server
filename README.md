@@ -33,12 +33,33 @@ docker run -d --restart=unless-stopped \
   --db-host buildserver-db --db-password example --db-name buildserver
 ```
 
+Register a runner:
+
+```bash
+# Generate a registration token
+curl -X POST http://<server>/api/v1/runners/token
+
+# Register the runner
+buildserver-runner register -n <name> -t <token> -u <server>
+
+# Start the runner
+buildserver-runner start
+```
+
 Submit a job:
 
 ```bash
+<<<<<<< HEAD
 curl -X POST <hostname>/api/v1/jobs \
+=======
+curl -X POST http://<server>/api/v1/jobs \
+>>>>>>> main
   -H "Content-Type: application/json" \
   -d '{"git_repository_url": "https://github.com/user/repo.git"}'
 ```
+
+## Development
+
+Clone the repository and open it in VS Code. When prompted, reopen in the dev container.
 
 For full documentation see [build-server.readthedocs.io](https://build-server.readthedocs.io/).

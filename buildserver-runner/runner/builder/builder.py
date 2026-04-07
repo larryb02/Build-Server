@@ -26,7 +26,7 @@ def _run_script(script_path: Path, cwd: Path = None):
     os.chmod(script_path, 0o755)
 
     with subprocess.Popen(
-        [str(script_path)],
+        ["/bin/bash", str(script_path)],
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -107,8 +107,8 @@ def run(payload: Job) -> None:
 
     try:
         clone_repo(payload.git_repository_url, build_dir)
-        # TODO: not in the right directory
-        _run_script(build_dir / SCRIPT_FILE, build_dir)
+        repo_dir = build_dir / utils.get_dir_name(payload.git_repository_url)
+        _run_script(repo_dir / SCRIPT_FILE, repo_dir)
     except (CloneError, BuildError):
         utils.cleanup_build_files(build_dir)
         raise
