@@ -4,27 +4,39 @@
 
 A CI/CD system for building programs.
 
-## Components
+<!-- ## Components
 
 - **API** - REST API for submitting and managing build jobs
 - **Runner** - Distributed execution nodes that consume and run jobs from the queue. Multiple runners can operate concurrently
 - **Rebuilder** - Background task that polls registered repositories for new commits and triggers rebuilds
-- **Database** - PostgreSQL for storing job and artifact metadata
+- **Database** - PostgreSQL for storing job and artifact metadata -->
 
 ## Quick Start
 
-Clone the repository and open it in VS Code. When prompted, reopen in the dev container — it will automatically set up a local k3d cluster and install all dependencies.
-
-Deploy all services to the cluster:
+Start a PostgreSQL container:
 
 ```bash
-ansible-playbook infra/ansible/site.yml
+docker run -d --name buildserver-db \
+  -e POSTGRES_PASSWORD=example \
+  -e POSTGRES_DB=buildserver \
+  postgres:latest
+```
+
+Start the API:
+
+```bash
+docker run -d --restart=unless-stopped \
+  --name buildserver-api \
+  --link buildserver-db \
+  -p 8000:8000 \
+  ghcr.io/larryb02/build-server/api:latest \
+  --db-host buildserver-db --db-password example --db-name buildserver
 ```
 
 Submit a job:
 
 ```bash
-curl -X POST http://<cluster-ip>/jobs/register \
+curl -X POST <hostname>/api/v1/jobs \
   -H "Content-Type: application/json" \
   -d '{"git_repository_url": "https://github.com/user/repo.git"}'
 ```

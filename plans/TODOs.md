@@ -1,8 +1,9 @@
-## 0.0.x (pre-0.1.0)
+## (pre 1.0.0)
 - [ ] Builder isolation abstraction
 	- [ ] Introduce a base `Builder` class and a `ShellBuilder` subclass
 		- `ShellBuilder` bootstraps the execution environment (e.g. sets up cwd, permissions, env vars) before running the repo's build script
 		- Lays groundwork for future executor types
+- [ ] YAML spec
 
 ## General
 - [ ] Refactors

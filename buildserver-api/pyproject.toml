@@ -13,6 +13,7 @@ dependencies = [
     "requests",
     "dynaconf",
     "pyjwt",
+    "typer",
 ]
 
 [project.optional-dependencies]
@@ -33,7 +34,7 @@ Homepage = "https://github.com/larryb02/Build-Server"
 Issues = "https://github.com/larryb02/Build-Server/issues"
 
 [project.scripts]
-buildserver = "buildserver.main:main"
+buildserver = "buildserver.cli:app"
 
 [tool.setuptools.dynamic]
 version = {file = "version.txt"}

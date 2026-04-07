@@ -12,4 +12,4 @@ COPY --from=builder /app/dist /app/dist
 ENV PYTHONPATH=/app/dist
 ENV PATH=/app/dist/bin:$PATH
 
-CMD ["buildserver"]
+ENTRYPOINT ["buildserver", "start"]
