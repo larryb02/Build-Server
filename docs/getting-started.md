@@ -10,12 +10,23 @@ The quickest way to run Build Server is with Docker.
 
 ### Start the API
 
+Start a PostgreSQL container:
+
+```bash
+docker run -d --name buildserver-db \
+  -e POSTGRES_PASSWORD=example \
+  -e POSTGRES_DB=buildserver \
+  postgres:latest
+```
+
+Start the server:
+
 ```bash
 docker run -d --restart=unless-stopped \
   --name buildserver-api \
   --link buildserver-db \
   -p 8000:8000 \
-  ghcr.io/larryb02/build-server/api:latest \
+  ghcr.io/larryb02/buildserver-api:latest \
   --db-host buildserver-db --db-password example --db-name buildserver
 ```
 

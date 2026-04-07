@@ -29,7 +29,7 @@ docker run -d --restart=unless-stopped \
   --name buildserver-api \
   --link buildserver-db \
   -p 8000:8000 \
-  ghcr.io/larryb02/build-server/api:latest \
+  ghcr.io/larryb02/buildserver-api:latest \
   --db-host buildserver-db --db-password example --db-name buildserver
 ```
 
