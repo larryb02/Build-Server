@@ -49,11 +49,7 @@ buildserver-runner start
 Submit a job:
 
 ```bash
-<<<<<<< HEAD
 curl -X POST <hostname>/api/v1/jobs \
-=======
-curl -X POST http://<server>/api/v1/jobs \
->>>>>>> main
   -H "Content-Type: application/json" \
   -d '{"git_repository_url": "https://github.com/user/repo.git"}'
 ```

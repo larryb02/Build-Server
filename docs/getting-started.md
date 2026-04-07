@@ -32,7 +32,7 @@ All database options can also be provided via environment variables:
 ### Submitting a Job
 
 ```bash
-curl -X POST https://<hostname>/api/v1/jobs \
+curl -X POST <hostname>/api/v1/jobs \
   -H "Content-Type: application/json" \
   -d '{"git_repository_url": "https://github.com/user/repo.git"}'
 ```
