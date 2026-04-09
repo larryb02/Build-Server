@@ -1,8 +1,8 @@
 const config = {
     routes: {
-        builds: '/builds'
+        jobs: '/api/v1/jobs',
+        runners: '/api/v1/runners',
     },
-    API_HOSTNAME: import.meta.env.VITE_API_HOSTNAME,
 }
 
 export default config;
