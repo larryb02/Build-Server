@@ -8,7 +8,7 @@ import httpx
 from pydantic import ValidationError
 from tenacity import retry, retry_if_exception_type, wait_exponential, before_sleep_log
 
-from runner.builder.builder import run as run_build, BuildError, CloneError
+from runner.builder.builder import ShellBuilder, BuildError, CloneError
 from runner.config import APISERVER_HOST, RUNNER_TOKEN
 from runner.types import Job
 
@@ -116,7 +116,7 @@ class Agent:
             self._update_job_status(
                 validated_job.job_id, "RUNNING"
             )  # TODO: make enum type
-            run_build(validated_job)
+            ShellBuilder(validated_job).run()
             self._update_job_status(validated_job.job_id, "SUCCEEDED")
             logger.info("Job %s succeeded", validated_job.job_id)
         except (BuildError, CloneError) as exc:

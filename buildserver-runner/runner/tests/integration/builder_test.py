@@ -1,6 +1,19 @@
 import pytest
+from datetime import datetime
 
-from runner.builder.builder import clone_repo, run, _run_script, CloneError, BuildError
+from runner.builder.builder import ShellBuilder, _run_script, CloneError, BuildError
+from runner.types import Job, JobStatus
+
+
+def _make_job(**kwargs) -> Job:
+    defaults = dict(
+        job_id=1,
+        git_repository_url="https://github.com/larryb02/test.git",
+        commit_hash=None,
+        job_status=JobStatus.QUEUED,
+        created_at=datetime.now(),
+    )
+    return Job(**{**defaults, **kwargs})
 
 
 class TestRunScript:
@@ -21,28 +34,25 @@ class TestRunScript:
 
 
 @pytest.mark.skip("skip until I create an environment where CI can invoke git.")
-class TestCloneRepo:
+class TestShellBuilder:
 
     def test_clone_http(self, tmp_path):
-        http_repo_url = "https://github.com/larryb02/test.git"
-        clone_repo(http_repo_url, tmp_path)
-        assert (tmp_path / "test").exists()
+        job = _make_job(git_repository_url="https://github.com/larryb02/test.git")
+        builder = ShellBuilder(job)
+        builder.prepare_environment()
+        assert builder.repo_dir.exists()
 
-    def test_clone_invalid_repo(self, tmp_path):
-        invalid_repo = "https://github.com:nonexistent/repo.git"
+    def test_clone_invalid_repo(self):
+        job = _make_job(git_repository_url="https://github.com:nonexistent/repo.git")
+        builder = ShellBuilder(job)
         with pytest.raises(CloneError):
-            clone_repo(invalid_repo, tmp_path)
-
-
-@pytest.mark.skip("skip until I create an environment where CI can invoke git.")
-class TestRun:
+            builder.prepare_environment()
 
     def test_run_build_success(self):
-        test_repo = "git@github.com:larryb02/test.git"
-        # Should not raise
-        run(test_repo)
+        job = _make_job(git_repository_url="git@github.com:larryb02/test.git")
+        ShellBuilder(job).run()
 
     def test_run_clone_failure(self):
-        invalid_repo = "git@github.com:nonexistent/repo.git"
+        job = _make_job(git_repository_url="git@github.com:nonexistent/repo.git")
         with pytest.raises(CloneError):
-            run(invalid_repo)
+            ShellBuilder(job).run()

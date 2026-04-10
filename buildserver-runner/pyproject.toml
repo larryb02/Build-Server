@@ -13,6 +13,7 @@ dependencies = [
     "dynaconf",
     "toml",
     "tenacity",
+    "gitpython",
 ]
 
 [project.optional-dependencies]
