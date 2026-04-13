@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     stop_event = threading.Event()
-    rebuilder_thread = threading.Thread(
-        target=run_rebuilder, args=(stop_event,), daemon=True
-    )
-    rebuilder_thread.start()
+    # rebuilder_thread = threading.Thread(
+    #     target=run_rebuilder, args=(stop_event,), daemon=True
+    # )
+    # rebuilder_thread.start()
     health_monitor_thread = threading.Thread(
         target=run_health_monitor, args=(stop_event,), daemon=True
     )

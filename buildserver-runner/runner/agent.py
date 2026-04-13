@@ -10,7 +10,7 @@ from tenacity import retry, retry_if_exception_type, wait_exponential, before_sl
 
 from runner.builder.builder import run as run_build, BuildError, CloneError
 from runner.config import APISERVER_HOST, RUNNER_TOKEN
-from runner.types import Job
+from runner.types import PipelineJob
 
 
 logger = logging.getLogger(__name__)
@@ -46,14 +46,14 @@ class Agent:
             self.stop()
 
     def _request_work(self):
-        sleep_for = 3
+        sleep_for = 20
         while not self._stop_event.is_set():
             time.sleep(sleep_for)
             logger.debug("requesting work...")
             try:
                 with httpx.Client() as client:
                     r = client.post(
-                        f"{APISERVER_HOST}/api/v1/jobs/request",
+                        f"{APISERVER_HOST}/api/v1/pipelines/jobs/request",
                         headers={"Authorization": f"Bearer {RUNNER_TOKEN}"},
                     )
                     r.raise_for_status()
@@ -95,11 +95,11 @@ class Agent:
                 except httpx.HTTPError as exc:
                     logger.error("failed to send heartbeat: %s", exc)
 
-    def _update_job_status(self, job_id: int, status: str):
+    def _update_job_status(self, pipeline_job_id: int, status: str):
         with httpx.Client() as client:
             r = client.patch(
-                f"{APISERVER_HOST}/api/v1/jobs/{job_id}",
-                json={"job_status": status},
+                f"{APISERVER_HOST}/api/v1/pipelines/jobs/{pipeline_job_id}",
+                json={"status": status},
                 headers={"Authorization": f"Bearer {RUNNER_TOKEN}"},
             )
             r.raise_for_status()
@@ -108,20 +108,18 @@ class Agent:
         """Execute a job. Runs in a worker thread."""
         logger.info("handling job: %s", job)
         try:
-            validated_job = Job.model_validate(job)
+            validated_job = PipelineJob.model_validate(job)
         except ValidationError as exc:
             logger.error(exc)
             return
         try:
-            self._update_job_status(
-                validated_job.job_id, "RUNNING"
-            )  # TODO: make enum type
+            self._update_job_status(validated_job.pipeline_job_id, "RUNNING")
             run_build(validated_job)
-            self._update_job_status(validated_job.job_id, "SUCCEEDED")
-            logger.info("Job %s succeeded", validated_job.job_id)
+            self._update_job_status(validated_job.pipeline_job_id, "SUCCEEDED")
+            logger.info("Job %s succeeded", validated_job.pipeline_job_id)
         except (BuildError, CloneError) as exc:
             logger.error("Job failed: %s", exc)
-            self._update_job_status(validated_job.job_id, "FAILED")
+            self._update_job_status(validated_job.pipeline_job_id, "FAILED")
         except httpx.HTTPError as exc:
             logger.error("Failed to update job status: %s", exc)
 

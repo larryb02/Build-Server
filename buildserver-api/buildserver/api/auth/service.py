@@ -31,7 +31,6 @@ def create_jwt(data: dict, expires_delta: timedelta | None = None):
 
 def decode_token(token: str) -> dict:
     try:
-        logger.debug("Got token: %s, %s", token, type(token))
         return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except InvalidTokenError as exc:
         logger.debug(exc)
