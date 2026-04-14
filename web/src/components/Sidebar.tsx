@@ -9,13 +9,15 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
-import WorkIcon from '@mui/icons-material/Work';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import FolderIcon from '@mui/icons-material/Folder';
 
 const DRAWER_WIDTH = 220;
 
 const navItems = [
-    { label: 'Jobs', path: '/', icon: <WorkIcon /> },
-    { label: 'Runners', path: '/runners', icon: <DirectionsRunIcon /> },
+    { label: 'Projects',  path: '/',          icon: <FolderIcon /> },
+    { label: 'Pipelines', path: '/pipelines', icon: <AccountTreeIcon /> },
+    { label: 'Runners',   path: '/runners',   icon: <DirectionsRunIcon /> },
 ];
 
 export default function Sidebar() {

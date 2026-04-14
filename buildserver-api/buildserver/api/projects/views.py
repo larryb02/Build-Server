@@ -11,6 +11,7 @@ from ..pipelines.models import PipelineRead
 from .models import ProjectCreate, ProjectRead, TriggerRequest
 from .service import (
     create_project,
+    delete_project,
     get_all_projects,
     get_project_by_id,
     trigger_pipeline,
@@ -38,6 +39,17 @@ def list_projects(dbsession: DbSession) -> list[ProjectRead]:
             ProjectRead.model_validate(p, from_attributes=True)
             for p in get_all_projects(dbsession)
         ]
+    except DBAPIError as exc:
+        logger.error(exc)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from exc
+
+
+@router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_project(project_id: int, dbsession: DbSession) -> None:
+    try:
+        found = delete_project(project_id, dbsession)
+        if not found:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     except DBAPIError as exc:
         logger.error(exc)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) from exc

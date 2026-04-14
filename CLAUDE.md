@@ -1,3 +1,8 @@
+## Style Guide and Best Practices:
+- Always avoid n + 1 database queries. Use subqueries, bulk inserts/updates, and other methods when acceptable
+- Always end a file with a new line
+- Always import modules at the top level -- no inline imports unless specifically requested or absolutely necessary
+
 ## Error Handling Philosophy: Fail Loud, Never Fake
 
 Prefer a visible failure over a silent fallback.

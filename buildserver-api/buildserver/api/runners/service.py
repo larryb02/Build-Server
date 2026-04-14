@@ -4,12 +4,13 @@ import secrets
 import threading
 from datetime import datetime, timedelta
 
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import select, update
 from sqlalchemy.exc import DBAPIError
 
 from .models import PendingTokens, Runner, RunnerHealth
 from ...database.core import DbSession, session_context
-from ..auth.service import create_jwt
+from ..auth.service import create_jwt, get_token_payload
 
 logger = logging.getLogger(__name__)
 EXPIRES_IN = timedelta(minutes=60)
@@ -64,13 +65,19 @@ def register_runner(name: str, reg_token: str, dbsession: DbSession) -> str:
 
 def unregister_runner(runner_id: int, dbsession: DbSession) -> bool:
     try:
-        runner = dbsession.get(Runner, runner_id)
-        if runner is None:
+        result = dbsession.execute(
+            update(Runner)
+            .where(Runner.runner_id == runner_id)
+            .where(Runner.deleted == False)  # noqa: E712
+            .values(deleted=True)
+            .returning(Runner.runner_id)
+        )
+        found = result.one_or_none() is not None
+        if found:
+            logger.debug("successfully unregistered runner %s", runner_id)
+        else:
             logger.debug("could not find runner with id: %s", runner_id)
-            return False
-        dbsession.delete(runner)
-        logger.debug("successfully unregistered runner")
-        return True
+        return found
     except DBAPIError as exc:
         logger.error(exc)
         raise exc
@@ -78,7 +85,9 @@ def unregister_runner(runner_id: int, dbsession: DbSession) -> bool:
 
 def get_all_runners(dbsession: DbSession) -> list[Runner]:
     try:
-        return list(dbsession.scalars(select(Runner)).all())
+        return list(
+            dbsession.scalars(select(Runner).where(Runner.deleted == False)).all()
+        )  # noqa: E712
     except DBAPIError as exc:
         logger.error("failed to list runners: %s", exc)
         raise exc
@@ -136,3 +145,17 @@ def validate_registration_token(token: str, dbsession: DbSession) -> bool:
     except DBAPIError as exc:
         logger.error("failed to validate token: %s", exc)
         raise exc
+
+
+def get_active_runner(
+    dbsession: DbSession,
+    payload: dict = Depends(get_token_payload),
+) -> dict:
+    runner_id = int(payload.get("sub"))
+    runner = dbsession.get(Runner, runner_id)
+    if runner is None or runner.deleted:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized client",
+        )
+    return payload

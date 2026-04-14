@@ -5,7 +5,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import DBAPIError
 
-from ..auth.service import get_token_payload
+from ..runners.service import get_active_runner
 from .models import (
     PipelineDetail,
     PipelineJobResponse,
@@ -19,7 +19,6 @@ from .service import (
     get_pipeline_detail,
     update_job_status,
 )
-from ..runners.service import get_runner_by_id
 from ...database.core import DbSession
 
 logger = logging.getLogger(__name__)
@@ -59,12 +58,9 @@ def get_pipeline(pipeline_id: int, dbsession: DbSession):
     response_model=PipelineJobResponse,
     status_code=status.HTTP_202_ACCEPTED,
 )
-def request_job(dbsession: DbSession, payload: dict = Depends(get_token_payload)):
+def request_job(dbsession: DbSession, payload: dict = Depends(get_active_runner)):
     try:
         runner_id = int(payload.get("sub"))
-        runner = get_runner_by_id(runner_id, dbsession)
-        if not runner:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         job = assign_job(runner_id, dbsession)
         if not job:
             return PipelineJobResponse(job=None)
@@ -78,14 +74,9 @@ def update_job(
     pipeline_job_id: int,
     body: PipelineJobStatusUpdate,
     dbsession: DbSession,
-    payload: dict = Depends(get_token_payload),
+    _: dict = Depends(get_active_runner),
 ):
     try:
-        runner_id = int(payload.get("sub"))
-        runner = get_runner_by_id(runner_id, dbsession)
-        if not runner:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-
         job = update_job_status(dbsession, pipeline_job_id, body.status)
         if not job:
             raise HTTPException(

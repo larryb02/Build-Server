@@ -6,6 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import DBAPIError
 
 from ...database.core import DbSession
+from ..projects.models import Project
 from .models import (
     Artifact,
     ArtifactCreate,
@@ -45,20 +46,22 @@ def get_pipeline_detail(
     """
     try:
         rows = dbsession.execute(
-            select(Pipeline, PipelineJob)
+            select(Pipeline, PipelineJob, Project.name)
             .join(PipelineJob, PipelineJob.pipeline_id == Pipeline.pipeline_id)
+            .join(Project, Pipeline.project_id == Project.project_id)
             .where(Pipeline.pipeline_id == pipeline_id)
         ).all()
 
         if not rows:
             return None
 
-        pipeline, _ = rows[0]
-        jobs = [job for _, job in rows]
+        pipeline, _, project_name = rows[0]
+        jobs = [job for _, job, _ in rows]
 
         return PipelineDetail(
             pipeline_id=pipeline.pipeline_id,
             project_id=pipeline.project_id,
+            project_name=project_name,
             branch=pipeline.branch,
             commit_hash=pipeline.commit_hash,
             status=PipelineStatus(pipeline.status),
@@ -90,8 +93,6 @@ def build_job_read(
     Build a PipelineJobRead for the given pipeline_job_id, joining to resolve
     repo URL and commit_hash from Project/Pipeline.
     """
-    from ..projects.models import Project
-
     row = dbsession.execute(
         select(
             PipelineJob,

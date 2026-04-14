@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy import insert, select
+from sqlalchemy import delete, insert, select
 
 from ...database.core import DbSession
 from ...pipeline.spec import parse_spec
@@ -30,6 +30,15 @@ def get_project_by_id(project_id: int, dbsession: DbSession) -> Project | None:
     return dbsession.get(Project, project_id)
 
 
+def delete_project(project_id: int, dbsession: DbSession) -> bool:
+    result = dbsession.execute(
+        delete(Project)
+        .where(Project.project_id == project_id)
+        .returning(Project.project_id)
+    )
+    return result.one_or_none() is not None
+
+
 def trigger_pipeline(project: Project, branch: str, dbsession: DbSession) -> Pipeline:
     """
     Fetch the latest commit on branch, parse the pipeline spec, and create
@@ -53,15 +62,18 @@ def trigger_pipeline(project: Project, branch: str, dbsession: DbSession) -> Pip
         .returning(Pipeline)
     ).one()
 
-    for job_spec in spec.jobs:
-        dbsession.execute(
-            insert(PipelineJob).values(
-                pipeline_id=pipeline.pipeline_id,
-                name=job_spec.name,
-                commands=job_spec.commands,
-                status=PipelineStatus.QUEUED,
-            )
-        )
+    dbsession.execute(
+        insert(PipelineJob),
+        [
+            {
+                "pipeline_id": pipeline.pipeline_id,
+                "name": job_spec.name,
+                "commands": job_spec.commands,
+                "status": PipelineStatus.QUEUED,
+            }
+            for job_spec in spec.jobs
+        ],
+    )
 
     logger.info(
         "Triggered pipeline %s for %s@%s (%d jobs)",

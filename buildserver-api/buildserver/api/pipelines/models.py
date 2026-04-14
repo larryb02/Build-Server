@@ -108,6 +108,7 @@ class PipelineJobSummary(BaseModel):
 class PipelineDetail(BaseModel):
     pipeline_id: int
     project_id: int
+    project_name: str
     branch: str
     commit_hash: str
     status: PipelineStatus

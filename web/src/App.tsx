@@ -3,9 +3,11 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 
-import Sidebar from './Sidebar';
-import Runners from './Runners';
-import Jobs from './Jobs';
+import Sidebar from './components/Sidebar';
+import Projects from './views/Projects';
+import Pipelines from './views/Pipelines';
+import PipelineDetail from './views/PipelineDetail';
+import Runners from './views/Runners';
 
 const darkTheme = createTheme({
   palette: {
@@ -22,7 +24,9 @@ export default function App() {
           <Sidebar />
           <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: 'auto' }}>
             <Routes>
-              <Route path="/" element={<Jobs />} />
+              <Route path="/" element={<Projects />} />
+              <Route path="/pipelines" element={<Pipelines />} />
+              <Route path="/pipelines/:id" element={<PipelineDetail />} />
               <Route path="/runners" element={<Runners />} />
             </Routes>
           </Box>

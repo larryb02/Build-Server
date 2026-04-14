@@ -7,6 +7,7 @@ from sqlalchemy.exc import DBAPIError
 # TODO: switching to relative imports
 from .service import (
     generate_registration_token,
+    get_active_runner,
     get_all_runners,
     get_runner_by_id,
     register_runner,
@@ -22,14 +23,13 @@ from .models import (
     RunnerHealth,
 )
 from ...database.core import DbSession
-from ..auth.service import get_token_payload
 
 router = APIRouter(prefix="/runners")
 logger = logging.getLogger(__name__)
 
 
 @router.post("/heartbeat", status_code=status.HTTP_204_NO_CONTENT)
-def send_heartbeat(dbsession: DbSession, payload: dict = Depends(get_token_payload)):
+def send_heartbeat(dbsession: DbSession, payload: dict = Depends(get_active_runner)):
     try:
         # TODO: create some types when this is fully fleshed out so linter stops yelling
         runner_id = int(payload.get("sub"))  # type: ignore
