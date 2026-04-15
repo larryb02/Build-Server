@@ -8,7 +8,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Chip from '@mui/material/Chip';
+// import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -29,17 +29,17 @@ type Runner = {
     // health: string;
 };
 
-type ChipColor = 'success' | 'error' | 'warning' | 'default';
+// type ChipColor = 'success' | 'error' | 'warning' | 'default';
 
-function healthChip(health: string) {
-    const map: Record<string, { color: ChipColor; label: string }> = {
-        healthy:   { color: 'success', label: 'Healthy' },
-        unhealthy: { color: 'error',   label: 'Unhealthy' },
-        unknown:   { color: 'warning', label: 'Unknown' },
-    };
-    const h = map[health.toLowerCase()] ?? { color: 'default', label: health };
-    return <Chip label={h.label} color={h.color} size="small" />;
-}
+// function healthChip(health: string) {
+//     const map: Record<string, { color: ChipColor; label: string }> = {
+//         healthy:   { color: 'success', label: 'Healthy' },
+//         unhealthy: { color: 'error',   label: 'Unhealthy' },
+//         unknown:   { color: 'warning', label: 'Unknown' },
+//     };
+//     const h = map[health.toLowerCase()] ?? { color: 'default', label: health };
+//     return <Chip label={h.label} color={h.color} size="small" />;
+// }
 
 type TokenDialog = {
     open: boolean;

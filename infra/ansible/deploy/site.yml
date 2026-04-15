@@ -1,0 +1,67 @@
+---
+- name: Deploy Server
+  hosts: buildserver
+  become: true
+
+  vars:
+    deploy_dir: /opt/buildserver
+
+  tasks:
+    - name: Create deploy directories
+      ansible.builtin.file:
+        path: "{{ deploy_dir }}/nginx"
+        state: directory
+        mode: "0755"
+
+    - name: Copy compose file
+      ansible.builtin.copy:
+        src: ../../docker/compose.api.yml
+        dest: "{{ deploy_dir }}/compose.yml"
+        mode: "0644"
+
+    - name: Copy nginx config
+      ansible.builtin.copy:
+        src: ../../nginx/nginx.conf
+        dest: "{{ deploy_dir }}/nginx/nginx.conf"
+        mode: "0644"
+
+    - name: Write .env file
+      ansible.builtin.copy:
+        dest: "{{ deploy_dir }}/.env"
+        mode: "0600"
+        content: |
+          APP_PORT={{ app_port }}
+          BS_SECRET_KEY={{ secret_key }}
+          DATABASE_HOST={{ database_host }}
+          DATABASE_PORT={{ database_port }}
+          DATABASE_USER={{ database_user }}
+          DATABASE_PASSWORD={{ database_password }}
+
+    - name: Create certs directory
+      ansible.builtin.file:
+        path: /etc/nginx/certs
+        state: directory
+        mode: "0700"
+
+    - name: Write Cloudflare origin certificate
+      ansible.builtin.copy:
+        dest: /etc/nginx/certs/cert.pem
+        content: "{{ cloudflare_origin_cert }}"
+        mode: "0600"
+
+    - name: Write Cloudflare origin key
+      ansible.builtin.copy:
+        dest: /etc/nginx/certs/key.pem
+        content: "{{ cloudflare_origin_key }}"
+        mode: "0600"
+      no_log: true
+
+    - name: Pull latest images
+      ansible.builtin.command:
+        cmd: docker compose -f compose.yml pull
+        chdir: "{{ deploy_dir }}"
+
+    - name: Compose Up
+      ansible.builtin.command:
+        cmd: docker compose -f compose.yml up -d
+        chdir: "{{ deploy_dir }}"

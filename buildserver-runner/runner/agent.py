@@ -15,7 +15,7 @@ from runner.types import PipelineJob
 
 logger = logging.getLogger(__name__)
 
-HEARTBEAT_INTERVAL = 10
+HEARTBEAT_INTERVAL = 3
 
 
 class Agent:
@@ -46,7 +46,7 @@ class Agent:
             self.stop()
 
     def _request_work(self):
-        sleep_for = 20
+        sleep_for = 5
         while not self._stop_event.is_set():
             time.sleep(sleep_for)
             logger.debug("requesting work...")

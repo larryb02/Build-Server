@@ -56,7 +56,7 @@ def register(
     try:
         # TODO: check status codes and/or create custom statuses to improve UX
         r = httpx.post(
-            url=f"{url}/api/v1/runners/",
+            url=f"{url}/api/v1/runners",
             headers={"Content-Type": "application/json"},
             json={"reg_token": token, "name": name},
             follow_redirects=True,
