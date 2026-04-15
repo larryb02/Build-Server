@@ -58,10 +58,10 @@
 
     - name: Pull latest images
       ansible.builtin.command:
-        cmd: docker compose -f compose.yml pull
+        cmd: nerdctl compose -f compose.yml pull
         chdir: "{{ deploy_dir }}"
 
     - name: Compose Up
       ansible.builtin.command:
-        cmd: docker compose -f compose.yml up -d
+        cmd: nerdctl compose -f compose.yml up -d
         chdir: "{{ deploy_dir }}"
