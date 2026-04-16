@@ -54,6 +54,6 @@ class Runner(Base):
     __tablename__ = "runner"
     runner_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40))
-    # runner_token_hash: Mapped[str] = mapped_column(String(64), unique=True)
     health: Mapped[int] = mapped_column(Integer, default=RunnerHealth.OFFLINE)
     last_seen: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
+    deleted: Mapped[bool] = mapped_column(default=False)

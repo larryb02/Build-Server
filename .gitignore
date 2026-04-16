@@ -266,3 +266,6 @@ terraform.rc
 
 # protobuf generated code
 *_pb2*
+
+# static files
+static/

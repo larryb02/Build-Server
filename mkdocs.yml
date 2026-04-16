@@ -22,3 +22,4 @@ nav:
   - Getting Started: getting-started.md
   - Architecture: architecture.md
   - API: api.md
+  - Pipeline Spec: pipeline-spec.md

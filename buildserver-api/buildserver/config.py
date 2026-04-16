@@ -22,3 +22,9 @@ SLEEP_FOR = settings.get("SLEEP_FOR", 60 * 15)
 TIMEOUT = settings.get("TIMEOUT", 60)
 
 ARTIFACT_REPOSITORY_ROOT = settings.get("ARTIFACT_REPOSITORY_ROOT", "")
+
+SECRET_KEY = settings.get("SECRET_KEY", None)
+if not SECRET_KEY:
+    raise RuntimeError(
+        "BS_SECRET_KEY must be set (generate with: openssl rand -hex 32)"
+    )

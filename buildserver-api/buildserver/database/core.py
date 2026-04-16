@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from typing import Annotated, Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, scoped_session, Session
+from sqlalchemy_utils import database_exists, create_database
 from fastapi import Depends
 from ..config import DATABASE_URI
 
@@ -39,6 +40,8 @@ class Base(DeclarativeBase):
 
 
 def init_db():
+    if not database_exists(engine.url):
+        create_database(engine.url)
     """Create all database tables."""
     from . import models  # noqa: F401
 

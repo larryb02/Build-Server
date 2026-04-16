@@ -1,0 +1,12 @@
+---
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-west-1
+filters:
+  tag:Name:
+    - buildserver
+  instance-state-name: running
+hostnames:
+  - tag:Name
+compose:
+  ansible_host: instance_id

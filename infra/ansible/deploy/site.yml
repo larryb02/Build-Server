@@ -1,0 +1,48 @@
+---
+- name: Deploy Server
+  hosts: buildserver
+  become: true
+
+  vars:
+    deploy_dir: /opt/buildserver
+
+  tasks:
+    - name: Create deploy directories
+      ansible.builtin.file:
+        path: "{{ deploy_dir }}/nginx"
+        state: directory
+        mode: "0755"
+
+    - name: Copy compose file
+      ansible.builtin.copy:
+        src: ../../docker/compose.api.yml
+        dest: "{{ deploy_dir }}/compose.yml"
+        mode: "0644"
+
+    - name: Template nginx config
+      ansible.builtin.template:
+        src: ../../nginx/nginx.conf
+        dest: "{{ deploy_dir }}/nginx/nginx.conf"
+        mode: "0644"
+
+    - name: Write .env file
+      ansible.builtin.copy:
+        dest: "{{ deploy_dir }}/.env"
+        mode: "0600"
+        content: |
+          APP_PORT={{ app_port }}
+          BS_SECRET_KEY={{ secret_key }}
+          DATABASE_HOST={{ database_host }}
+          DATABASE_PORT={{ database_port }}
+          DATABASE_USER={{ database_user }}
+          DATABASE_PASSWORD={{ database_password }}
+
+    - name: Pull latest images
+      ansible.builtin.command:
+        cmd: nerdctl compose -f compose.yml pull
+        chdir: "{{ deploy_dir }}"
+
+    - name: Compose Up
+      ansible.builtin.command:
+        cmd: nerdctl compose -f compose.yml up -d
+        chdir: "{{ deploy_dir }}"

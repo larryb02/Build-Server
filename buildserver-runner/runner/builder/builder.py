@@ -1,8 +1,5 @@
-"""
-Functions for compiling C programs
-"""
+"""Clone a repository at a specific commit and execute a shell command."""
 
-import os
 import logging
 import subprocess
 import tempfile
@@ -13,13 +10,11 @@ import git
 
 from runner import utils
 from runner.config import LOG_LEVEL
-from runner.types import Job
+from runner.types import PipelineJob
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
-
-SCRIPT_FILE = ".buildserver.sh"
 
 
 class Builder(ABC):
@@ -35,7 +30,7 @@ class Builder(ABC):
 class ShellBuilder(Builder):
     """Executes a job on the local system shell."""
 
-    def __init__(self, job: Job) -> None:
+    def __init__(self, job: PipelineJob) -> None:
         self.job = job
         self.build_dir: Path | None = None
         self.repo_dir: Path | None = None
@@ -67,29 +62,56 @@ class ShellBuilder(Builder):
         actual_hash = cloned.head.commit.hexsha
         logger.info("Cloned %s at %s", repo_name, actual_hash)
 
-        os.environ["JOB_ID"] = str(self.job.job_id)
-        os.environ["REPO_URL"] = self.job.git_repository_url
-        os.environ["COMMIT_HASH"] = actual_hash
-
     def run(self) -> None:
-        """Prepare the environment and execute the build script."""
-        try:
-            self.prepare_environment()
-            _run_script(self.repo_dir / SCRIPT_FILE, self.repo_dir)
-        except (CloneError, BuildError):
-            if self.build_dir:
-                utils.cleanup_build_files(self.build_dir)
-            raise
+        """
+        Clone the repository at the job's commit and execute its commands in order.
+
+        Raises:
+            CloneError: If cloning fails.
+            BuildError: If any command exits with a non-zero code.
+        """
+        with tempfile.TemporaryDirectory(prefix="job_") as tmp:
+            build_dir = Path(tmp)
+            logger.info("Job %s: build dir %s", self.job.pipeline_job_id, build_dir)
+            repo_dir = clone_repo(
+                self.job.git_repository_url, self.job.commit_hash, build_dir
+            )
+            for command in self.job.commands:
+                run_command(command, repo_dir)
 
 
-def _run_script(script_path: Path, cwd: Path = None):
-    if not script_path.exists():
-        raise BuildError(f"Build script not found: {script_path}")
+def clone_repo(repo_url: str, commit_hash: str, build_dir: Path) -> Path:
+    """
+    Clone repo_url into build_dir and check out commit_hash.
 
-    os.chmod(script_path, 0o755)
+    Returns:
+        Path to the cloned repository root.
 
+    Raises:
+        CloneError: If cloning or checkout fails.
+    """
+    logger.info("Cloning %s at %s", repo_url, commit_hash)
+    try:
+        repo = git.Repo.clone_from(repo_url, build_dir / "repo")
+        repo.git.checkout(commit_hash)
+    except git.GitCommandError as exc:
+        raise CloneError(
+            f"Failed to clone/checkout {repo_url}@{commit_hash}: {exc}"
+        ) from exc
+    return build_dir / "repo"
+
+
+def run_command(command: str, cwd: Path) -> None:
+    """
+    Execute a shell command in cwd, streaming output to the logger.
+
+    Raises:
+        BuildError: If the command exits with a non-zero code.
+    """
+    logger.info("Running: %s", command)
     with subprocess.Popen(
-        ["/bin/bash", str(script_path)],
+        command,
+        shell=True,
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -98,7 +120,7 @@ def _run_script(script_path: Path, cwd: Path = None):
         for line in proc.stdout:
             logger.info(line.rstrip())
     if proc.returncode != 0:
-        raise BuildError(f"Script exited with code {proc.returncode}")
+        raise BuildError(f"Command exited with code {proc.returncode}: {command}")
 
 
 class BuildError(Exception):
@@ -110,64 +132,3 @@ class CloneError(Exception):
 
 
 # TODO: support switching to branch build job is scheduled for
-
-
-# def clone_repo(repo: str, build_dir: Path) -> str:
-#     """
-#     Clone git repository into build directory.
-
-#     Args:
-#         repo: Git repository URL (git@ or https://)
-#         build_dir: Directory to clone into
-
-#     Returns:
-#         The commit hash of the cloned repo.
-
-#     Raises:
-#         CloneError: If cloning fails.
-#     """
-#     logger.info("Cloning %s into %s", repo, build_dir)
-#     try:
-#         result = subprocess.run(
-#             ["/usr/bin/git", "clone", repo],
-#             cwd=build_dir,
-#             check=True,
-#             capture_output=True,
-#             text=True,
-#         )
-#     except subprocess.CalledProcessError as e:
-#         raise CloneError(f"Failed to clone {repo}: {e.stderr}") from e
-
-#     repo_name = utils.get_dir_name(repo)
-#     repo_path = build_dir / repo_name
-
-#     try:
-#         commit_hash = utils.get_commit_hash(repo_path, logger)
-#     except Exception as e:
-#         raise CloneError(f"Failed to get commit hash: {e}") from e
-
-#     logger.info("Cloned %s at %s", repo_name, commit_hash)
-#     return commit_hash
-
-
-# def run(payload: Job) -> None:
-#     """
-#     Clone and run a script in an isolated temp directory.
-
-#     Args:
-#         repo: Git repository URL.
-
-#     Raises:
-#         CloneError: If cloning fails.
-#         BuildError: If script execution fails.
-#     """
-#     build_dir = Path(tempfile.mkdtemp(prefix="job_"))
-#     logger.info("Created temp build directory: %s", build_dir)
-
-#     try:
-#         clone_repo(payload.git_repository_url, build_dir)
-#         repo_dir = build_dir / utils.get_dir_name(payload.git_repository_url)
-#         _run_script(repo_dir / SCRIPT_FILE, repo_dir)
-#     except (CloneError, BuildError):
-#         utils.cleanup_build_files(build_dir)
-#         raise

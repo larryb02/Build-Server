@@ -1,13 +1,12 @@
 """Fixtures for integration tests"""
 
-import os
-
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from testcontainers.postgres import PostgresContainer
 
-from ...api.runners.models import Base
+import buildserver.database.models  # noqa: F401 — registers all ORM models on Base
+from buildserver.database.core import Base
 
 # from ...config import (
 #     DATABASE_USER,
