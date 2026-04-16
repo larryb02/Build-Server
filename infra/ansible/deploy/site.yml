@@ -19,8 +19,8 @@
         dest: "{{ deploy_dir }}/compose.yml"
         mode: "0644"
 
-    - name: Copy nginx config
-      ansible.builtin.copy:
+    - name: Template nginx config
+      ansible.builtin.template:
         src: ../../nginx/nginx.conf
         dest: "{{ deploy_dir }}/nginx/nginx.conf"
         mode: "0644"
@@ -36,25 +36,6 @@
           DATABASE_PORT={{ database_port }}
           DATABASE_USER={{ database_user }}
           DATABASE_PASSWORD={{ database_password }}
-
-    - name: Create certs directory
-      ansible.builtin.file:
-        path: /etc/nginx/certs
-        state: directory
-        mode: "0700"
-
-    - name: Write Cloudflare origin certificate
-      ansible.builtin.copy:
-        dest: /etc/nginx/certs/cert.pem
-        content: "{{ cloudflare_origin_cert }}"
-        mode: "0600"
-
-    - name: Write Cloudflare origin key
-      ansible.builtin.copy:
-        dest: /etc/nginx/certs/key.pem
-        content: "{{ cloudflare_origin_key }}"
-        mode: "0600"
-      no_log: true
 
     - name: Pull latest images
       ansible.builtin.command:

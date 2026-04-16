@@ -85,5 +85,4 @@ jobs:
             -e "database_port=${{ secrets.DATABASE_PORT }}" \
             -e "database_user=${{ secrets.DATABASE_USER }}" \
             -e "database_password=${{ secrets.DATABASE_PASSWORD }}" \
-            -e "cloudflare_origin_cert=${{ secrets.CLOUDFLARE_ORIGIN_CERT }}" \
-            -e "cloudflare_origin_key=${{ secrets.CLOUDFLARE_ORIGIN_KEY }}"
+            -e "domain=${{ secrets.DOMAIN }}"
