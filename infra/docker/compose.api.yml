@@ -16,6 +16,8 @@ services:
     build:
       context: ../..
       dockerfile: infra/docker/api.Dockerfile
+    environment:
+      - BS_SECRET_KEY=${BS_SECRET_KEY}
     command:
       - "--port=${APP_PORT}"
       - "--db-user=${DATABASE_USER}"
