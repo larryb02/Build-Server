@@ -57,3 +57,43 @@ jobs:
       - name: Run tests
         working-directory: buildserver-runner
         run: pytest -xv runner/tests
+
+  tag:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.read_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: read_version
+        run: echo "version=$(cat buildserver-runner/version.txt)" >> "$GITHUB_OUTPUT"
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag "runner-v${{ steps.read_version.outputs.version }}"
+          git push origin "runner-v${{ steps.read_version.outputs.version }}"
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [tag]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install build
+        run: pip install build
+      - name: Build package
+        working-directory: buildserver-runner
+        run: python -m build --sdist
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: runner-v${{ needs.tag.outputs.version }}
+          files: buildserver-runner/dist/*.tar.gz
