@@ -8,7 +8,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     proxy: {
-      '/api/v1': 'http://host.docker.internal:8580',
+      '/api/v1': 'http://host.docker.internal:8000',
     },
   },
 })

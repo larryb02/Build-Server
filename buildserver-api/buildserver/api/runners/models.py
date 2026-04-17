@@ -1,9 +1,9 @@
 from datetime import datetime
-from enum import IntEnum
+from enum import Enum as PyEnum
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Integer, DateTime
+from sqlalchemy import Enum, String, Integer, DateTime
 
 from ...database.core import Base
 
@@ -12,10 +12,10 @@ class HeartbeatRequest(BaseModel):
     token: str
 
 
-class RunnerHealth(IntEnum):
-    OFFLINE = 0
-    UNHEALTHY = 1
-    HEALTHY = 2
+class RunnerHealth(str, PyEnum):
+    OFFLINE = "OFFLINE"
+    UNHEALTHY = "UNHEALTHY"
+    HEALTHY = "HEALTHY"
 
 
 class RegisterResponse(BaseModel):
@@ -54,6 +54,8 @@ class Runner(Base):
     __tablename__ = "runner"
     runner_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40))
-    health: Mapped[int] = mapped_column(Integer, default=RunnerHealth.OFFLINE)
+    health: Mapped[str] = mapped_column(
+        Enum(RunnerHealth, name="runnerhealth"), default=RunnerHealth.OFFLINE
+    )
     last_seen: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     deleted: Mapped[bool] = mapped_column(default=False)

@@ -8,7 +8,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-// import Chip from '@mui/material/Chip';
+import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -26,20 +26,21 @@ import config from '../config';
 type Runner = {
     runner_id: number;
     name: string;
-    // health: string;
+    health: string;
+    last_seen: string;
 };
 
-// type ChipColor = 'success' | 'error' | 'warning' | 'default';
+type ChipColor = 'success' | 'error' | 'warning' | 'default';
 
-// function healthChip(health: string) {
-//     const map: Record<string, { color: ChipColor; label: string }> = {
-//         healthy:   { color: 'success', label: 'Healthy' },
-//         unhealthy: { color: 'error',   label: 'Unhealthy' },
-//         unknown:   { color: 'warning', label: 'Unknown' },
-//     };
-//     const h = map[health.toLowerCase()] ?? { color: 'default', label: health };
-//     return <Chip label={h.label} color={h.color} size="small" />;
-// }
+function healthChip(health: string) {
+    const map: Record<string, { color: ChipColor; label: string }> = {
+        HEALTHY:   { color: 'success', label: 'Healthy' },
+        UNHEALTHY: { color: 'error',   label: 'Unhealthy' },
+        OFFLINE:   { color: 'warning', label: 'Offline' },
+    };
+    const h = map[health] ?? { color: 'default', label: health };
+    return <Chip label={h.label} color={h.color} size="small" />;
+}
 
 type TokenDialog = {
     open: boolean;
@@ -106,7 +107,7 @@ export default function Runners() {
                     <TableHead>
                         <TableRow>
                             <TableCell>Name</TableCell>
-                            {/* <TableCell>Health</TableCell> */}
+                            <TableCell>Health</TableCell>
                             <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
@@ -117,7 +118,7 @@ export default function Runners() {
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <TableCell>{row.name}</TableCell>
-                                {/* <TableCell>{healthChip(row.health)}</TableCell> */}
+                                <TableCell>{healthChip(row.health)}</TableCell>
                                 <TableCell>
                                     <Tooltip title="Delete runner">
                                         <IconButton size="small" onClick={() => handleDelete(row)}>
@@ -163,10 +164,10 @@ export default function Runners() {
                                     color: 'success.light',
                                 }}
                             >
-                                {`buildserver-runner register --server <SERVER_URL> --token ${tokenDialog.token}`}
+                                {`buildserver-runner register --url <SERVER_URL> --token ${tokenDialog.token} --name <RUNNER_NAME>`}
                             </Box>
                             <Typography variant="caption" color="text.secondary">
-                                This token expires after 24 hours and can only be used once.
+                                This token expires after 1 hour and can only be used once.
                             </Typography>
                         </Box>
                     )}
