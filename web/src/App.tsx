@@ -13,6 +13,10 @@ const darkTheme = createTheme({
   palette: {
     mode: 'dark',
   },
+  typography: {
+    fontSize: 16,
+  },
+  spacing: 10,
 });
 
 export default function App() {
@@ -22,13 +26,16 @@ export default function App() {
       <BrowserRouter>
         <Box sx={{ display: 'flex', height: '100vh' }}>
           <Sidebar />
-          <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: 'auto' }}>
-            <Routes>
-              <Route path="/" element={<Projects />} />
-              <Route path="/pipelines" element={<Pipelines />} />
-              <Route path="/pipelines/:id" element={<PipelineDetail />} />
-              <Route path="/runners" element={<Runners />} />
-            </Routes>
+          <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
+            {/* <Header /> */}
+            <Box component="main" sx={{ flexGrow: 1, p: 4, overflow: 'auto' }}>
+              <Routes>
+                <Route path="/" element={<Projects />} />
+                <Route path="/pipelines" element={<Pipelines />} />
+                <Route path="/pipelines/:id" element={<PipelineDetail />} />
+                <Route path="/runners" element={<Runners />} />
+              </Routes>
+            </Box>
           </Box>
         </Box>
       </BrowserRouter>

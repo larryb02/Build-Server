@@ -93,44 +93,51 @@ export default function Runners() {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ flexGrow: 1 }}>Runners</Typography>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={openTokenDialog}>
-                    Add Runner
-                </Button>
-            </Box>
-
             {fetchError && <Alert severity="error" sx={{ mb: 2 }}>Something went wrong — could not load runners.</Alert>}
 
-            <TableContainer component={Paper} sx={{ flexGrow: 1, overflow: 'auto' }}>
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Health</TableCell>
-                            <TableCell>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {runners.map((row) => (
-                            <TableRow
-                                key={row.runner_id}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell>{row.name}</TableCell>
-                                <TableCell>{healthChip(row.health)}</TableCell>
-                                <TableCell>
-                                    <Tooltip title="Delete runner">
-                                        <IconButton size="small" onClick={() => handleDelete(row)}>
-                                            <DeleteOutlineIcon fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                </TableCell>
+            <Paper sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <Box sx={{ px: 3, pt: 3, pb: 2, display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" fontWeight={600}>All Runners</Typography>
+                        <Typography variant="body2" color="primary.main">
+                            {runners.length} {runners.length === 1 ? 'runner' : 'runners'}
+                        </Typography>
+                    </Box>
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={openTokenDialog}>
+                        Add Runner
+                    </Button>
+                </Box>
+
+                <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Name</TableCell>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Health</TableCell>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Actions</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {runners.map((row) => (
+                                <TableRow
+                                    key={row.runner_id}
+                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                    <TableCell>{row.name}</TableCell>
+                                    <TableCell>{healthChip(row.health)}</TableCell>
+                                    <TableCell>
+                                        <Tooltip title="Delete runner">
+                                            <IconButton size="small" onClick={() => handleDelete(row)}>
+                                                <DeleteOutlineIcon fontSize="small" />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
 
             {/* Add runner / token dialog */}
             <Dialog open={tokenDialog.open} onClose={() => setTokenDialog(TOKEN_CLOSED)} fullWidth maxWidth="sm">

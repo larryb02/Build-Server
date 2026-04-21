@@ -142,53 +142,62 @@ export default function Projects() {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ flexGrow: 1 }}>Projects</Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setAdd({ ...ADD_CLOSED, open: true })}
-                >
-                    Add Project
-                </Button>
-            </Box>
-
             {fetchError && (
                 <Alert severity="error" sx={{ mb: 2 }}>
                     Something went wrong — could not load projects.
                 </Alert>
             )}
 
-            <TableContainer component={Paper} sx={{ flexGrow: 1, overflow: 'auto' }}>
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Repository</TableCell>
-                            <TableCell>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {projects.map((row) => (
-                            <TableRow
-                                key={row.project_id}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell>{row.name}</TableCell>
-                                <TableCell sx={{ fontFamily: 'monospace' }}>{row.git_repository_url}</TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => setRowMenu({ project: row, anchor: e.currentTarget })}
-                                    >
-                                        <MoreVertIcon fontSize="small" />
-                                    </IconButton>
-                                </TableCell>
+            <Paper sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <Box sx={{ px: 3, pt: 3, pb: 2, display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" fontWeight={600}>All Projects</Typography>
+                        <Typography variant="body2" color="primary.main">
+                            {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+                        </Typography>
+                    </Box>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => setAdd({ ...ADD_CLOSED, open: true })}
+                    >
+                        Add Project
+                    </Button>
+                </Box>
+
+                <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Name</TableCell>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Repository</TableCell>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Actions</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {projects.map((row) => (
+                                <TableRow
+                                    key={row.project_id}
+                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                    <TableCell>{row.name}</TableCell>
+                                    <TableCell sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                                        {row.git_repository_url}
+                                    </TableCell>
+                                    <TableCell>
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => setRowMenu({ project: row, anchor: e.currentTarget })}
+                                        >
+                                            <MoreVertIcon fontSize="small" />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
 
             {/* Row actions menu */}
             <Menu

@@ -11,8 +11,9 @@ import Divider from '@mui/material/Divider';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import FolderIcon from '@mui/icons-material/Folder';
+import TerminalIcon from '@mui/icons-material/Terminal';
 
-const DRAWER_WIDTH = 220;
+const DRAWER_WIDTH = 260;
 
 const navItems = [
     { label: 'Projects',  path: '/',          icon: <FolderIcon /> },
@@ -30,29 +31,35 @@ export default function Sidebar() {
                 '& .MuiDrawer-paper': {
                     width: DRAWER_WIDTH,
                     boxSizing: 'border-box',
+                    borderRight: '1px solid',
+                    borderColor: 'divider',
                 },
             }}
         >
-            <Box sx={{ px: 2, py: 2 }}>
-                <Typography variant="h6" noWrap>
+            <Box sx={{ px: 3, py: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <TerminalIcon color="primary" />
+                <Typography variant="h6" fontWeight={700} noWrap>
                     Build Server
                 </Typography>
             </Box>
             <Divider />
-            <List>
+            <List sx={{ px: 1.5, pt: 2 }}>
                 {navItems.map(({ label, path, icon }) => (
-                    <ListItem key={label} disablePadding>
+                    <ListItem key={label} disablePadding sx={{ mb: 0.5 }}>
                         <ListItemButton
                             component={NavLink}
                             to={path}
                             end={path === '/'}
                             sx={{
+                                borderRadius: 2,
                                 '&.active': {
-                                    bgcolor: 'action.selected',
+                                    bgcolor: 'primary.main',
+                                    color: 'white',
+                                    '& .MuiListItemIcon-root': { color: 'white' },
                                 },
                             }}
                         >
-                            <ListItemIcon>{icon}</ListItemIcon>
+                            <ListItemIcon sx={{ minWidth: 40 }}>{icon}</ListItemIcon>
                             <ListItemText primary={label} />
                         </ListItemButton>
                     </ListItem>

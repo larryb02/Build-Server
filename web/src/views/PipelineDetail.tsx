@@ -68,7 +68,7 @@ export default function PipelineDetail() {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Breadcrumbs sx={{ mb: 2 }}>
+            <Breadcrumbs sx={{ mb: 3 }}>
                 <Link component={RouterLink} to="/pipelines" underline="hover" color="inherit">
                     Pipelines
                 </Link>
@@ -80,26 +80,31 @@ export default function PipelineDetail() {
             {error && <Alert severity="error" sx={{ mb: 2 }}>Could not load pipeline.</Alert>}
 
             {pipeline && (
-                <>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                <Paper sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <Box sx={{ px: 3, pt: 3, pb: 2, display: 'flex', alignItems: 'center' }}>
                         <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="h5">
+                            <Typography variant="h6" fontWeight={600}>
                                 {pipeline.branch}
-                                <Typography component="span" variant="h5" color="text.secondary" sx={{ fontFamily: 'monospace', ml: 1 }}>
+                                <Typography
+                                    component="span"
+                                    variant="h6"
+                                    color="text.secondary"
+                                    sx={{ fontFamily: 'monospace', ml: 1 }}
+                                >
                                     {pipeline.commit_hash.slice(0, 7)}
                                 </Typography>
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">{pipeline.project_name}</Typography>
+                            <Typography variant="body2" color="primary.main">{pipeline.project_name}</Typography>
                         </Box>
                         {statusChip(pipeline.status)}
                     </Box>
 
-                    <TableContainer component={Paper}>
-                        <Table>
+                    <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
+                        <Table stickyHeader>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Job</TableCell>
-                                    <TableCell>Status</TableCell>
+                                    <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Job</TableCell>
+                                    <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Status</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -115,7 +120,7 @@ export default function PipelineDetail() {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                </>
+                </Paper>
             )}
         </Box>
     );

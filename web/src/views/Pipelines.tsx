@@ -46,11 +46,8 @@ export default function Pipelines() {
         const fetchPipelines = async () => {
             try {
                 const res = await fetch(config.routes.pipelines);
-                if (!res.ok) {
-                    throw new Error(`req responded with ${res.status} ${res.statusText}`);
-                }
-                const json = await res.json();
-                setPipelines(json);
+                if (!res.ok) throw new Error(`req responded with ${res.status} ${res.statusText}`);
+                setPipelines(await res.json());
             } catch (err) {
                 console.error(`${err}`);
                 setError(true);
@@ -61,35 +58,41 @@ export default function Pipelines() {
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Typography variant="h5" sx={{ mb: 2 }}>Pipelines</Typography>
             {error && <Alert severity="error" sx={{ mb: 2 }}>Something went wrong — could not load pipelines.</Alert>}
-            <TableContainer component={Paper} sx={{ flexGrow: 1, overflow: 'auto' }}>
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Commit</TableCell>
-                            <TableCell>Status</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {pipelines.map((row) => (
-                            <TableRow
-                                key={row.pipeline_id}
-                                hover
-                                onClick={() => navigate(`/pipelines/${row.pipeline_id}`)}
-                                sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell sx={{ color: 'text.disabled', fontStyle: 'italic' }}>--</TableCell>
-                                <TableCell sx={{ fontFamily: 'monospace' }}>
-                                    {row.commit_hash.slice(0, 7)}
-                                </TableCell>
-                                <TableCell>{statusChip(row.status)}</TableCell>
+
+            <Paper sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <Box sx={{ px: 3, pt: 3, pb: 2 }}>
+                    <Typography variant="h6" fontWeight={600}>All Pipelines</Typography>
+                </Box>
+
+                <TableContainer sx={{ flexGrow: 1, overflow: 'auto' }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Name</TableCell>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Commit</TableCell>
+                                <TableCell sx={{ color: 'text.secondary', fontWeight: 500 }}>Status</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {pipelines.map((row) => (
+                                <TableRow
+                                    key={row.pipeline_id}
+                                    hover
+                                    onClick={() => navigate(`/pipelines/${row.pipeline_id}`)}
+                                    sx={{ cursor: 'pointer', '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                    <TableCell sx={{ color: 'text.disabled', fontStyle: 'italic' }}>--</TableCell>
+                                    <TableCell sx={{ fontFamily: 'monospace' }}>
+                                        {row.commit_hash.slice(0, 7)}
+                                    </TableCell>
+                                    <TableCell>{statusChip(row.status)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
         </Box>
     );
 }
