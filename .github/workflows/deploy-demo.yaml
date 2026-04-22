@@ -1,0 +1,49 @@
+name: Deploy Demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag to deploy (default: latest)'
+        default: 'latest'
+        required: false
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+  workflow_run:
+    workflows: ["Buildserver API"]
+    types: [completed]
+    branches: [main]
+
+env:
+  AWS_REGION: us-west-1
+
+jobs:
+  deploy-demo:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_RUNNER_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Install Ansible and dependencies
+        run: pip install ansible boto3 botocore
+      - name: Install amazon.aws collection
+        run: ansible-galaxy collection install amazon.aws
+      - name: Run playbook
+        run: |
+          ansible-playbook infra/ansible/deploy/site.yml \
+            -i infra/ansible/deploy/inventory/aws_ec2.yml \
+            -e "app_port=${{ secrets.APP_PORT }}" \
+            -e "secret_key=${{ secrets.BS_SECRET_KEY }}" \
+            -e "database_host=${{ secrets.DATABASE_HOST }}" \
+            -e "database_port=${{ secrets.DATABASE_PORT }}" \
+            -e "database_user=${{ secrets.DATABASE_USER }}" \
+            -e "database_password=${{ secrets.DATABASE_PASSWORD }}" \
+            -e "domain=${{ secrets.DOMAIN }}"

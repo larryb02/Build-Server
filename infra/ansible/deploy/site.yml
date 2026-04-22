@@ -44,5 +44,5 @@
 
     - name: Compose Up
       ansible.builtin.command:
-        cmd: nerdctl compose -f compose.yml up -d
+        cmd: nerdctl compose -f compose.yml up -d --force-recreate postgres api
         chdir: "{{ deploy_dir }}"
