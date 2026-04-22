@@ -46,3 +46,8 @@
       ansible.builtin.command:
         cmd: nerdctl compose -f compose.yml up -d --force-recreate postgres api
         chdir: "{{ deploy_dir }}"
+
+    - name: Reload nginx
+      ansible.builtin.command:
+        cmd: nerdctl compose -f compose.yml exec nginx nginx -s reload
+        chdir: "{{ deploy_dir }}"
