@@ -36,9 +36,11 @@ def start(
 
     from .database.core import init_db
     from .main import app as fastapi_app
+    from .utils import setup_logging
 
+    setup_logging()
     init_db()
-    uvicorn.run(fastapi_app, host=host, port=port)
+    uvicorn.run(fastapi_app, host=host, port=port, log_config=None)
 
 
 def version_callback(value: bool):

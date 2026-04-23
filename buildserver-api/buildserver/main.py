@@ -16,7 +16,6 @@ from .api.runners.service import run_health_monitor
 from .config import LOG_LEVEL
 from .database.core import init_db
 
-logging.basicConfig(level=LOG_LEVEL, force=True)
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +52,7 @@ app.mount("/", StaticFiles(directory="/dist", html=True), name="static")
 
 def main():  # noqa: C0116
     init_db()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_config=None)
 
 
 if __name__ == "__main__":

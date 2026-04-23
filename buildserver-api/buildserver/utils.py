@@ -2,17 +2,46 @@
 Various helper functions for use across modules
 """
 
-from pathlib import Path
+import json
 import logging
-import subprocess
+import logging.handlers
 import os
 import shutil
+import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
 
-from .config import LOG_LEVEL
+from .config import LOG_FILE, LOG_LEVEL
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
+
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        entry = {
+            "timestamp": datetime.fromtimestamp(
+                record.created, tz=timezone.utc
+            ).isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+        }
+        if record.exc_info:
+            entry["exc_info"] = self.formatException(record.exc_info)
+        return json.dumps(entry)
+
+
+def setup_logging():
+    root = logging.getLogger()
+    root.setLevel(LOG_LEVEL)
+    root.handlers.clear()
+    file_handler = logging.handlers.RotatingFileHandler(
+        LOG_FILE, maxBytes=10 * 1024 * 1024, backupCount=5
+    )
+    file_handler.setFormatter(JsonFormatter())
+    root.addHandler(file_handler)
 
 
 def get_dir_name(url: str):

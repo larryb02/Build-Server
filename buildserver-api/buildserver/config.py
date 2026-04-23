@@ -23,6 +23,8 @@ TIMEOUT = settings.get("TIMEOUT", 60)
 
 ARTIFACT_REPOSITORY_ROOT = settings.get("ARTIFACT_REPOSITORY_ROOT", "")
 
+LOG_FILE = settings.get("LOG_FILE", "buildserver.log")
+
 SECRET_KEY = settings.get("SECRET_KEY", None)
 if not SECRET_KEY:
     raise RuntimeError(
