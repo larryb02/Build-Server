@@ -48,12 +48,3 @@ async def exception_404_handler(request, exc):
 
 
 app.mount("/", StaticFiles(directory="/dist", html=True), name="static")
-
-
-def main():  # noqa: C0116
-    init_db()
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_config=None)
-
-
-if __name__ == "__main__":
-    main()
