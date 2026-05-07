@@ -4,7 +4,7 @@ regions:
   - us-west-1
 filters:
   tag:Name:
-    - buildserver
+    - buildserver-prod
     - buildserver-dev
   instance-state-name: running
 hostnames:
@@ -12,5 +12,5 @@ hostnames:
 compose:
   ansible_host: instance_id
 groups:
-  buildserver: "tags.Name == 'buildserver'"
+  buildserver: "tags.Name == 'buildserver-prod'"
   buildserver_dev: "tags.Name == 'buildserver-dev'"
