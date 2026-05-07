@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:16
+    pull_policy: missing
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -12,7 +13,7 @@ services:
       retries: 5
 
   api:
-    image: ghcr.io/larryb02/buildserver-api:latest
+    image: ${IMAGE}
     build:
       context: ../..
       dockerfile: infra/docker/api.Dockerfile
@@ -31,6 +32,7 @@ services:
 
   nginx:
     image: nginx:alpine
+    pull_policy: missing
     ports:
       - "80:80"
       - "443:443"

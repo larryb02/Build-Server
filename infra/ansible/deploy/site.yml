@@ -30,6 +30,7 @@
         dest: "{{ deploy_dir }}/.env"
         mode: "0600"
         content: |
+          IMAGE={{ image }}
           APP_PORT={{ app_port }}
           BS_SECRET_KEY={{ secret_key }}
           DATABASE_HOST={{ database_host }}
@@ -37,9 +38,9 @@
           DATABASE_USER={{ database_user }}
           DATABASE_PASSWORD={{ database_password }}
 
-    - name: Pull latest images
+    - name: Pull api image at requested tag
       ansible.builtin.command:
-        cmd: nerdctl compose -f compose.yml pull
+        cmd: "nerdctl pull {{ image }}"
         chdir: "{{ deploy_dir }}"
 
     - name: Compose Up
