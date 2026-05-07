@@ -1,6 +1,6 @@
 ---
 - name: Deploy Server
-  hosts: buildserver
+  hosts: "{{ target_hosts }}"
   become: true
 
   vars:

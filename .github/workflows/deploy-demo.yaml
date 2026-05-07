@@ -39,9 +39,11 @@ jobs:
       - name: Run playbook
         env:
           IMAGE: ghcr.io/larryb02/buildserver-api:${{ inputs.image_tag || 'latest' }}
+          TARGET_HOSTS: ${{ (github.event_name == 'workflow_dispatch' && github.ref_name != 'main') && 'buildserver_dev' || 'buildserver' }}
         run: |
           ansible-playbook infra/ansible/deploy/site.yml \
             -i infra/ansible/deploy/inventory/aws_ec2.yml \
+            -e "target_hosts=${TARGET_HOSTS}" \
             -e "image=${IMAGE}" \
             -e "app_port=${{ secrets.APP_PORT }}" \
             -e "secret_key=${{ secrets.BS_SECRET_KEY }}" \

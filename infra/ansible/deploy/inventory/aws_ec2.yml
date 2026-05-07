@@ -5,8 +5,12 @@ regions:
 filters:
   tag:Name:
     - buildserver
+    - buildserver-dev
   instance-state-name: running
 hostnames:
   - tag:Name
 compose:
   ansible_host: instance_id
+groups:
+  buildserver: "tags.Name == 'buildserver'"
+  buildserver_dev: "tags.Name == 'buildserver-dev'"
